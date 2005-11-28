@@ -1,24 +1,201 @@
 import cgi
 import urllib
 
+"""widgets module -- a framework for generating dynamic web pages
 
-# flags for Widget.load_state and Widget.load_value
-# (see Widget.load_value docstring for descriptions)
-LOAD_URL = 1 << 0
-LOAD_POST = 1 << 1
-LOAD_FORM = LOAD_URL | LOAD_POST
+Widgets are a way of organizing python code which generates web pages. The idea
+behind them is simple: take various components of web pages, like forms, form
+elements, navigation areas, even entire web applications, and implement them as
+python classes, with the more complex classes containing and reusing the
+simpler ones, and each class instance responsible for outputting a chunk of the
+page's HTML.
+
+A Widget class implements two methods: First, an __init__ method where it
+initializes its state, assigns members, creates child widgets, reads form
+variables, and does anything else that needs to be done before page output is
+generated. Second, a write method where it produces whatever HTML output
+it's responsible for. Both methods take Request objects as arguments, which
+provide a simple server-independent interface for accessing form variables and
+HTTP headers, and sending output.
+
+And that's basically all there is to Widgets. This framework provides a
+number of widget classes useful for implementing form-driven applications,
+some Request classes for server environments like CGI and Mod_Python, and
+some helper classes which make it easy to use Template engines like Cheetah,
+PSP, or EZT to generate widget output. The sole concern of this framework is
+organizing the complex logic used to generate web pages by breaking those
+pages down into independent components. Unlike other web frameworks it is not
+concerned with things like URL schemes, database access, authentication,
+MVC separation, and so on, except in being flexible enough to work with
+software and design schemes that do provide these things."""
 
 
-# flags for Widget.write_state and Widget.write_value
-# (see Widget.write_value docstring for descriptions)
-WRITE_FORM = 1 << 0
-WRITE_URL  = 1 << 1
+class Widget:
+  """Abstract base for Widget classes
+
+  Subclasses implement two methods (not defined in the class body to avoid
+  masking other definitions when multiple inheritance is used):
+
+    __init__(self, req, ...)
+      implementations of this method should initialize members and load
+      widget state. In a well-behaved application, this method will be
+      called before any page output is written, making it possible for widgets
+      to do things like set cookies, issue redirects, and modify the states
+      of other widgets here.
+
+    write(self, req, ...)
+      implementations of this method should mostly just write HTML output
+      to the page.
+
+    Both methods take a Request object as an argument, and sometimes other
+    arguments as well, depending on what a widget does."""
+
+
+class Request:
+  """Abstract base for Request classes
+
+  Request objects are used by widgets to interact with the web server. They
+  provide a means of reading and writing request data.
+
+  They define the following members:
+
+    form
+      an object, such as cgi.FieldStorage, which provides getfirst(),
+      getlist(),and keys() methods for retrieving values of GET and
+      POST variables. These methods are described in cgi.FieldStorage
+      docstring and in the Python Standard Library Reference
+
+    get
+      an object exactly like "form" but only returns the values of GET
+      variables
+
+    post
+      an object exactly like "form" but only returns the values of POST
+      variables
+
+    Some web server interfaces make it difficult to separate GET and POST
+    variables. Request objects for these servers may make "get" and "post"
+    members aliases to the "form" object as incorrect, but probably harmless
+    expedients."""
+
+  def write(self, data):
+    """Write data to client
+
+    This should be implemented as a buffered write because widgets and
+    templates typically output small amounts of data at a time"""
+    raise NotImplementedError
+
+  def flush(self, data):
+    """Flush write buffer, if any"""
+    raise NotImplementedError
+
+  def server_name(self):
+    """Return server name
+    Example: Returns "hello.com" for http://hello.com:88/page.py/path?1=2"""
+    raise NotImplementedError
+
+  def server_port(self):
+    """Return server port number as integer
+    Example: Returns 88 for http://hello.com:88/page.py/path?1=2"""
+    raise NotImplementedError
+
+  def is_https(self):
+    """Return True if this is an HTTPS request, False for HTTP"""
+    raise NotImplementedError
+
+  def request_uri(self):
+    """Return raw requested URI from first line of HTTP request
+    Example: Returns "/page.py/path?1=2" for
+    http://hello.com:88/page.py/path?1=2"""
+    raise NotImplementedError
+
+  def script_name(self):
+    """Return script name
+    Example: Returns "page.py" for http://hello.com:88/page.py/path?1=2"""
+    raise NotImplementedError
+
+  def path_info(self):
+    """Return extended path
+    Example: Returns "/path" for http://hello.com:88/page.py/path?1=2"""
+    raise NotImplementedError
+
+  def query_string(self):
+    """Return query string
+    Example: Returns "1=2" for http://hello.com:88/page.py/path?1=2"""
+    raise NotImplementedError
+
+
+class Template:
+  """Abstract base for Template classes
+
+  Template objects provide a common interface for a variety of template
+  engines."""
+
+  def __init__(self, string=None, file=None):
+    """Load a template from a string or file
+
+    string can be a string containing template code
+
+    file can be the path to a file containing template code
+
+    The template can specified as either a string or file, but not both.
+    Subclasses should attempt to do as much initialization as possible here,
+    including parsing and compiling template code, so there's less work to be
+    done when execute() is called."""
+    raise NotImplementedError
+
+  def execute(self, req, dataobj):
+    """Execute template, writing to req and using data from dataobj
+
+    req is a request object
+
+    dataobj is an object whose members will be exposed as template variables"""
+    raise NotImplementedError
+
+  def callback(self, cb):
+    ### Need to implement Template classes for templates other than EZT
+    ### to see if this interface is at all workable...
+    """Adapt a callback for use in a template
+
+    cb should be a callable object that takes a request object as its
+    first argument, for example a bound Widget.write method. It may take
+    additional arguments as well if the template engine allows passing
+    arguments to callbacks."""
+    raise NotImplementedError
+
+
+class TemplateWidget(Widget):
+  """Base class for Widgets that output templates populated with member data
+
+  Base classes set a member called "template" member to a Template object.
+  When the write method is called it executes the template, making other
+  members available as template variables.
+
+  The point of this class is to make it possible to make simple widgets
+  wholly out of templates and python class declarations, with little or
+  no supporting python code. It is not intended to be subclassed by widgets
+  that implement __init__ and write methods, or have members of their
+  own which don't need to be exposed to templates. These classes should the
+  use the Template interface directly."""
+
+  def __init__(self, req, **args):
+    """Default constructor that saves any keyword arguments as members"""
+    vars(self).update(args)
+
+  def write(self, req):
+    """Execute self.template passing self as input and writing output to req"""
+    self.template.execute(req, self)
+
+  def embed(self):
+    """Return Widget as a template variable that can be included in other
+    templates"""
+    return self.template.callback(lambda req: self.template.execute(req, self))
 
 
 class Form:
   """Class holding common data for all widgets on a form
 
-  Form objects have the following public members:
+  Form instances have the following public members:
 
     name
       string holding value of the form's "name=" attribute. It is used by
@@ -26,51 +203,35 @@ class Form:
 
     url
       string holding a link to the current page without any query parameters.
-      It is usually specified as a server-relative URL (i.e. "/dir/page.py")
-      or a location-relative URL (i.e. "page.py"). The value could go in a
-      form's "action=" attribute. It is also used as the as the base URL
-      for links returned by the Form.get_url() method.
+      If not overridden, this member is automatically initialized in the
+      constructor, Typicaly it is a server-relative URL (i.e. "/dir/page.py")
+      or a location-relative URL (i.e. "page.py") meant to go in a form's
+      "action=" attribute. It is also used as the base URL for links returned
+      by the Form.get_url() method.
 
-    short_names
-      dictionary mapping dot-separated widget identifiers to shorter names.
-      To allow multiple instances of widgets to coexist on the same page
-      without name clashes, the widget framework uses identifiers like
-      "widget.childwidget.param" in HTML output to guarantee that each
-      widget's identifiers are unique. But sometimes you can guarantee
-      that there will only be one instance of a widget on a page. In this case
-      you can add short names for the widget identifiers to the dictionary and
-      the widget loading and writing code will automatically substitute them,
-      resulting in cleaner html output and more user-friendly urls without
-      any further changes in the code. The typical place to add to short_names
-      is during widget construction where you'll do something like
+    Applications may set additional members on Form objects to share
+    information (like session data) or resources (like database connections)
+    between widgets."""
 
-        self.form.short_names[self.id('item_id')] = 'item_id'
-
-    widgets
-      list of top level Widget objects in this form, automatically populated
-      by Widget constructors"""
-
-  def __init__(self, name=None, url=None):
+  def __init__(self, req, name=None, url=None):
     """Create Form object, see class docstring for argument meanings
+
+    req is the Request object
 
     name can be set to None on forms with no javascript widgets, but it's a
     good idea to set it whenever you have any widgets in a <form> element, in
     case you decide to add javascript in the future.
 
-    url can be safely set to None when you know none of the widgets on your
-    page will call Form.get_url(), but as with the form name it's a good
-    idea to set it anyway in case your widgets change in the future."""
+    url is usually just None so the member will be automatically initialized"""
+
     self.name = name
-    self.url = url
-    self.widgets = []
+    if url is None:
+      self.url = _url(req)
+    else:
+      self.url = url
     self._url_vars = []
 
-  def load_state(self, req):
-    """Call load_state on all widgets associated with this form"""
-    for widget in self.widget():
-      widget.load_state(req, None, LOAD_FORM)
-
-  def get_url(self, url, extra_vars, remove_vars):
+  def get_url(self, extra_vars, remove_vars):
     """Return URL to current page with state preserved in URL params
 
       extra_vars is a list of (name, value) tuples to add the URL query string
@@ -87,9 +248,8 @@ class Form:
     for that purpose.
 
     Note that to prevent URL bloat, most widgets will not include their state
-    in the generated URLs, unless you first call their write_state method with
+    in the generated URLs, unless you first call their write_hidden method with
     the WRITE_URL flag."""
-    assert self.url is not None
     params = []
 
     for name, value in extra_vars:
@@ -105,155 +265,162 @@ class Form:
     """Add name, value pair to include in get_url generated URLs."""
     self._url_vars.append((name, value))
 
+  def short_name(self, name):
+    """Hook for mapping dot-separated widget identifiers to shorter names
 
-class Widget:
-  """Abstract base for Widgets
+    To allow multiple instances of widgets to coexist on the same page without
+    name clashes, form widgets use identifiers like "widget.childwidget.param"
+    in HTML output to guarantee that each widget's identifiers are unique. But
+    sometimes you can guarantee that there will only be one instance of a widget
+    on a page. In this case you can override the short_name method to map widget
+    identifiers to shorter names. The widget loading and writing code will
+    automatically perform the substitutions, resulting in cleaner html output
+    and more user-friendly urls without any further changes to the code."""
+    return name
 
-  Widget instances have the following members:
 
-    identifer
-      a base string used by the Widget.id() method to generate unique
-      names for page elements associated with the widget.
+# flags for FormWidget.__init__ and FormWidget.read_value
+# (see FormWidget.read_value docstring for descriptions)
+READ_DEFAULT = 1 << 0
+READ_URL     = 1 << 1
+READ_POST    = 1 << 2
+READ_FORM    = READ_URL | READ_POST
+
+
+# flags for FormWidget.write_hidden and FormWidget.write_value
+# (see FormWidget.write_value docstring for descriptions)
+WRITE_FORM = 1 << 0
+WRITE_URL  = 1 << 1
+
+
+class FormWidget(Widget):
+  """Abstract base for Form Widgets
+
+  Subclasses implement two methods (not defined in the class body to avoid
+  masking other definitions when multiple inheritance is used):
+
+    write(self, req, ...)
+      implementations of this method write the HTML contents of widget to the
+      the page. The first argument is a Request object. Typically only
+      primitive widgets (like buttons and checkboxes) accept additional
+      arguments, usually for things like labels, captions, and HTML attributes
+      which affect widget appearance without affecting behavior. They provide
+      these arguments for maximum flexibility and to restrict their
+      implementations to application logic, leaving callers to work out
+      presentation logic. More complex widgets are usually less flexible about
+      how they are displayed and separate their presentation logic from
+      application logic by other means, such as templates.
+
+    write_hidden(self, req, flags=WRITE_FORM)
+      implementations of this method write widget state without outputting any
+      user-visible HTML, typically by making calls to FormWidget.write_value()
+      which emit <input type="hidden"> elements. The first argument, req, is
+      a Request object. The second argument, flags, is a set of WRITE_* flags
+      described in the FormWidget.write_value() docstring. The flags are
+      usually just passed along unaltered to calls of that function.
+
+  FormWidget instances have 2 public members:
 
     form
-      instance of Form object this widget is associated with"""
+      instance of Form class the FormWidget is associated with
 
-  def __init__(self, identifier, parent):
-    """Construct widget and associate with other widgets on the form
+    full_id
+      a base string used by the FormWidget.id() method to generate unique
+      names for page elements associated with the widget."""
 
-      identifer
-        a base string which is prepended with the parent widget's identifer
-        and used to set the Widget.identifer member
+  def __init__(self, req, parent, id, flags=READ_FORM):
+    """Construct form widget
 
-      parent
-        parent widget, or Form object if this is a top-level widget
+    req is the Request object
 
-    Widget classes which override this method should be sure to call it
-    internally. They should also avoid doing any heavyweight initialization
-    such as accessing a database or reading request variables here. That type
-    of thing is meant to be done in Widget.load_values."""
+    parent is a Form object if this is a top level widget, or another widget
+    if this is a child widget.
+
+    id is a base string which is prepended with the parent widget's full id
+    and used to initialize the the FormWidget.full_id member
+
+    flags is a set of READ_* flags described in the FormWidget.read_value
+    docstring. Typically it will just be forwarded to calls to that function.
+
+    FormWidget classes which override this method should be sure to call it
+    internally. Almost all subclasses will extend this method and use it to
+    load widget state."""
 
     if isinstance(parent, Form):
-      self.identifier = identifier
+      self.full_id = id
       self.form = parent
     else:
-      assert isinstance(parent, ParentWidget)
-      self.identifier = _join_ids(parent.identifier, identifier)
+      self.full_id = _join_ids(parent.full_id, id)
       self.form = parent.form
 
-    parent.widgets.append(self)
-
-  def load_state(self, req, is_new, flags=LOAD_FORM):
-    """Load widget state, possibly reading from request variables
-
-    req is the request object
-
-    is_new can be True, False, or None. If True it means that the Widget
-    has been newly created, and this method should not attempt to read
-    any state from request variables. If False, it means that the widget
-    was displayed on a previous page load and should read state from the
-    request. If None, it means that the caller does not know whether the
-    widget is newly-created or not. Widgets with complex initial state
-    (like widgets that need to load initial form values from a database) can
-    require their callers to provide a True or False values and "assert
-    is_new is not None"
-
-    flags values are described in the Widget.load_value() docstring. The most
-    common use of the flags argument here is just to forward it to that
-    function."""
-
-  def write_state(self, req, flags=WRITE_FORM):
-    """Write widget state where it can be read on future page loads
-
-    This function is called to preserve widget state when the widget is NOT
-    being displayed on current page. When the widget is being displayed, the
-    write method (or whatever other method is called to output the widget
-    HTML) is responsible for writing any neccessary state.
-
-    req is the request object
-
-    flags values are described in the Widget.write_value() docstring. The most
-    common use of the flags argument here is just to forward it to that
-    function."""
-
-  def write(self, req):
-    """Write HTML contents of widget to page
-
-      req is the request object
-
-    Unlike other Widget methods meant to be overridden by subclasses
-    (like load_state, write_state), this method is not a hook method,
-    meaning that it will never be automatically called anywhere in the
-    widget framework. Subclasses are therefore free to implement this
-    function in varying ways (such as with extra arguments) or not at
-    all."""
-    raise NotImplementedError
-
-  def id(self, identifer=None):
+  def id(self, id=None):
     """Return Widget identifer or another identifier prefixed with it"""
-    long_identifier =  _join_ids(self.identifier, identifer)
-    try:
-      return self.form.short_ids[long_identifier]
-    except KeyError:
-      return long_identifier
+    full_id =  _join_ids(self.full_id, id)
+    return self.form.short_name(full_id)
 
-  def load_value(self, req, identifier, flags):
-    """Load value from URL or POST request variables
+  def read_value(self, req, id, flags):
+    """read value from URL or POST request variables
 
     req is the request object
 
-    identifier
-      string specifying what value to load. This string prefixed with the
-      Widget.identifier is the name of the variable that will be looked up
+    id is a string specifying what value to read. This string prefixed with
+    the FormWidget.full_id is the name of the variable that will be looked up
 
     flags can be a bitwise combination of the following values
 
-      LOAD_URL
+      READ_DEFAULT
+        if this flag is set, all other flags are ignored and the function
+        returns None. The flag indicates that the widget is newly created
+        (did not exist in previous page loads) and should initialize itself
+        to a default state.
+
+      READ_URL
         looks up variable in URL query string (i.e. the part after the question
         mark in "page.py?widget.var=value")
 
-      LOAD_POST
+      READ_POST
         looks up variable in POST data (i.e. a form field submitted in a
         <form "method=post" ...> form)
 
-      LOAD_FORM
-        bitwise combination of LOAD_URL and LOAD_POST that finds form field
+      READ_FORM
+        bitwise combination of READ_URL and READ_POST that finds form field
         values regardless of whether they were submitted in a method="get" or
         a method="post" form.
 
     If multiple values are found, this function only returns the first one.
-    The Widget.load_values method can be used instead of this one to retrieve
-    multiple values.
+    The FormWidget.read_values method can be used instead of this one to
+    retrieve multiple values.
 
     If no values are found this function returns None"""
+
     fs = _get_storage(req, flags)
     if fs is not None:
-      id = self.id(identifier)
-      value = req.get.getfirst(id)
+      full_id = self.id(id)
+      value = fs.getfirst(full_id)
       if value is not None:
         return value
     return None
 
-  def load_values(self, req, identifer, flags):
-    """Load values from URL or POST variables
+  def read_values(self, req, id, flags):
+    """Read values from URL or POST variables
 
-    This function takes the same arguments as Widget.load_value. The only
+    This function takes the same arguments as FormWidget.read_value. The only
     difference is that it is a generator that yields ALL the values
     corresponding to an identifer instead of just returning the first value."""
     fs = _get_storage(req, flags)
     if fs is not None:
-      id = self.id(identifier)
-      for value in fs.getlist(id):
+      full_id = self.id(id)
+      for value in fs.getlist(full_id):
         yield value
 
   def enum_values(self, req, flags):
     """Enumerate URL or POST variables associated with this widget
 
       req is the current request object
-      flags are described in Widget.load_value docstring
+      flags are described in FormWidget.read_value docstring
 
-    The return value is the sequence of all the identifier strings that can be
-    passed to Widget.load_value and not return None"""
+    The return value is the sequence of all the id strings that can be
+    passed to FormWidget.read_value and not return None"""
 
     # This function currently works by doing a linear search through all the
     # request variables, which might not be the most efficient thing to do
@@ -262,26 +429,23 @@ class Widget:
     # dictionaries organized as a trie. Or a normal character based trie
     # could be used, if such a thing exists for python. But really, this
     # function should never need to be optimized. The only widget that
-    # relies on it is ActionButton, and there only ever needs to be one
-    # ActionButton loading state per page request.
+    # relies on it is DataButton, and there is typically only one
+    # DataButton doing the search per page request.
 
     fs = _get_storage(req, flags)
     if fs is not None:
-      id = self.identifier
-      prefix = _join_ids(id, "")
-      for field in fs.list:
-        if field.name.startswith(prefix):
-          yield field.name[len(prefix):]
-        elif field.name == id:
-          yield None
+      prefix = self.id("")
+      for field in fs.keys():
+        if field.startswith(prefix):
+          yield field[len(prefix):]
 
-  def write_value(self, req, identifier, value, flags):
+  def write_value(self, req, id, value, flags):
     """Store value so it can be read by the widget on future page loads
 
     req is the current request object
 
-    identifier is a string that identifies the value, and can be passed
-    to Widget.load_value() in future page loads.
+    id is a string that identifies the value, and can be passed
+    to FormWidget.read_value() in future page loads.
 
     value is the string value to be written
 
@@ -299,15 +463,19 @@ class Widget:
     In the future, more flags could be added to store state in other places
     like session objects or cookies."""
 
-    id = self.id(identifier)
+    if value is None:
+      return
+
+    full_id = self.id(id)
     if flags & WRITE_FORM:
-      _tag(req, 'input', ('type', 'hidden'), ('name', id), ('value', value))
+      _tag(req, "input", ("type", "hidden"),
+           ("name", full_id), ("value", value))
 
     if flags & WRITE_URL:
-      self.form.add_url_var(id, value)
+      self.form.add_url_var(full_id, value)
 
 
-class TextBox(Widget):
+class TextBox(FormWidget):
   """Text input widget
 
   Members:
@@ -315,56 +483,52 @@ class TextBox(Widget):
     text
       string containing widget text"""
 
-  def load_state(self, req, is_new, flags):
-    if is_new:
-      self.text = None
-    else:
-      self.text = self.load_value(req, None, flags)
+  def __init__(self, req, parent, id, flags):
+    FormWidget.__init__(self, req, parent, id, flags)
+    self.text = self.read_value(req, None, flags)
 
-  def write_state(self, req, flags):
-    if self.text is not None:
-      self.write_value(req, None, self.text, flags)
+  def write_hidden(self, req, flags):
+    self.write_value(req, None, self.text, flags)
 
-  def write(self, req, rows=0, cols=0, attribs=()):
+  def write(self, req, cols=0, rows=0, *attribs):
     """Write input box
+
+    cols
+      width of field, passed as textarea "cols" attribute or text input "size"
+      attribute (only if nonzero)
 
     rows
       If nonzero, writes a <textarea> field with the specified number of rows.
       If zero, writes an <input type=text> field
 
-    cols
-      width of field, passed as textarea "rows" attribute or text input "size"
-      attribute (only if nonzero)
-
     attribs
-      list of extra attributes to add to html tag as (name, value) tuples"""
+      extra attributes to add to html tag in (name, value) tuples"""
     id = self.id()
-    if rows == 0:
-      _tag(req, 'input', ('name', id),
-           self.text is not None and ('value', self.text) or None,
-           cols and ('size', cols) or None, *attribs)
-    else:
-      _tag(req, 'textarea', ('name', id), ('rows', rows), ('cols', cols),
+    if rows:
+      _tag(req, "textarea", ("name", id), ("rows", rows), ("cols", cols),
            open=True)
       req.write(_escape_html(self.text or ""))
-      _ctag(req, 'textarea')
+      _ctag(req, "textarea")
+    else:
+      _tag(req, "input", ("name", id),
+           self.text is not None and ("value", self.text) or None,
+           cols and ("size", cols) or None, *attribs)
 
-# The CheckBoxes, RadioButtons, SelectBox, and MSelectBox classes have a lot
+
+# The CheckBox, RadioButton, SelectBox, and MSelectBox classes have a lot
 # of methods in common, so they share implementations through the
 # _SingleSelect, _MultipleSelect, and _ClickBox and _SelectBox mixin classes
 # below
 
-class _SingleSelect:
-  """Mixin class providing common methods for RadioButtons and SelectBox"""
-  def load_state(self, req, is_new, flags):
-    if is_new:
-      self.selected = None
-    else:
-      self.selected = self.load_values(req, None, flags)
+class _SingleSelect(FormWidget):
+  """Mixin class providing common methods for RadioButton and SelectBox"""
 
-  def write_state(self, req, flags):
-    if self.selected is not None:
-      self.write_value(req, None, self.selected, flags)
+  def __init__(self, req, parent, id, flags):
+    FormWidget.__init__(self, req, parent, id, flags)
+    self.selected = self.read_value(req, None, flags)
+
+  def write_hidden(self, req, flags):
+    self.write_value(req, None, self.selected, flags)
 
   def is_selected(self, value):
     """Return True if the specified value is currently selected"""
@@ -372,15 +536,15 @@ class _SingleSelect:
 
   select_multiple = False
 
-class _MultipleSelect:
-  """Mixin class providing common methods for CheckBoxes and MSelectBox"""
-  def load_state(self, req, is_new, flags):
-    if is_new:
-      self.selected = []
-    else:
-      self.selected = self.load_values(req, None, flags)
 
-  def write_state(self, req, flags):
+class _MultipleSelect(FormWidget):
+  """Mixin class providing common methods for CheckBox and MSelectBox"""
+
+  def __init__(self, req, parent, id, flags):
+    FormWidget.__init__(self, req, parent, id, flags)
+    self.selected = list(self.read_values(req, None, flags))
+
+  def write_hidden(self, req, flags):
     for item in self.selected:
       self.write_value(req, None, item, flags)
 
@@ -390,191 +554,214 @@ class _MultipleSelect:
 
   select_multiple = True
 
+
 class _SelectBox:
   """Mixin class providing common methods for SelectBox and MSelectBox"""
-  def write(self, req, items, attribs=()):
-    """Write check box or radio button with the specified value
 
-    If the box is selected, calls to is_selected(value) on future page
-    loads will return true. In a group of check boxes or radio buttons,
-    this method is meant to be called once for each box or button.
+  def write(self, req, items, *attribs):
+    """Write select box with specified items
 
-    req
-      request object
+    req is a Request object
 
-    value
-      input element's "value=" attribute
+    items is a sequence of (value, name) tuples to include in the list.
 
-    identifier
-      if specified this value is set as the input element's "id=" attribute,
-      prefixed with the widget identifier. This argument is useful when you
-      want to make labels for the boxes with <label for="id"> tags.
+    attribs are extra attributes to add to the html tag in (name, value) tuples
 
-    attribs
-      list of extra attributes to add to html tag as (name, value) tuples"""
+    On the next page load, the "selected" member and is_selected method can
+    be used to see which item(s) have been selected.
 
-    id = self.id()
-    _tag(req, 'select', ('name', id),
-         self.multiple_select and ('multiple', None) or None,
-         open=True, *attribs)
+    The write_open(), write_item(), and write_close() methods can be called as
+    an alternative to write(). It may be neccessary to use these in template
+    languages where it's not possible to create sequences of tuples for the
+    "items" argument, or when you need to write things like <optgroup> tags
+    or javascript within the select block."""
+
+    self.write_open(req, *attribs)
 
     for item in items:
-      if type(item) is tuple:
+      if isinstance(item, tuple):
         value, name = item
       else:
-        name = item
         value = None
-      _tag(req, 'option', value is not None and ('value', value) or None,
-           self.is_selected(value) and ('selected', None) or None, open=True)
-      req.write(_html_escape(name))
-      _ctag(req, 'option')
-    _ctag(req, 'select')
+        name = item
+      self.write_item(req, value, name)
+
+    self.write_close(req)
+
+  def write_open(self, req, *attribs):
+    """Output widget's opening <select> tag"""
+    id = self.id()
+    _tag(req, "select", ("name", id),
+         self.multiple_select and ("multiple", None) or None,
+         open=True, *attribs)
+
+  def write_item(self, req, value, name, *attribs):
+    """Output an <option> block"""
+    _tag(req, "option", value is not None and ("value", value) or None,
+         self.is_selected(value) and ("selected", None) or None,
+         open=True, *attribs)
+    req.write(_html_escape(name))
+    _ctag(req, "option")
+
+  def write_close(self, req):
+    """Output widget's closing </select> tag"""
+    _ctag(req, "select")
 
 
 class _ClickBox:
-  """Mixin class providing common methods for RadioButtons and CheckBoxes"""
+  """Mixin class providing common methods for RadioButton and CheckBox"""
 
-  def write(self, req, value, identifer=None, attribs=()):
+  def write(self, req, value, identifer=None, *attribs):
     """Write check box or radio button with the specified value
 
-    If the box is selected, calls to is_selected(value) on future page
-    loads will return true. In a group of check boxes or radio buttons,
-    this method is meant to be called once for each box or button.
+    In a group of check boxes or radio buttons, this method is meant to be
+    called once for each box or button. On the next page load, the "selected"
+    member and is_selected() method can be used to see which boxes have been
+    selected.
 
-    req
-      request object
+    req is a Request object
 
-    value
-      input element's "value=" attribute
+    value is the input element's "value=" attribute
 
-    identifier
-      if specified this value is set as the input element's "id=" attribute,
-      prefixed with the widget identifier. This argument is useful when you
-      want to make labels for the boxes with <label for="id"> tags.
+    identifier, if not None, is set as the input element's "id=" attribute,
+    prefixed with the widget's full_id. This argument is useful when you
+    want to make labels for the boxes with <label for="id"> tags.
 
-    attribs
-      list of extra attributes to add to html tag as (name, value) tuples"""
+    attribs are extra attributes to add to <input> tag in (name, value) tuples
+    """
+
     id = self.id()
-    _tag(req, 'input', ('type', self.input_type), ('name', id),
-         identifier is not None and ('id', self.id(identifer)) or None,
-         self.is_selected(value) and ('checked', None) or None, *attribs)
+    _tag(req, "input", ("type", self.input_type), ("name", id),
+         identifier is not None and ("id", self.id(identifer)) or None,
+         self.is_selected(value) and ("checked", None) or None, *attribs)
+
+  def label_id(self, req, id):
+    """Return escaped id for use in a <label for=""> tag"""
+    return _escape_html(self.id(id), True)
 
 
-class RadioButtons(_ClickBox, _SingleSelect, Widget):
+class RadioButton(_ClickBox, _SingleSelect):
   """Widget for a group of radio buttons
 
   Members:
     selected
       string value of the current selected button, or None"""
-  input_type = 'radio'
+  input_type = "radio"
 
 
-class CheckBoxes(_ClickBox, _MultipleSelect, Widget):
-  """Widget for a group of check buttons
+class CheckBox(_ClickBox, _MultipleSelect):
+  """Widget for a group of check boxes
 
   Members:
+
     selected
       list of currently checked values"""
-  input_type = 'checkbox'
+  input_type = "checkbox"
 
 
-class SelectBox(_SelectBox, _SingleSelect, Widget):
+class SelectBox(_SelectBox, _SingleSelect):
   """Select Box Widget
 
   Members:
+
     selected
        string value of current selected item, or None"""
 
 
-class MSelectBox(_SelectBox, _MultipleSelect, Widget):
+class MSelectBox(_SelectBox, _MultipleSelect):
   """Select Box Widget allowing multiple select
 
   Members:
+
     selected
       list of currently selected values"""
-  input_type = 'checkbox'
 
 
-class SubmitButton(Widget):
+class SubmitButton(FormWidget):
   """Submit Button Widget
 
   Members:
+
     clicked
       boolean, True if button was clicked on current page load"""
 
-  def load_state(self, req, is_new, flags):
-    if is_new:
-      self.clicked = False
-    else:
-      self.clicked = self.load_value(req, None, flags) is not None
+  def __init__(self, req, parent, id, flags):
+    FormWidget.__init__(self, req, parent, id, flags)
+    self.clicked = self.read_value(req, None, flags) is not None
 
-  def write(self, req, caption, attribs=()):
-    """Write submit button with specified caption and attributes
+  def write_hidden(self, req):
+    pass
 
-    caption
-      string, button text
+  def write(self, req, label, *attribs):
+    """Write submit button with specified label and attributes
 
-    attribs
-      list of extra attributes to add to html tag as (name, value) tuples"""
+    label is a string specifying button text
+
+    attribs are extra attributes to add to <input> tag in (name, value) tuples
+    """
     id = self.id()
-    _tag(req, 'input', ('type', 'submit'), ('name', id), ('value', caption),
+    _tag(req, "input", ("type", "submit"), ("name", id), ("value", label),
          *attribs)
 
 
-class ParentWidget(Widget):
-  """Abstract base for Widgets which hold other Widgets"""
-  def __init__(self, identifier, parent):
-    Widget.__init__(self, identifier, parent)
-    self.widgets = []
+class DataButton(FormWidget):
+  """Submit button widget that passes data strings with button clicks
 
-  def load_state(self, req, is_new, flags=LOAD_FORM):
-    """Call load_state on child widgets"""
-    for widget in self.widgets:
-      widget.load_state(req, is_new, flags)
+  This class is similar to SubmitButton, except that it attaches non-visible
+  data strings to buttons that are submitted when they are clicked. This is
+  convenient for pages with a lot of buttons because you can see which button
+  was clicked by looking at a single data string instead of running over all
+  the buttons that might have existed on the previous page and testing each for
+  clicks.
 
-  def write_state(self, req, flags=WRITE_FORM):
-    """Call write_state on child widgets"""
-    for widget in self.widgets:
-      widget.write_state(req, flags)
+  Implementation note: HTML forms submit their elements as pairs of name/value
+  strings. For the most part they allow applications to choose arbitrary
+  values for those strings which are invisible to users and not displayed
+  on pages. Submit buttons are the only exception, they use the value string as
+  the label that appears on the button. As a result, the only way to associate
+  application data with a button click is to store it in the name. That is what
+  this class does. It writes buttons with data strings appended to the widget
+  name and at page loading time looks for a GET and POST variables beginning
+  with the widget name, setting the "data" member if it finds one
 
+  Members:
 
-class Block:
-  """Abstract base for classes outputting blocks of HTML
+    clicked, string with data from last button click, or None if no buttons
+    were clicked"""
 
-  A Block is like a stripped down Widget. Blocks don't have any facilities
-  for reading form data or constructing unique identifiers for page
-  elements. The only method a Block class needs to have is a write method
-  for outputting its contents to the page."""
+  def __init__(self, req, parent, id, flags):
+    FormWidget.__init__(self, req, parent, id, flags)
+    self.clicked = None
+    for data in self.enum_values(req, flags):
+      self.clicked = data
+      break # shouldn't be more than one value, but if there is, keep first
 
-  def write(req):
-    """Write contents of block to page"""
-    raise NotImplementedError
+  def write_hidden(self, req):
+    pass
 
+  def write(self, req, caption, data, *attribs):
+    _tag(req, "input", ("type", "submit"), ("name", self.id(data)),
+         ("value", caption), *attribs)
 
-class TemplateBlock:
-  """Base class for Blocks that output templates populated with member data"""
-  def __init__(self, **args):
-    """Default constructor that saves any keyword arguments as members"""
-    vars(self).update(args)
+  def write_cb(self, data):
+    """Return callable object that performs write with specified data argument
+    Useful for passing buttons writes to templates without exposing data"""
+    return lambda req, caption, *attrib: \
+      self.write(req, caption, data, *attrib)
 
-  def write(self, req):
-    """Write block to request output"""
-    self.template.write(req, self)
-
-  def var(self):
-    """Return this Block as a variable can be inserted into other templates"""
-    return self.template.var(self)
 
 # Helper functions
 
 def _get_storage(req, flags):
   """Get FieldStorage object for a set LOAD_* flags"""
-  if flags & LOAD_FORM:
+  if flags & READ_DEFAULT:
+    return None
+  elif flags & READ_FORM:
     return req.form
-  elif flags & LOAD_URL:
-    return req.form.get
-  elif flags & LOAD_POST:
-    return req.form.post
+  elif flags & READ_URL:
+    return req.get
+  elif flags & READ_POST:
+    return req.post
   else:
     return None
 
@@ -596,10 +783,11 @@ def _tag(req, tag, *attribs, **options):
 
   tag is a string holding the name of the tag
 
-  attribs arguments are list 2-tuples or None elements. None elements are
-  ignored and 2-tuples are printed as attribute=value pairs
+  attribs arguments are 2-tuples, strings or None elements.
+  2-tuples are printed as escaped attribute=value pairs, strings are
+  printed as is and None elements are ignored.
 
-  options arguents are:
+  options arguments are:
 
     open
       boolean which causes the tag to be written with closing slash
@@ -607,12 +795,15 @@ def _tag(req, tag, *attribs, **options):
 
   req.write("<%s" % tag)
   for attrib in attribs:
-    if attrib is not None:
+    if isinstance(attrib, tuple):
       name, value = attrib
       if value is None:
-        req.write(' %s' % (name))
+        req.write(" %s" % (name))
       else:
         req.write(' %s="%s"' % (name, _escape_html(str(value), True)))
+    elif attrib is not None:
+      req.write(" ")
+      req.write(attrib)
 
   if options.get("open"):
     req.write(">")
@@ -623,3 +814,55 @@ def _ctag(req, tag):
   """Write closing tag"""
   req.write("</%s>" % tag)
 
+def _url(req, server=False, info=True, query=False,
+         relative=False, raw=False):
+  """Return URL of current page in the specified format
+
+  req is a Request object.
+
+  The rest of the arguments are booleans:
+
+  server includes server protocol, name, and port in URL if True.
+
+  info includes extended path (part after script name) in URL if True.
+    Ignored when raw=True.
+
+  query includes query string in URL (part starting from ?) if True.
+    Ignored when raw=True.
+
+  relative returns a page-relative URL if True. Ignored if server=True
+    or raw=True.
+
+  raw uses unparsed URI from first line of HTTP request if True, instead
+    of URL components parsed by web server. Implies info=True, query=True
+    and relative=False"""
+
+  server_str = path_str = query_str = ""
+  if server:
+    name = req.server_name()
+    port = req.server_port()
+    https = req.is_https()
+    proto = https and "https" or "http"
+    if (not https and port == 80) or (https and port == 443):
+      server_str = "%s://%s" % (proto, name)
+    else:
+      server_str = "%s://%s:%i" % (proto, name, port)
+
+  if raw:
+    path_str = req.request_uri()
+  else:
+    path_str = req.script_name()
+    if info:
+      path_info = req.path_info()
+      path_str = "%s%s" % (path_str, path_info)
+
+    if relative and not server:
+      p = path_str.rfind("/")
+      if p >= 0:
+        path_str = path_str[pos:]
+
+    if query:
+      args = req.query_string()
+      query_str = "%s%s" % (args and "?", args)
+
+  return "%s%s%s" % (server_str, path_str, query_str)
