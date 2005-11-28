@@ -8,7 +8,7 @@ ROOT = "/"
 
 ### At the moment, it's convenient to write these templates in python strings.
 ### Should probably push them out to files if the site grows
-class Outline(widgets.TemplateBlock):
+class Outline(widgets.TemplateWidget):
   template = ezt(
 """<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <html>
@@ -28,7 +28,7 @@ class Outline(widgets.TemplateBlock):
 </html>""")
 
 
-class NavBar(widgets.TemplateBlock):
+class NavBar(widgets.TemplateWidget):
   root = ROOT
   template = ezt(
 """<script>
@@ -78,7 +78,7 @@ function reallyRevertCaption()
 
 <h2 id=caption>[caption]</h2>""")
 
-  def __init__(self, caption):
+  def __init__(self, req, caption):
     self.caption = caption
     self.links = [ kw(caption="Home", href="index.py",
                       img="media/student.gif",
@@ -98,28 +98,31 @@ function reallyRevertCaption()
                       width=107, height=103) ]
 
 
-class BasePage(widgets.TemplateBlock):
+class BasePage(widgets.TemplateWidget):
   """Base class for all the site's pages, sets up outline and navbar"""
-  def __init__(self):
-    self.navbar = NavBar(self.title).var()
+  def __init__(self, req):
+    self.navbar = NavBar(req, self.title).embed()
+    self.outline = Outline(req, title=self.title, body=self.embed())
 
   def write(self, req):
-    Outline(title=self.title, body=self.var()).write(req)
+    self.outline.write(req)
 
 
 class kw:
   def __init__(self, **kw):
     vars(self).update(kw)
 
+
 # ========================================================================== #
 # CGI handler
 # ========================================================================== #
 
-def handle_cgi(page):
+def handle_cgi(Page):
   from widgets import driver_cgi
   req = driver_cgi.Request()
   req.write('Content-Type: text/html\r\n\r\n')
-  page.write(req)
+  Page(req).write(req)
+
 
 # ========================================================================== #
 # Mod_Python handler
@@ -127,20 +130,23 @@ def handle_cgi(page):
 
 import os.path
 
-def handler(req):
+def handler(mp_req):
   global apache, driver_mod_python
   from mod_python import apache
   from widgets import driver_mod_python
 
   # based on publisher.py
-  path, module_name =  os.path.split(req.filename)
+  path, module_name =  os.path.split(mp_req.filename)
   module_name, module_ext = os.path.splitext(module_name)
   try:
     module = apache.import_module(module_name, path=[path])
   except ImportError:
     raise apache.SERVER_RETURN, apache.HTTP_NOT_FOUND
 
-  req.content_type = 'text/html'
-  module.Page().write(driver_mod_python.Request(req))
+  mp_req.content_type = 'text/html'
+
+  req = driver_mod_python.Request(mp_req)
+  page = module.Page(req)
+  page.write(req)
 
   return apache.OK

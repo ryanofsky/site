@@ -57,4 +57,4 @@ class Page(web.BasePage):
 
 
 if __name__ == '__main__':
-  web.handle_cgi(Page())
+  web.handle_cgi(Page)

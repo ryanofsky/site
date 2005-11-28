@@ -54,8 +54,8 @@ class Page(web.BasePage):
 [end]
 </div>""")
 
-  def __init__(self):
-    web.BasePage.__init__(self)
+  def __init__(self, req):
+    web.BasePage.__init__(self, req)
     conn = PgSQL.connect("::projects:postgres:::")
     try:
       cursor = conn.cursor()
@@ -101,4 +101,4 @@ class Page(web.BasePage):
 
 
 if __name__ == '__main__':
-  web.handle_cgi(Page())
+  web.handle_cgi(Page)
