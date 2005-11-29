@@ -124,32 +124,18 @@ class TableEditor(widgets.FormWidget):
     </tr>
     [for rows]
       <tr>
-        [if-any rows.edit_cols]
-           <td>
-             [if-any rows.edit_id][rows.edit_id][else]<em>auto</em>[end]
-           </td>
-          [for rows.edit_cols]<td>[rows.edit_cols]</td>[end]
-          <td>[rows.save "Save"] [rows.cancel "Cancel"]</td>
-        [else]
-           [for rows.cols]<td>[rows.cols]</td>[end]
-           <td>[rows.edit "Edit"] [rows.delete "Delete"]</td>
-        [end]
-       </tr>
-     [end]
+        [for rows.cols]<td>[rows.cols]</td>[end]
+        <td>[rows.edit "Edit"] [rows.delete "Delete"]</td>
+      </tr>
+    [end]
   </tbody>
 </table>""")
 
   EDIT = 1
   DELETE = 2
-  SAVE = 3
-  CANCEL = 4
 
   def parse_state(self, state):
-    if state == "save":
-      return self.SAVE, None
-    elif state == "cancel":
-      return self.CANCEL, None
-    elif state:
+    if state:
       row = state[1:]
       if state[0] == "d":
         return self.DELETE, int(row)
@@ -167,18 +153,17 @@ class TableEditor(widgets.FormWidget):
         return "e%i" % row
       else:
         return "e"
-    elif command == self.SAVE:
-      return "save"
-    elif command == self.CANCEL:
-      return "cancel"
 
   def __init__(self, req, parent, id, flags, table):
     widgets.FormWidget.__init__(self, req, parent, id, flags)
     self.table = table
     self.message = None
 
+    ### Reorg not to create data button if row editor is active
+    ### and it won't be displayed
     self.state = self.parse_state(self.read_value(req, "state", flags))
     self.button = widgets.DataButton(req, self, "button", flags)
+    self.editor = None
 
     command = self.parse_state(self.button.clicked)
     new_state = False
@@ -203,50 +188,11 @@ class TableEditor(widgets.FormWidget):
       edit_row = self.state[1]
       edit_flags = flags | (new_state and widgets.READ_DEFAULT)
 
-      # Text box for id column, only created if editing existing row
-      self.edit_id = None
-      if edit_row is not None:
-        self.edit_id = widgets.TextBox(req, self, table.id_col, edit_flags)
+      self.editor = RowEditor(req, self, 'row', edit_flags,
+                              self.table, edit_row)
 
-      # Text boxes for other columns
-      self.edit_cols = []
-      for col in self.table.cols:
-        self.edit_cols.append(widgets.TextBox(req, self, col, edit_flags))
-
-      # If fields being shown for first time, load values from database
-      if new_state and edit_row is not None:
-        cursor = connect(self.form).cursor()
-        vals = self.table.select(cursor, edit_row)
-        if vals:
-          self.edit_id.text = edit_row
-          for col, val in zip(self.edit_cols, vals):
-            col.text = val
-        else:
-          # Show a message on attempt to edit a row that no longer exists
-          self.message = Message(req, not_found=True, row=edit_row)
-          self.state = None, None
-
-      if command[0] == self.SAVE:
-        # Save button pressed, either insert new row or update existing
-        try:
-          conn = connect(self.form)
-          cursor = conn.cursor()
-          if edit_row is not None:
-            self.table.update(cursor, edit_row,
-                              [self.edit_id.text]
-                              + [col.text for col in self.edit_cols])
-            saved_row = int(self.edit_id.text)
-          else:
-            saved_row = self.table.insert \
-              (cursor, [col.text for col in self.edit_cols])
-          conn.commit()
-          self.state = None, None
-          self.message = Message(req, save=True, row=saved_row)
-        except DbError, e:
-          self.message = Message(req, save=True, row=edit_row, error=e)
-
-      elif command[0] == self.CANCEL:
-        # Cancel button pressed, reset state
+      if self.editor.done:
+        self.message = self.editor.message
         self.state = None, None
 
   def write(self, req):
@@ -254,46 +200,137 @@ class TableEditor(widgets.FormWidget):
     self.write_value(req, "state", self.state_str(self.state),
                      widgets.WRITE_FORM)
 
+    if self.editor and not self.editor.done:
+      self.editor.write(req)
+      return
+
     # execute template
     data = web.kw(message=self.message and self.message.write or "",
                   id_col=self.table.id_col,
                   cols=self.table.cols,
                   table_cols=len(self.table.cols) + 2,
-                  insert=None,
+                  insert=self.button.write_cb
+                         (self.state_str((self.EDIT, None))),
                   rows=self.rows())
-
-    insert_state = self.EDIT, None
-    if self.state != insert_state:
-      data.insert = self.button.write_cb(self.state_str(insert_state))
 
     self.template.execute(req, data)
 
   def rows(self):
     # generator for "rows" template variable
-    edit_row = None
-    if self.state[0] == self.EDIT:
-      edit_row = self.state[1]
-      edit_ret = web.kw(edit_id=self.edit_id and self.edit_id.write,
-                        edit_cols=[col.write for col in self.edit_cols],
-                        save=self.button.write_cb
-                              (self.state_str((self.SAVE, None))),
-                        cancel=self.button.write_cb
-                              (self.state_str((self.CANCEL, None))))
-
-      if edit_row is None:
-        yield edit_ret
-
     cursor = connect(self.form).cursor()
     for row in self.table.select_all(cursor):
-      if row[0] == edit_row:
-        yield edit_ret
+      yield web.kw(cols=row,
+                   edit=self.button.write_cb
+                        (self.state_str((self.EDIT, row[0]))),
+                   delete=self.button.write_cb
+                          (self.state_str((self.DELETE, row[0]))))
+
+class RowEditor(widgets.FormWidget):
+  """Row Editor Widget
+
+  Public members
+
+   done - boolean, true when there's nothing left for Widget to do
+          (save or cancel pressed)
+   message - message object"""
+
+  template = web.ezt(
+"""
+[message]
+<table>
+  [if-any auto_field]
+    <tr>
+      <td>[auto_field]</td>
+      <td><em>auto</em></td>
+    </tr>
+  [end]
+  [for fields]
+    <tr>
+      <td>[fields.name]</td>
+      <td>[fields.control "50"]</td>
+    </tr>
+  [end]
+</table>
+[save "Save"] [cancel "Cancel"]""")
+
+  def __init__(self, req, parent, id, flags, table, row):
+    widgets.FormWidget.__init__(self, req, parent, id, flags)
+    self.table = table
+    self.row = row
+    self.done = False
+    self.message = None
+
+    # Text box for id column, only created if editing existing row
+    self.id_col = None
+    if row is not None:
+      self.id_col = widgets.TextBox(req, self, self.table.id_col, flags)
+
+    # Text boxes for other columns
+    self.cols = []
+    for col in self.table.cols:
+      self.cols.append(widgets.TextBox(req, self, col, flags))
+
+    # Save and cancel buttons
+    self.save = widgets.SubmitButton(req, self, 'save', flags)
+    self.cancel = widgets.SubmitButton(req, self, 'cancel', flags)
+
+    # If widget being loaded for first time, load values from database
+    if flags & widgets.READ_DEFAULT and self.row is not None:
+      cursor = connect(self.form).cursor()
+      vals = self.table.select(cursor, self.row)
+      if vals:
+        self.id_col.text = self.row
+        for col, val in zip(self.cols, vals):
+          col.text = val
       else:
-        yield web.kw(cols=row,
-                     edit_cols=None,
-                     edit=self.button.write_cb
-                            (self.state_str((self.EDIT, row[0]))),
-                     delete=self.button.write_cb
-                              (self.state_str((self.DELETE, row[0]))))
+        # Can't edit a row that no longer exists, exit and show message
+        self.message = Message(req, not_found=True, row=self.row)
+        self.done = True
+
+    if self.save.clicked:
+      # Save button pressed, either insert new row or update existing
+      try:
+        conn = connect(self.form)
+        cursor = conn.cursor()
+        if self.row is not None:
+          self.table.update(cursor, self.row,
+                            [self.id_col.text]
+                            + [col.text for col in self.cols])
+          saved_row = int(self.id_col.text)
+        else:
+          saved_row = self.table.insert \
+                      (cursor, [col.text for col in self.cols])
+        conn.commit()
+        self.done = True
+        self.message = Message(req, save=True, row=saved_row)
+      except DbError, e:
+        self.message = Message(req, save=True, row=self.row, error=e)
+
+    elif self.cancel.clicked:
+      self.done = True
+
+  def write(self, req):
+    # template data
+    data = web.kw(message=self.message and self.message.write or "",
+                  auto_field=None,
+                  fields=[],
+                  save=self.save.write,
+                  cancel=self.cancel.write)
+
+    # if inserting a new row, id is filled automatically
+    if self.row is None:
+      data.auto_field = self.table.id_col
+
+    # otherwise it's another text field
+    else:
+      data.fields.append(web.kw(name=self.table.id_col,
+                                control=self.id_col.write))
+
+    # add normal fields
+    for name, control in zip(self.table.cols, self.cols):
+      data.fields.append(web.kw(name=name, control=control.write))
+
+    self.template.execute(req, data)
 
 class Message(widgets.TemplateWidget):
   template = web.ezt(
