@@ -105,7 +105,7 @@ class Page(web.BasePage):
     self.editor = TableEditor(req, self.form, "table", widgets.READ_FORM,
                               tables["languages"])
 
-class TableEditor(widgets.FormWidget):
+class TableEditor(widgets.ModalWidget):
   template = web.ezt(
 """[message]
 <table border=1 bordercolor=black cellpadding=3 cellspacing=0>
@@ -131,77 +131,63 @@ class TableEditor(widgets.FormWidget):
   </tbody>
 </table>""")
 
-  EDIT = 1
-  DELETE = 2
-
-  def parse_state(self, state):
-    if state:
-      row = state[1:]
-      if state[0] == "d":
-        return self.DELETE, int(row)
-      elif state[0] == "e":
-        if row:
-          return self.EDIT, int(row)
-        return self.EDIT, None
-    return None, None
-
-  def state_str(self, (command, row)):
-    if command == self.DELETE:
-      return "d%i" % row
-    elif command == self.EDIT:
-      if row is not None:
-        return "e%i" % row
-      else:
-        return "e"
+  EDIT = "edit"
+  DELETE = "delete"
 
   def __init__(self, req, parent, id, flags, table):
-    widgets.FormWidget.__init__(self, req, parent, id, flags)
+    widgets.ModalWidget.__init__(self, req, parent, id, flags)
+
+    # set members
     self.table = table
     self.message = None
 
-    ### Reorg not to create data button if row editor is active
-    ### and it won't be displayed
-    self.state = self.parse_state(self.read_value(req, "state", flags))
+    # initialize mode, quit if there's an active child
+    self.read_mode(req, flags)
+    if self.init_children(req, flags):
+      return
+
+    # handle button clicks
     self.button = widgets.DataButton(req, self, "button", flags)
-    self.editor = None
+    command = self.parse_mode(self.button.clicked)
+    if command:
+      if command[0] == self.DELETE:
+        # Delete button pressed
+        error = None
+        try:
+          conn = connect(self.form)
+          self.table.delete(conn.cursor(), command[1])
+          conn.commit()
+        except DbError, e:
+          error = e
+        self.message = Message(req, delete=True, row=command[1], error=error)
 
-    command = self.parse_state(self.button.clicked)
-    new_state = False
-    if command[0] == self.DELETE:
-      # Delete button pressed
-      error = None
-      try:
-        conn = connect(self.form)
-        self.table.delete(conn.cursor(), command[1])
-        conn.commit()
-      except DbError, e:
-        error = e
-      self.message = Message(req, delete=True, row=command[1], error=error)
+      elif command[0] == self.EDIT:
+        # Edit button pressed
+        self.mode = command
+        self.init_children(req, flags | widgets.READ_DEFAULT)
 
-    elif command[0] == self.EDIT:
-      # Edit button pressed
-      self.state = command
-      new_state = True
+  def init_children(self, req, flags):
+    if self.mode is not None:
+      if self.mode[0] == self.EDIT:
+        row = None
+        if len(self.mode) > 1:
+          row = int(self.mode[1])
 
-    if self.state[0] == self.EDIT:
-      # Edit state
-      edit_row = self.state[1]
-      edit_flags = flags | (new_state and widgets.READ_DEFAULT)
+        self.editor = RowEditor(req, self, "row", flags, self.table, row)
+        if self.editor.active:
+          return True
 
-      self.editor = RowEditor(req, self, 'row', edit_flags,
-                              self.table, edit_row)
-
-      if self.editor.done:
+        self.mode = None
         self.message = self.editor.message
-        self.state = None, None
+        self.modal_children.remove(self.editor)
+        del self.editor
+
+    return False
 
   def write(self, req):
-    # preserve state
-    self.write_value(req, "state", self.state_str(self.state),
-                     widgets.WRITE_FORM)
-
-    if self.editor and not self.editor.done:
-      self.editor.write(req)
+    # preserve mode, if there's an active child widget, show it and return
+    self.write_mode(req)
+    if self.write_children(req):
       return
 
     # execute template
@@ -210,7 +196,7 @@ class TableEditor(widgets.FormWidget):
                   cols=self.table.cols,
                   table_cols=len(self.table.cols) + 2,
                   insert=self.button.write_cb
-                         (self.state_str((self.EDIT, None))),
+                         (self.mode_str((self.EDIT, ))),
                   rows=self.rows())
 
     self.template.execute(req, data)
@@ -221,17 +207,15 @@ class TableEditor(widgets.FormWidget):
     for row in self.table.select_all(cursor):
       yield web.kw(cols=row,
                    edit=self.button.write_cb
-                        (self.state_str((self.EDIT, row[0]))),
+                        (self.mode_str((self.EDIT, row[0]))),
                    delete=self.button.write_cb
-                          (self.state_str((self.DELETE, row[0]))))
+                          (self.mode_str((self.DELETE, row[0]))))
 
-class RowEditor(widgets.FormWidget):
+class RowEditor(widgets.ModalWidget):
   """Row Editor Widget
 
   Public members
 
-   done - boolean, true when there's nothing left for Widget to do
-          (save or cancel pressed)
    message - message object"""
 
   template = web.ezt(
@@ -254,10 +238,9 @@ class RowEditor(widgets.FormWidget):
 [save "Save"] [cancel "Cancel"]""")
 
   def __init__(self, req, parent, id, flags, table, row):
-    widgets.FormWidget.__init__(self, req, parent, id, flags)
+    widgets.ModalWidget.__init__(self, req, parent, id, flags)
     self.table = table
     self.row = row
-    self.done = False
     self.message = None
 
     # Text box for id column, only created if editing existing row
@@ -271,8 +254,8 @@ class RowEditor(widgets.FormWidget):
       self.cols.append(widgets.TextBox(req, self, col, flags))
 
     # Save and cancel buttons
-    self.save = widgets.SubmitButton(req, self, 'save', flags)
-    self.cancel = widgets.SubmitButton(req, self, 'cancel', flags)
+    self.save = widgets.SubmitButton(req, self, "save", flags)
+    self.cancel = widgets.SubmitButton(req, self, "cancel", flags)
 
     # If widget being loaded for first time, load values from database
     if flags & widgets.READ_DEFAULT and self.row is not None:
@@ -285,7 +268,7 @@ class RowEditor(widgets.FormWidget):
       else:
         # Can't edit a row that no longer exists, exit and show message
         self.message = Message(req, not_found=True, row=self.row)
-        self.done = True
+        self.active = False
 
     if self.save.clicked:
       # Save button pressed, either insert new row or update existing
@@ -301,13 +284,13 @@ class RowEditor(widgets.FormWidget):
           saved_row = self.table.insert \
                       (cursor, [col.text for col in self.cols])
         conn.commit()
-        self.done = True
+        self.active = False
         self.message = Message(req, save=True, row=saved_row)
       except DbError, e:
         self.message = Message(req, save=True, row=self.row, error=e)
 
     elif self.cancel.clicked:
-      self.done = True
+      self.active = False
 
   def write(self, req):
     # template data
