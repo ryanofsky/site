@@ -1,4 +1,5 @@
 import cgi
+import re
 import urllib
 
 """widgets module -- a framework for generating dynamic web pages
@@ -748,6 +749,134 @@ class DataButton(FormWidget):
     Useful for passing buttons writes to templates without exposing data"""
     return lambda req, caption, *attrib: \
       self.write(req, caption, data, *attrib)
+
+class ModalWidget(FormWidget):
+  """Base class for widgets that show child widgets depending on mode
+
+  Lots of times the functionality you want to implement in a widget, like a
+  wizard interface or message editor, can be broken down into several modes
+  (or states), making it logical to implement the logic behind the individual
+  modes in seperate child widgets which are displayed, one at a time, by the
+  main widget. For example, in the case of the wizard interface you might want
+  to make the forms displayed on each step of the wizard into seperate widgets.
+  A message editor widget might implement a text editor in one child widget, a
+  spell checking interface in another child widget, and a file uploading
+  interface in a third. The ModalWidget class exists to make it possible to
+  write widgets like these with less boilerplate code and with common naming
+  conventions. As it coordinates loading and display of form elements over time
+  (on different page loads) it's  sort of a logical extension to Form Widgets,
+  which coordinate creation of widgets in space (alongside each other on the
+  same pages).
+
+  To use ModalWidget functionality, the main, parent widget and the separate
+  child widgets which comprise its interface should all inherit from the
+  ModalWidget base class. (This symmetry means you can nest modal widgets as
+  modes in other modal widgets, so you could make a wizard a mode of a
+  message editing interface or vice versa.)
+
+  A ModalWidget parent will create and display ModalWidget children depending
+  on what mode or state it's in. For any given mode of the parent, at most one
+  child will be displayed (it's write method called). This is called the
+  "active" child and each ModalWidget instance has an "active" boolean member
+  that indicates whether or not a parent widget should display it on the
+  current page load.
+
+  The ModalWidget class doesn't impose much structure on subclasses. In
+  particular, it doesn't have any abstract methods for subclasses to implement.
+  Instead, it provides methods implementing reasonable-default logic for
+  modal widgets that some subclasses will use directly, some will override,
+  and some will just completely ignore. The init_children(), write_children(),
+  and write_hidden_children() methods it provides implement most of the logic a
+  parent needs to manage it's children. And the write_mode(), read_mode(),
+  parse_mode(), and mode_str() methods it provides help deal with modes
+  represented as lists of strings.
+
+  ModalWidget classes provide the following members:
+
+  "modal_children" - a list of ModalWidget child instances that is
+    automatically populated as each instance is constructed
+
+  "active" - boolean, default True. If this is a child widget, indicates
+    whether it should be displayed (whether its write method should be called
+    instead of write_hidden). At most one child widget should be marked active
+    per parent, depending on the mode of the parent.
+
+  "mode" - list of strings, or None. Only present if the read_mode() method
+    has been called (and not overridden to do something different). May also
+    be something other than a list of strings if the parse_mode() and
+    mode_str() methods have been overridden. In any case, it represents the
+    mode of a parent widget and determines whether its children will be
+    displayed (or created)."""
+
+  def __init__(self, req, parent, id, flags, *args, **kwargs):
+    """Initialize modal widget, setting default values for members"""
+    FormWidget.__init__(self, req, parent, id, flags)
+    self.active = True
+    self.modal_children = []
+    if isinstance(parent, ModalWidget):
+      parent.modal_children.append(self)
+
+  def init_children(self, req, flags):
+    """Set up child widgets depending on mode, return True if one is active
+
+    A parent widget should call this method in its __init__ constructor to
+    initialize the current mode. It can use a True return value to avoid doing
+    unneccessary processing like handling button clicks when a child is active.
+
+    A parent widget can override this method to create child widgets on the fly
+    depending on the current mode, calling it wherever it changes the mode, to
+    create the corresponding child widget."""
+    any_active = False
+    for child in self.modal_children:
+      if child.active:
+        any_active = True
+    return any_active
+
+  def write_children(self, req):
+    """Write output from child widgets, return True if any is active.
+
+    A parent widget should call this method in its write() method. If there
+    is an active child widget, this calls that child's write() method.
+    Otherwise this calls childrens' write_hidden() methods."""
+    any_active = False
+    for child in self.modal_children:
+      if child.active:
+        child.write(req)
+        any_active = True
+      else:
+        child.write_hidden(req)
+    return any_active
+
+  def write_hidden_children(req):
+    """Write hidden output from child widgets"""
+    for child in self.modal_children:
+      self.child.write_hidden(req)
+
+  def write_mode(self, req):
+    """Preserve "mode" member using mode_str() to format as a string"""
+    self.write_value(req, "mode", self.mode_str(self.mode), WRITE_FORM)
+
+  def read_mode(self, req, flags):
+    """Read "mode" member using parse_mode() to parse stored string"""
+    self.mode = self.parse_mode(self.read_value(req, "mode", flags))
+
+  def mode_str(self, mode):
+    """Format a list of strings as a string
+
+    The different elements of the lists are joined by dots. Dots are escaped
+    by backslashes. Backslashes are escaped by backslashes."""
+    if mode is not None:
+      return ".".join([re.sub(r"([\\\.])", r"\\\1", str(p)) for p in mode])
+
+  def parse_mode(self, str):
+    """Parse dot separated mode string formatted by mode_str()
+
+    Will return a list of strings identical to the one passed to mode_str.
+    Should handle all lists correctly, including ones with empty members
+    and members containing dots and backslashes."""
+    if str is not None:
+      return [re.sub(r"\\(.)", r"\1", p)
+              for p in re.findall(r"((?:[^\\]|\\.)*?)\.", str + ".")]
 
 
 # Helper functions
