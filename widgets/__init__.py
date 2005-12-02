@@ -593,15 +593,16 @@ class _SelectBox:
     """Output widget's opening <select> tag"""
     id = self.id()
     _tag(req, "select", ("name", id),
-         self.multiple_select and ("multiple", None) or None,
+         self.select_multiple and ("multiple", None) or None,
          open=True, *attribs)
 
   def write_item(self, req, value, name, *attribs):
     """Output an <option> block"""
+    key = value is None and name or value
     _tag(req, "option", value is not None and ("value", value) or None,
-         self.is_selected(value) and ("selected", None) or None,
+         self.is_selected(key) and ("selected", None) or None,
          open=True, *attribs)
-    req.write(_html_escape(name))
+    req.write(_escape_html(name))
     _ctag(req, "option")
 
   def write_close(self, req):
@@ -690,7 +691,7 @@ class SubmitButton(FormWidget):
     FormWidget.__init__(self, req, parent, id, flags)
     self.clicked = self.read_value(req, None, flags) is not None
 
-  def write_hidden(self, req):
+  def write_hidden(self, req, flags):
     pass
 
   def write(self, req, label, *attribs):
@@ -737,7 +738,7 @@ class DataButton(FormWidget):
       self.clicked = data
       break # shouldn't be more than one value, but if there is, keep first
 
-  def write_hidden(self, req):
+  def write_hidden(self, req, flags):
     pass
 
   def write(self, req, caption, data, *attribs):
@@ -749,6 +750,7 @@ class DataButton(FormWidget):
     Useful for passing buttons writes to templates without exposing data"""
     return lambda req, caption, *attrib: \
       self.write(req, caption, data, *attrib)
+
 
 class ModalWidget(FormWidget):
   """Base class for widgets that show child widgets depending on mode
@@ -764,7 +766,7 @@ class ModalWidget(FormWidget):
   interface in a third. The ModalWidget class exists to make it possible to
   write widgets like these with less boilerplate code and with common naming
   conventions. As it coordinates loading and display of form elements over time
-  (on different page loads) it's  sort of a logical extension to Form Widgets,
+  (on different page loads) it's sort of a logical extension to Form Widgets,
   which coordinate creation of widgets in space (alongside each other on the
   same pages).
 
@@ -844,13 +846,13 @@ class ModalWidget(FormWidget):
         child.write(req)
         any_active = True
       else:
-        child.write_hidden(req)
+        child.write_hidden(req, widgets.WRITE_FORM)
     return any_active
 
-  def write_hidden_children(req):
+  def write_hidden_children(req, flags):
     """Write hidden output from child widgets"""
     for child in self.modal_children:
-      self.child.write_hidden(req)
+      self.child.write_hidden(req, flags)
 
   def write_mode(self, req):
     """Preserve "mode" member using mode_str() to format as a string"""
