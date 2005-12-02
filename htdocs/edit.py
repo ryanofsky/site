@@ -102,12 +102,15 @@ class Page(web.BasePage):
   def __init__(self, req):
     web.BasePage.__init__(self, req)
     self.form = widgets.Form(req, "edit")
-    self.editor = TableEditor(req, self.form, "table", widgets.READ_FORM,
-                              tables["languages"])
+    self.editor = TableEditor(req, self.form, "table", widgets.READ_FORM)
 
 class TableEditor(widgets.ModalWidget):
   template = web.ezt(
-"""[message]
+r"""[message]
+<div>Table [chooser "onchange=\"this.form.submit()\"" "poop"]
+<input type="submit" value="Set">
+</div>
+
 <table border=1 bordercolor=black cellpadding=3 cellspacing=0>
   <thead>
     <tr>
@@ -134,12 +137,16 @@ class TableEditor(widgets.ModalWidget):
   EDIT = "edit"
   DELETE = "delete"
 
-  def __init__(self, req, parent, id, flags, table):
+  def __init__(self, req, parent, id, flags):
     widgets.ModalWidget.__init__(self, req, parent, id, flags)
 
     # set members
-    self.table = table
+    self.chooser = widgets.SelectBox(req, self, "chooser", flags)
     self.message = None
+    if self.chooser.selected is None:
+      self.table = tables.values()[0]
+    else:
+      self.table = tables[self.chooser.selected]
 
     # initialize mode, quit if there's an active child
     self.read_mode(req, flags)
@@ -188,10 +195,13 @@ class TableEditor(widgets.ModalWidget):
     # preserve mode, if there's an active child widget, show it and return
     self.write_mode(req)
     if self.write_children(req):
+      self.chooser.write_hidden(req, widgets.WRITE_FORM)
       return
 
     # execute template
     data = web.kw(message=self.message and self.message.write or "",
+                  chooser=lambda req, *attribs: 
+                          self.chooser.write(req, tables.keys(), *attribs),
                   id_col=self.table.id_col,
                   cols=self.table.cols,
                   table_cols=len(self.table.cols) + 2,
@@ -205,7 +215,7 @@ class TableEditor(widgets.ModalWidget):
     # generator for "rows" template variable
     cursor = connect(self.form).cursor()
     for row in self.table.select_all(cursor):
-      yield web.kw(cols=row,
+      yield web.kw(cols=map(str, row),
                    edit=self.button.write_cb
                         (self.mode_str((self.EDIT, row[0]))),
                    delete=self.button.write_cb
