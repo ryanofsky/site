@@ -260,7 +260,11 @@ FORMAT_XML = 'xml'
 _item = r'(?:"(?:[^\\"]|\\.)*"|[-\w.]+)'
 _re_parse = re.compile(r'\[(%s(?: +%s)*)\]|(\[\[\])|\[#[^\]]*\]' % (_item, _item))
 
+# expression for separating items within a directive
 _re_args = re.compile(r'"(?:[^\\"]|\\.)*"|[-\w.]+')
+
+# expression for unescaping string literals
+_re_unescape = re.compile(r'\\(.)')
 
 # block commands and their argument counts
 _block_cmd_specs = { 'if-index':2, 'for':1, 'is':2, 'define':1, 'format':1 }
@@ -414,7 +418,7 @@ class Template:
           stack.append([cmd, len(program), args[1:], None])
         elif cmd == 'include':
           if args[1][0] == '"':
-            include_filename = args[1][1:-1]
+            include_filename = _parse_string(args[1])
             f_args = [ ]
             for arg in args[2:]:
               f_args.append(_prepare_ref(arg, for_names, file_args))
@@ -537,6 +541,9 @@ def boolean(value):
     return 'yes'
   return None
 
+def _parse_string(string):
+  assert string[0] == '"' and string[-1] == '"' and len(string) >= 2
+  return _re_unescape.sub(r'\1', string[1:-1])
 
 def _prepare_ref(refname, for_names, file_args):
   """refname -> a string containing a dotted identifier. example:"foo.bar.bang"
@@ -547,7 +554,7 @@ def _prepare_ref(refname, for_names, file_args):
   """
   # is the reference a string constant?
   if refname[0] == '"':
-    return None, refname[1:-1], None
+    return None, _parse_string(refname), None
 
   parts = string.split(refname, '.')
   start = parts[0]
