@@ -12,7 +12,12 @@ from widgets import ezt
 class Table:
   def __init__(self, name, id_col, id_seq, cols):
     self.name = name
-    self.id_col = id_col
+    if id_col:
+      self.id_col = id_col
+      self.id_readonly = False
+    else:
+      self.id_col = "oid"
+      self.id_readonly = True
     self.id_seq = id_seq
     self.cols = cols
 
@@ -30,10 +35,15 @@ class Table:
       return cursor.fetchone()[0]
 
   def update(self, cursor, id, vals):
+    if self.id_readonly:
+      update_cols = self.cols
+    else:
+      update_cols = (self.id_col,) + self.cols
+
     self._query(cursor, "UPDATE %s SET %s WHERE %s = %%s"
                         % (self.name,
                            ", ".join(["%s = %%s" % col
-                                      for col in (self.id_col,) + self.cols]),
+                                      for col in update_cols]),
                            self.id_col), vals + [id])
 
   def select(self, cursor, id):
@@ -74,7 +84,7 @@ tables = {
                     ("name", "lines", "cvsmodule", "startdate", "enddate",
                      "description")),
   "languages": Table("languages", "language_id", "language_ids", ("name",)),
-  "project_languages": Table("project_languages", "oid", None,
+  "project_languages": Table("project_languages", None, None,
                              ("project_id", "language_id"))
 }
 
@@ -235,7 +245,7 @@ class RowEditor(widgets.ModalWidget):
   [if-any auto_field]
     <tr>
       <td>[auto_field]</td>
-      <td><em>auto</em></td>
+      <td><em>[if-any auto_val][auto_val][else]auto[end]</em></td>
     </tr>
   [end]
   [for fields]
@@ -253,13 +263,10 @@ class RowEditor(widgets.ModalWidget):
     self.row = row
     self.message = None
 
-    # Text box for id column, only created if editing existing row
-    self.id_col = None
-    if row is not None:
-      self.id_col = widgets.TextBox(req, self, self.table.id_col, flags)
-
-    # Text boxes for other columns
+    # Create text boxes for columns
     self.cols = []
+    if row is not None and not self.table.id_readonly:
+      self.cols.append(widgets.TextBox(req, self, self.table.id_col, flags))
     for col in self.table.cols:
       self.cols.append(widgets.TextBox(req, self, col, flags))
 
@@ -272,8 +279,10 @@ class RowEditor(widgets.ModalWidget):
       cursor = connect(self.form).cursor()
       vals = self.table.select(cursor, self.row)
       if vals:
-        self.id_col.text = self.row
-        for col, val in zip(self.cols, vals):
+        cols = iter(self.cols)
+        if not self.table.id_readonly:
+          cols.next().text = self.row
+        for col, val in zip(cols, vals):
           col.text = val
       else:
         # Can't edit a row that no longer exists, exit and show message
@@ -287,9 +296,11 @@ class RowEditor(widgets.ModalWidget):
         cursor = conn.cursor()
         if self.row is not None:
           self.table.update(cursor, self.row,
-                            [self.id_col.text]
-                            + [col.text for col in self.cols])
-          saved_row = int(self.id_col.text)
+                            [col.text for col in self.cols])
+          if self.table.id_readonly:
+            saved_row = self.row
+          else:
+            saved_row = int(self.cols[0].text)
         else:
           saved_row = self.table.insert \
                       (cursor, [col.text for col in self.cols])
@@ -306,21 +317,21 @@ class RowEditor(widgets.ModalWidget):
     # template data
     data = web.kw(message=self.message and self.message.write or "",
                   auto_field=None,
+                  auto_val=None,
                   fields=[],
                   save=self.save.write,
                   cancel=self.cancel.write)
 
-    # if inserting a new row, id is filled automatically
-    if self.row is None:
+    # if inserting a new row or editing read only, id is filled automatically
+    cols = self.table.cols
+    if self.row is None or self.table.id_readonly:
       data.auto_field = self.table.id_col
-
-    # otherwise it's another text field
+      data.auto_val = self.row
     else:
-      data.fields.append(web.kw(name=self.table.id_col,
-                                control=self.id_col.write))
+      cols = (self.table.id_col,) + cols
 
     # add normal fields
-    for name, control in zip(self.table.cols, self.cols):
+    for name, control in zip(cols, self.cols):
       data.fields.append(web.kw(name=name, control=control.write))
 
     self.template.execute(req, data)
