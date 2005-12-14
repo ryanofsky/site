@@ -1,10 +1,11 @@
 #!/usr/bin/env python
+import cgitb; cgitb.enable()
 import web
 from pyPgSQL import PgSQL
 
 
 class Page(web.BasePage):
-  title = "Projects"
+  title = "Code"
   template = web.ezt(
 """[navbar]
 <div class=notugly>

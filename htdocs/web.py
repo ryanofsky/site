@@ -88,7 +88,7 @@ function reallyRevertCaption()
                       img="media/lawyer.gif",
                       imgglow="media/lawyer_glow.gif",
                       width=115, height=249),
-                   kw(caption="Projects", href="projects.py",
+                   kw(caption="Code", href="code.py",
                       img="media/kneeling.gif",
                       imgglow="media/kneeling_glow.gif",
                       width=171, height=238),
