@@ -12,7 +12,7 @@ class Page(web.BasePage):
 <form>
 
 <p>It's taking a lot longer than I thought it would to gather source files, statistics, and comments for these projects.  I'm going to add to the content here and revise gradually over the next few weeks, as time permits. So far I've added all of the projects that have online CVS repositories or preexisting web sites.</p>
-<p><i>Note:</i> These controls don't actually do anything right now. When I get the opportunity, I'll replace them with ASP.NET Web Form elements, so I'll be able to add functionality and learn a new API at once.</p>
+<p><i>Note:</i> These controls don't actually do anything right now.</p>
 
 <table border=1 cellpadding=3>
 <tr>
