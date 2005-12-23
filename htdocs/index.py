@@ -3,6 +3,7 @@ import web
 
 
 class Page(web.BasePage):
+  DATE = "$Date$"
   title = "Home"
   template = web.ezt(
 """[navbar]
