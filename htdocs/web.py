@@ -1,6 +1,10 @@
 import widgets
 from widgets.driver_ezt import Template as ezt
 
+import time
+import calendar
+import re
+
 
 # location of these pages on server
 ROOT = "/"
@@ -101,15 +105,48 @@ function reallyRevertCaption()
                       width=107, height=103) ]
 
 
+class Footer(widgets.TemplateWidget):
+  root = ROOT
+  template = ezt(
+"""<div class="notugly" style="text-align: right;">
+  <hr>
+  <a href="[date_href]" title="Last Modified">[date]</a>
+  <a href="mailto:[mail]" title="Email"><img src="[root]media/mail.png" border="0" alt="Email"></a>
+  </div>""")
+
+
 class BasePage(widgets.TemplateWidget):
   """Base class for all the site's pages, sets up outline and navbar"""
+  DATE = None
+  root = ROOT
+
   def __init__(self, req):
     self.navbar = NavBar(req, self.title).embed()
-    self.outline = Outline(req, title=self.title, body=self.embed())
+    self.footer = Footer(req, date =self.reformat_date(self.DATE),
+                         date_href="/viewcvs.py/site/htdocs%s?view=log"
+			           % req.script_name(),
+			 mail="russell.yanofsky@us.army.mil").embed()
+    self.outline = Outline(req, body=self.embed(), title=self.title)
 
   def write(self, req):
     self.outline.write(req)
 
+  def reformat_date(self, date):
+    if date is None:
+      return None
+    m = re.match(r"\$Date: (\d{4})-(\d{2})-(\d{2}) "
+                 r"(\d{2}):(\d{2}):(\d{2}) ([+-]\d{4}) .*\$$", 
+	         date)
+    if not m:
+      return None
+    year, month, day, hour, min, sec, offset = map(int, m.groups())
+    if offset < 0:
+      offset = -60 * ((-offset % 100) + 60 * (-offset // 100))
+    else:
+      offset = 60 * ((offset % 100) + 60 * (offset // 100))
+    ticks = (calendar.timegm((year, month, day, hour, min, sec, 0, 0, 0))
+             - offset)
+    return time.strftime('%a %b %d %H:%M:%S UTC %Y', time.gmtime(ticks))
 
 class kw:
   def __init__(self, **kw):
@@ -139,7 +176,7 @@ def handler(mp_req):
   from widgets import driver_mod_python
 
   # based on publisher.py
-  path, module_name =  os.path.split(mp_req.filename)
+  path, module_name = os.path.split(mp_req.filename)
   module_name, module_ext = os.path.splitext(module_name)
   try:
     module = apache.import_module(module_name, path=[path])

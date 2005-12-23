@@ -3,6 +3,7 @@ import web
 
 
 class Page(web.BasePage):
+  DATE = "$Date$"
   title = "Links"
   template = web.ezt(
 """[navbar]
@@ -30,30 +31,29 @@ class Page(web.BasePage):
 <a href="http://www.google.com/">Google</a>,
 <a href="http://groups.google.com/">Google Groups</a>,
 <a href="http://www.google.com/univ/columbia">Google Columbia</a>,
-<a href="http://www.dictionary.com/">Dictionary</a>,
-<a href="http://dictionary.oed.com/entrance.dtl">OED</a>,
-<a href="http://www.columbia.edu/~rey4/classes.html">Classes</a>,
-<a href="http://astalavista.box.sk/">astalavista</a> (turn off popups for this),
-<a href="http://msdn.microsoft.com/workshop/author/dhtml/reference/objects.asp">DHTML Reference</a>
+<a href="http://www.onelook.com/">Dictionary</a>
 </p>
 
 <h3>Pages and Sites on this Machine</h3>
 <ul>
-  <li><a href="http://cvs.russ.hn.org/viewcvs.asp/">cvs.russ.hn.org</a> - CVS Web</li>
-  <li><a href="/cvcomputer/">/cvcomputer/</a> - Club I founded in high school</li>
-  <li><a href="/jica/">/jica/</a> - java citrix client</li>
-  <li><a href="/twofish/twofish.html">/twofish/</a> - javascript encryption utility (MD5, twofish)</li>
+  <li><a href="/cs1007/">/cs1007/</a>, <a href="/cs3156/">/cs3156/</a> - web pages for classes</li>
+  <li><a href="/cvcomputer/">/cvcomputer/</a> - high school computer club</li>
   <li><a href="/easycrt/">/easycrt/</a> - EasyCRT pascal graphics library</li>
-  <li><a href="/cs1007/">/cs1007/</a>, <a href="/cs3156/">/cs3156/</a> - Web pages for classes</li>
-  <li><a href="/reference/">/reference/</a> - cached copies of slow pages</li>
+  <li><a href="/horde/">/horde/</a> - web mail</li>
+  <li><a href="/rref/">/rref/</a> - rvalue references for G++</li>
+  <li><a href="/ssh/">/ssh/</a> - ssh applet</li>
+  <li><a href="/twofish/twofish.html">/twofish/</a> - javascript encryption utility (MD5, twofish)</li>
+  <li><a href="/viewcvs/">/viewcvs/</a> - ViewCVS for Windows</li>
+  <li><a href="/viewvc.py">/viewvc.py</a> - repository Browser</li>
+  <li><a href="http://www.evilive.net/">www.evilive.net</a> - sister's home page</li>
 </ul>
 
 <h3>Miscellany</h3>
 <ul>
   <li><a href="http://www.godecookery.com/clipart/clart.htm">Medieval Woodcuts Clipart Collection</a> - site's graphics come from here</li>
-  <li><a href="http://oracle.seas.columbia.edu/wces/">WCES</a></li>
 </ul>
-</div>""")
+</div>
+[footer]""")
 
 
 if __name__ == '__main__':

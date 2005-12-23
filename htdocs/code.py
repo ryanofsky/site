@@ -5,14 +5,13 @@ from pyPgSQL import PgSQL
 
 
 class Page(web.BasePage):
+  DATE = "$Date$"
   title = "Code"
   template = web.ezt(
 """[navbar]
 <div class=notugly>
 <form>
-
-<p>It's taking a lot longer than I thought it would to gather source files, statistics, and comments for these projects.  I'm going to add to the content here and revise gradually over the next few weeks, as time permits. So far I've added all of the projects that have online CVS repositories or preexisting web sites.</p>
-<p><i>Note:</i> These controls don't actually do anything right now.</p>
+<p>[This page is out of date. And the controls don't work]</p>
 
 <table border=1 cellpadding=3>
 <tr>
@@ -48,12 +47,13 @@ class Page(web.BasePage):
 <tr><td>Name:</td><td>[projects.name]</td></tr>
 <tr><td>Size:</td><td>[if-any projects.lines][projects.lines] lines[else]?[end]</td></tr>
 <tr><td>Dates:</td><td>[projects.dates]</td></tr>
-<tr><td nowrap>CVS Repository:</td><td>[if-any]<a href="http://russ.hn.org/viewvc/[projects.cvs]/">[projects.cvs]</a>[projects.cvs][else]<i>none</i>[end]</td></tr>
+<tr><td nowrap>CVS Repository:</td><td>[if-any projects.cvs]<a href="[root]viewvc.py/[projects.cvs]/">[projects.cvs]</a>[else]<i>none</i>[end]</td></tr>
 <tr><td>Language(s):</td><td>[projects.langs]</td></tr>
 <tr><td valign=top>Description:</td><td>[projects.description]</td></tr>
 </table><br>
 [end]
-</div>""")
+</div>
+[footer]""")
 
   def __init__(self, req):
     web.BasePage.__init__(self, req)
