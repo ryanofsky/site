@@ -18,8 +18,10 @@ class Outline(widgets.TemplateWidget):
 <!--
   h2 { text-align: center; }
   body { font-family: Modern, Trebuchet MS, Arial, Helvetica, sans-serif;
-         margin-left: auto; margin-right: auto; width: 600px; }
-  .notugly { font-family: Trebuchet MS, Arial, Helvetica, sans-serif; }
+         text-align: center; }
+  .notugly { font-family: Trebuchet MS, Arial, Helvetica, sans-serif;
+             margin-left: auto; margin-right: auto; width: 600px;
+	     text-align: left; }
 -->
 </style>
 </head>
