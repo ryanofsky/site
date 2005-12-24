@@ -123,7 +123,7 @@ class BasePage(widgets.TemplateWidget):
   def __init__(self, req):
     self.navbar = NavBar(req, self.title).embed()
     self.footer = Footer(req, date =self.reformat_date(self.DATE),
-                         date_href="/viewcvs.py/site/htdocs%s?view=log"
+                         date_href="/viewvc.py/site/trunk/htdocs%s?view=log"
 			           % req.script_name(),
 			 mail="russell.yanofsky@us.army.mil").embed()
     self.outline = Outline(req, body=self.embed(), title=self.title)

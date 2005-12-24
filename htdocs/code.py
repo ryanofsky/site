@@ -57,7 +57,7 @@ class Page(web.BasePage):
 
   def __init__(self, req):
     web.BasePage.__init__(self, req)
-    conn = PgSQL.connect("::projects:postgres:::")
+    conn = PgSQL.connect("::code:postgres:::")
     try:
       cursor = conn.cursor()
       try:

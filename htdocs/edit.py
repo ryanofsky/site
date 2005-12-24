@@ -101,13 +101,15 @@ def connect(form):
 # Web Logic
 
 class Page(web.BasePage):
+  DATE = "$Date$"
   title = "Table Editor"
   template = web.ezt(
 """<div class=notugly>
 <form action="[form.url]" name="[form.name]">
 [editor.write]
 </form>
-</div>""")
+</div>
+[footer]""")
 
   def __init__(self, req):
     web.BasePage.__init__(self, req)

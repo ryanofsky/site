@@ -38,13 +38,14 @@ class Page(web.BasePage):
 <ul>
   <li><a href="/cs1007/">/cs1007/</a>, <a href="/cs3156/">/cs3156/</a> - web pages for classes</li>
   <li><a href="/cvcomputer/">/cvcomputer/</a> - high school computer club</li>
+  <li><a href="/edit.py">/edit.py</a> - widgets test page
   <li><a href="/easycrt/">/easycrt/</a> - EasyCRT pascal graphics library</li>
-  <li><a href="/horde/">/horde/</a> - web mail</li>
+  <li><a href="/horde/">/horde/</a> - web mail (<a href="http://horde.org/imp/">IMP</a> 4.0)</li>
   <li><a href="/rref/">/rref/</a> - rvalue references for G++</li>
-  <li><a href="/ssh/">/ssh/</a> - ssh applet</li>
+  <li><a href="/ssh/ssh.html">/ssh/</a> - ssh applet (<a href="http://javassh.org/">JTA</a> 2.0)</li>
   <li><a href="/twofish/twofish.html">/twofish/</a> - javascript encryption utility (MD5, twofish)</li>
   <li><a href="/viewcvs/">/viewcvs/</a> - ViewCVS for Windows</li>
-  <li><a href="/viewvc.py">/viewvc.py</a> - repository Browser</li>
+  <li><a href="/viewvc.py">/viewvc.py</a> - repository browser (<a href="http://viewvc.org/">ViewVC</a> 1.0)</li>
   <li><a href="http://www.evilive.net/">www.evilive.net</a> - sister's home page</li>
 </ul>
 
