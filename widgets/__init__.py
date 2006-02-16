@@ -112,7 +112,7 @@ class Request:
 
   def script_name(self):
     """Return script name
-    Example: Returns "page.py" for http://hello.com:88/page.py/path?1=2"""
+    Example: Returns "/page.py" for http://hello.com:88/page.py/path?1=2"""
     raise NotImplementedError
 
   def path_info(self):
@@ -153,15 +153,22 @@ class Template:
     dataobj is an object whose members will be exposed as template variables"""
     raise NotImplementedError
 
-  def callback(self, cb):
-    ### Need to implement Template classes for templates other than EZT
-    ### to see if this interface is at all workable...
-    """Adapt a callback for use in a template
+  def bind_write(self, write_method, *args, **kwargs):
+    """Return object that can be used inside template to call write method
 
-    cb should be a callable object that takes a request object as its
-    first argument, for example a bound Widget.write method. It may take
-    additional arguments as well if the template engine allows passing
-    arguments to callbacks."""
+    A key aspect of widget organization is that widgets may contain other
+    widgets and use them to produce parts of their own output. Widgets that
+    implement their write methods using template engines need some way to
+    invoke other widgets' write methods during the course of their own output.
+
+    Since template engines vary considerably in the ways they allow you
+    to integrate external output with their own, this method defines a very
+    loose interface that will return some object (depending on the template
+    engine) that can be used inside the template to invoke a bound write_method
+    ("write_method") with the specified arguments ("args" and "kwargs")."""
+
+    ### Need to implement Template classes for templates other than EZT
+    ### to see if this interface is really workable...
     raise NotImplementedError
 
 
@@ -190,7 +197,8 @@ class TemplateWidget(Widget):
   def embed(self):
     """Return Widget as a template variable that can be included in other
     templates"""
-    return self.template.callback(lambda req: self.template.execute(req, self))
+    return self.template.bind_write \
+      (lambda req:self.template.execute(req, self))
 
 
 class Form:
@@ -741,15 +749,9 @@ class DataButton(FormWidget):
   def write_hidden(self, req, flags):
     pass
 
-  def write(self, req, caption, data, *attribs):
+  def write(self, req, data, label, *attribs):
     _tag(req, "input", ("type", "submit"), ("name", self.id(data)),
-         ("value", caption), *attribs)
-
-  def write_cb(self, data):
-    """Return callable object that performs write with specified data argument
-    Useful for passing buttons writes to templates without exposing data"""
-    return lambda req, caption, *attrib: \
-      self.write(req, caption, data, *attrib)
+         ("value", label), *attribs)
 
 
 class ModalWidget(FormWidget):

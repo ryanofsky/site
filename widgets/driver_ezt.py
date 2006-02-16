@@ -18,5 +18,9 @@ class Template:
   def execute(self, req, dataobj):
     self._ezt.generate(req, dataobj)
 
-  def callback(self, callback):
-    return callback
+  def bind_write(self, write_method, *args, **kwargs):
+    """Returns write method bound with arguments as an EZT callback
+
+    Arguments passed to the callback within the template are simply appended
+    to the the bound arguments."""
+    return lambda ctx, *cargs: write_method(ctx.fp, *(args+cargs), **kwargs)

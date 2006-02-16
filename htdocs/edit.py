@@ -106,7 +106,7 @@ class Page(web.BasePage):
   template = web.ezt(
 """<div class=notugly>
 <form action="[form.url]" name="[form.name]">
-[editor.write]
+[editor]
 </form>
 </div>
 [footer]""")
@@ -114,7 +114,8 @@ class Page(web.BasePage):
   def __init__(self, req):
     web.BasePage.__init__(self, req)
     self.form = widgets.Form(req, "edit")
-    self.editor = TableEditor(req, self.form, "table", widgets.READ_FORM)
+    editor = TableEditor(req, self.form, "table", widgets.READ_FORM)
+    self.editor = self.template.bind_write(editor.write)
 
 class TableEditor(widgets.ModalWidget):
   template = web.ezt(
@@ -211,14 +212,13 @@ r"""[message]
       return
 
     # execute template
-    data = web.kw(message=self.message and self.message.write or "",
-                  chooser=lambda req, *attribs: 
-                          self.chooser.write(req, tables.keys(), *attribs),
+    bw = self.template.bind_write
+    data = web.kw(message=self.message and bw(self.message.write),
+                  chooser=bw(self.chooser.write, tables.keys()),
                   id_col=self.table.id_col,
                   cols=self.table.cols,
                   table_cols=len(self.table.cols) + 2,
-                  insert=self.button.write_cb
-                         (self.mode_str((self.EDIT, ))),
+                  insert=bw(self.button.write, self.mode_str((self.EDIT, ))),
                   rows=self.rows())
 
     self.template.execute(req, data)
@@ -226,12 +226,13 @@ r"""[message]
   def rows(self):
     # generator for "rows" template variable
     cursor = connect(self.form).cursor()
+    bw = self.template.bind_write
     for row in self.table.select_all(cursor):
       yield web.kw(cols=map(str, row),
-                   edit=self.button.write_cb
-                        (self.mode_str((self.EDIT, row[0]))),
-                   delete=self.button.write_cb
-                          (self.mode_str((self.DELETE, row[0]))))
+                   edit=bw(self.button.write,
+		           self.mode_str((self.EDIT, row[0]))),
+                   delete=bw(self.button.write,
+                             self.mode_str((self.DELETE, row[0]))))
 
 class RowEditor(widgets.ModalWidget):
   """Row Editor Widget
@@ -317,12 +318,13 @@ class RowEditor(widgets.ModalWidget):
 
   def write(self, req):
     # template data
-    data = web.kw(message=self.message and self.message.write or "",
+    bw = self.template.bind_write
+    data = web.kw(message=self.message and bw(self.message.write),
                   auto_field=None,
                   auto_val=None,
                   fields=[],
-                  save=self.save.write,
-                  cancel=self.cancel.write)
+                  save=bw(self.save.write),
+                  cancel=bw(self.cancel.write))
 
     # if inserting a new row or editing read only, id is filled automatically
     cols = self.table.cols
@@ -334,7 +336,7 @@ class RowEditor(widgets.ModalWidget):
 
     # add normal fields
     for name, control in zip(cols, self.cols):
-      data.fields.append(web.kw(name=name, control=control.write))
+      data.fields.append(web.kw(name=name, control=bw(control.write)))
 
     self.template.execute(req, data)
 
