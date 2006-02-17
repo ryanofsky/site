@@ -31,6 +31,8 @@ r"""[navbar]
 </table>
 </form>
 
+<p>[num_projects] projects found</p>
+
 [for projects]
 <table border=1 bordercolor=black cellpadding=3 cellspacing=0>
 <tr><td>Name:</td><td>[projects.name]</td></tr>
@@ -46,8 +48,8 @@ r"""[navbar]
 
   sorts = (("datedown", "Date (descending)"),
            ("dateup", "Date (ascending)"),
-	   ("sizedown", "Size (descending)"),
-	   ("sizeup", "Size (ascending)"))
+           ("sizedown", "Size (descending)"),
+           ("sizeup", "Size (ascending)"))
 
   def __init__(self, req):
     web.BasePage.__init__(self, req)
@@ -64,7 +66,8 @@ r"""[navbar]
     self.langs = bw(langs.write, get_langs(conn),
                     default="--- Any Language ---")
 
-    self.projects = get_projects(conn, order.selected, langs.selected)
+    self.num_projects = num_projects(conn, langs.selected)
+    self.projects = get_projects(conn, langs.selected, order.selected, "", "")
 
 
 ########################
@@ -87,17 +90,20 @@ def get_langs(conn):
     yield str(language_id), name
   cursor.close()
 
-def get_projects(conn, order, languages):
+def num_projects(conn, languages):
+  cursor = conn.cursor()
+  cursor.execute("SELECT COUNT(*) FROM projects AS p %s"
+                 % (languages and where_uses_lang("p", languages) or ""))
+  return cursor.fetchone()[0]
+
+def get_projects(conn, languages, order, limit, offset):
+  cursor = conn.cursor()
+
   orderby = {"datedown": "p.startdate DESC",
              "dateup":   "p.startdate",
-	     "sizedown": "p.lines DESC",
-	     "sizeup":   "p.lines"}[order or "datedown"]
+             "sizedown": "p.lines DESC",
+             "sizeup":   "p.lines"}[order or "datedown"]
 
-  langin = ""
-  if languages:
-    langin = ",".join([str(int(language_id)) for language_id in languages])
-
-  cursor = conn.cursor()
   cursor.execute("""
     SELECT p.project_id, p.name, p.lines, p.cvsmodule, p.description,
       (CASE WHEN p.startdate IS NULL THEN '?'
@@ -111,12 +117,13 @@ def get_projects(conn, order, languages):
     %(where)s
     GROUP BY p.project_id, p.name, p.lines, p.cvsmodule, p.description,
       p.startdate, p.enddate
-    ORDER BY %(orderby)s"""
-    % { "where": langin and
-          "WHERE EXISTS (SELECT * FROM project_languages AS epl "
-	                 "WHERE epl.project_id = p.project_id "
-			 "AND epl.language_id in (%s))" % langin,
-        "orderby": orderby })
+    ORDER BY %(orderby)s
+    %(limit)s
+    %(offset)s"""
+    % { "where": languages and where_uses_lang("p", languages) or "",
+        "orderby": orderby,
+        "limit": limit and "LIMIT %i" % int(limit) or "",
+        "offset": offset and "OFFSET %i" % int(offset) or "" })
 
   while True:
     row = cursor.fetchone()
@@ -128,6 +135,13 @@ def get_projects(conn, order, languages):
     yield project
 
   cursor.close()
+
+def where_uses_lang(projects_table, languages):
+  langs = ",".join([str(int(language_id)) for language_id in languages])
+  return ("WHERE EXISTS (SELECT * FROM project_languages AS ulpl "
+                        "WHERE ulpl.project_id = %s.project_id "
+                        "AND ulpl.language_id IN (%s))"
+          % (projects_table, langs))
 
 
 if __name__ == '__main__':
