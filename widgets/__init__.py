@@ -567,7 +567,7 @@ class _MultipleSelect(FormWidget):
 class _SelectBox:
   """Mixin class providing common methods for SelectBox and MSelectBox"""
 
-  def write(self, req, items, *attribs):
+  def write(self, req, items, *attribs, **options):
     """Write select box with specified items
 
     req is a Request object
@@ -575,6 +575,10 @@ class _SelectBox:
     items is a sequence of (value, name) tuples to include in the list.
 
     attribs are extra attributes to add to the html tag in (name, value) tuples
+
+    options can contain a keyword argument called "default" which outputs a 
+      default item before the other items that is automatically selected when
+      no other items are
 
     On the next page load, the "selected" member and is_selected method can
     be used to see which item(s) have been selected.
@@ -584,17 +588,17 @@ class _SelectBox:
     languages where it's not possible to create sequences of tuples for the
     "items" argument, or when you need to write things like <optgroup> tags
     or javascript within the select block."""
-
+    
     self.write_open(req, *attribs)
-
-    for item in items:
-      if isinstance(item, tuple):
-        value, name = item
-      else:
-        value = None
-        name = item
-      self.write_item(req, value, name)
-
+    
+    if options.has_key("default"):
+      _tag(req, "option", ("value", ""),
+           not self.selected and ("selected", None) or None,
+           open=True, *attribs)
+      req.write(_escape_html(options["any"]))
+      _ctag(req, "option")
+      
+    self.write_items(req, items)
     self.write_close(req)
 
   def write_open(self, req, *attribs):
@@ -603,6 +607,15 @@ class _SelectBox:
     _tag(req, "select", ("name", id),
          self.select_multiple and ("multiple", None) or None,
          open=True, *attribs)
+	 
+  def write_items(self, req, items):
+    for item in items:
+      if isinstance(item, tuple):
+        value, name = item
+      else:
+        value = None
+        name = item
+      self.write_item(req, value, name)
 
   def write_item(self, req, value, name, *attribs):
     """Output an <option> block"""

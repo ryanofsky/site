@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import cgitb; cgitb.enable()
 import web
+import widgets
 from pyPgSQL import PgSQL
 
 
@@ -8,30 +9,18 @@ class Page(web.BasePage):
   DATE = "$Date$"
   title = "Code"
   template = web.ezt(
-"""[navbar]
+r"""[navbar]
 <div class=notugly>
-<form>
-<p>[This page is out of date. And the controls don't work]</p>
+<form action="[form.url]" name="[form.name]">
 
 <table border=1 cellpadding=3>
 <tr>
-  <td>Order by
-    <select size=1>
-    <option>Date (descending)</option>
-    <option>Size (descending)</option>
-    <option>Date (ascending)</option>
-    <option>Size (ascending)</option>
-    </select>
-  </td>
+  <td>Order by [order "size=\"1\""]</td>
 </tr>
 <tr>
   <td>
     Filter by Language<br>
-    <select size=5 multiple>
-    [for languages]
-      <option value="[languages.id]">[languages.name]</option>
-    [end]
-    </select>
+    [langs "size=\"5\""]
   </td>
 </tr>
 <tr>
@@ -55,50 +44,89 @@ class Page(web.BasePage):
 </div>
 [footer]""")
 
+  sorts = (("datedown", "Date (descending)"),
+           ("dateup", "Date (ascending)"),
+	   ("sizedown", "Size (descending)"),
+	   ("sizeup", "Size (ascending)"))
+
   def __init__(self, req):
     web.BasePage.__init__(self, req)
-    conn = PgSQL.connect("::code:postgres:::")
-    try:
-      cursor = conn.cursor()
-      try:
-        cursor.execute("SELECT language_id, name FROM languages "
-                       "ORDER BY language_id");
-        self.languages = []
-        while 1:
-          row = cursor.fetchone()
-          if not row:
-            break
-          language_id, name = row
-          self.languages.append(web.kw(id=language_id, name=name))
 
-        self.projects = []
-        cursor.execute("""
-          SELECT p.project_id, p.name, p.lines, p.cvsmodule, p.description,
-            (CASE WHEN p.startdate IS NULL THEN '?'
-             ELSE to_char(p.startdate,'MM/DD/YYYY') END) || ' - '
-            || (CASE WHEN p.enddate IS NULL THEN '?'
-                ELSE to_char(p.enddate,'MM/DD/YYYY') END) AS dates,
-            comma(l.name) AS langs
-          FROM projects AS p
-          INNER JOIN project_languages AS pl USING (project_id)
-          INNER JOIN languages AS l USING (language_id)
-          GROUP BY p.project_id, p.name, p.lines, p.cvsmodule, p.description,
-            p.startdate, p.enddate
-          ORDER BY p.startdate DESC""")
+    self.form = widgets.Form(req, "code")
 
-        while True:
-          row = cursor.fetchone()
-          if not row:
-            break
-          project = web.kw()
-          (project.id, project.name, project.lines, project.cvs,
-           project.description, project.dates, project.langs) = row
-          self.projects.append(project)
+    bw = self.template.bind_write
+    conn = connect(self.form)
 
-      finally:
-        cursor.close()
-    finally:
-      conn.close()
+    order = widgets.SelectBox(req, self.form, "order", widgets.READ_FORM)
+    self.order = bw(order.write, self.sorts)
+
+    langs = widgets.MSelectBox(req, self.form, "langs", widgets.READ_FORM)
+    self.langs = bw(langs.write, get_langs(conn), any="--- Any Language ---")
+
+    self.projects = get_projects(conn, order.selected, langs.selected)
+
+
+########################
+# #  Database Logic  # #
+
+def connect(form):
+  if not hasattr(form, "db"):
+    form.db = PgSQL.connect("::code:postgres:::")
+  return form.db
+
+def get_langs(conn):
+  cursor = conn.cursor()
+  cursor.execute("SELECT language_id, name FROM languages "
+                 "ORDER BY language_id")
+  while True:
+    row = cursor.fetchone()
+    if not row:
+      break
+    language_id, name = row
+    yield str(language_id), name
+  cursor.close()
+
+def get_projects(conn, order, languages):
+  orderby = {"datedown": "p.startdate DESC",
+             "dateup":   "p.startdate",
+	     "sizedown": "p.lines DESC",
+	     "sizeup":   "p.lines"}[order or "datedown"]
+
+  langin = ""
+  if languages:
+    langin = ",".join([str(int(language_id)) for language_id in languages])
+
+  cursor = conn.cursor()
+  cursor.execute("""
+    SELECT p.project_id, p.name, p.lines, p.cvsmodule, p.description,
+      (CASE WHEN p.startdate IS NULL THEN '?'
+       ELSE to_char(p.startdate,'MM/DD/YYYY') END) || ' - '
+      || (CASE WHEN p.enddate IS NULL THEN '?'
+          ELSE to_char(p.enddate,'MM/DD/YYYY') END) AS dates,
+      comma(l.name) AS langs
+    FROM projects AS p
+    INNER JOIN project_languages AS pl USING (project_id)
+    INNER JOIN languages AS l USING (language_id)
+    %(where)s
+    GROUP BY p.project_id, p.name, p.lines, p.cvsmodule, p.description,
+      p.startdate, p.enddate
+    ORDER BY %(orderby)s"""
+    % { "where": langin and
+          "WHERE EXISTS (SELECT * FROM project_languages AS epl "
+	                 "WHERE epl.project_id = p.project_id "
+			 "AND epl.language_id in (%s))" % langin,
+        "orderby": orderby })
+
+  while True:
+    row = cursor.fetchone()
+    if not row:
+      break
+    project = web.kw()
+    (project.id, project.name, project.lines, project.cvs,
+     project.description, project.dates, project.langs) = row
+    yield project
+
+  cursor.close()
 
 
 if __name__ == '__main__':
