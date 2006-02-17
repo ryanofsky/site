@@ -595,7 +595,7 @@ class _SelectBox:
       _tag(req, "option", ("value", ""),
            not self.selected and ("selected", None) or None,
            open=True, *attribs)
-      req.write(_escape_html(options["any"]))
+      req.write(_escape_html(options["default"]))
       _ctag(req, "option")
       
     self.write_items(req, items)

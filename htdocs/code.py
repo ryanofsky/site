@@ -61,7 +61,8 @@ r"""[navbar]
     self.order = bw(order.write, self.sorts)
 
     langs = widgets.MSelectBox(req, self.form, "langs", widgets.READ_FORM)
-    self.langs = bw(langs.write, get_langs(conn), any="--- Any Language ---")
+    self.langs = bw(langs.write, get_langs(conn),
+                    default="--- Any Language ---")
 
     self.projects = get_projects(conn, order.selected, langs.selected)
 
