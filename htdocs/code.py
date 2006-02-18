@@ -37,20 +37,19 @@ r"""[navbar]
 
 </form>
 
-
 [for projects]
 <table border=1 bordercolor=black cellpadding=3 cellspacing=0>
 <tr><td>Name:</td><td>[projects.name]</td></tr>
-<tr><td>Size:</td><td>[if-any projects.lines][projects.lines] lines[else]?[end]</td></tr>
 <tr><td>Dates:</td><td>[projects.dates]</td></tr>
-<tr><td nowrap>CVS Repository:</td><td>[if-any projects.cvs]<a href="[root]viewvc.py/[projects.cvs]/">[projects.cvs]</a>[else]<i>none</i>[end]</td></tr>
-<tr><td>Language(s):</td><td>[projects.langs]</td></tr>
+<tr><td>Size:</td><td>[if-any projects.lines][projects.lines] lines[else]?[end]</td></tr>
+<tr><td>Language(s):</td><td>[for projects.langs][projects.langs.name] ([projects.langs.percent])[if-index projects.langs last][else], [end][end]</td></tr>
+<tr><td nowrap>Repository:</td><td>[if-any projects.repos]<a href="[root]viewvc.py/[projects.repos]/">[projects.repos]</a>[else]<i>none</i>[end]</td></tr>
 <tr><td valign=top>Description:</td><td>[projects.description]</td></tr>
 </table><br>
 [end]
 
 [pager]
-
+<p><em><small>Line counts generated using '<a href="http://www.dwheeler.com/sloccount/">SLOCCount</a>' by David A. Wheeler.</small></em></p>
 </div>
 [footer]""")
 
@@ -95,7 +94,8 @@ class Pager(widgets.FormWidget):
   # number of items per page
   default_limit = 10
 
-  template = web.ezt("""
+  template = web.ezt(
+"""[if-any header pages]
   <div style="float: left">
     [if-any pages]
       Showing [first] - [last] of [num_projects] matches.</a>
@@ -117,8 +117,7 @@ class Pager(widgets.FormWidget):
   [end]
   </div>
   <div>&nbsp;</div>
-
-  """)
+[end]""")
 
   def __init__(self, req, parent, id, flags):
     widgets.FormWidget.__init__(self, req, parent, id, flags)
@@ -126,11 +125,7 @@ class Pager(widgets.FormWidget):
     self.limit = int(self.read_value(req, "limit", flags)
                      or self.default_limit)
 
-  def write(self, req, num_projects, header=False):
-    # footer looks stupid when there aren't a lot of matches
-    if not header and (num_projects < 3 or self.limit == 0):
-      return
-
+  def write(self, req, num_projects, header=""):
     # preserve current limit when form is submitted
     if header:
       self.write_value(req, "limit", str(self.limit), widgets.WRITE_FORM)
@@ -206,21 +201,20 @@ def get_projects(conn, languages, order, limit, offset):
 
   orderby = {"datedown": "p.startdate DESC",
              "dateup":   "p.startdate",
-             "sizedown": "p.lines DESC",
-             "sizeup":   "p.lines"}[order or "datedown"]
+             "sizedown": "lines DESC",
+             "sizeup":   "lines"}[order or "datedown"]
 
   cursor.execute("""
-    SELECT p.project_id, p.name, p.lines, p.cvsmodule, p.description,
+    SELECT p.project_id, p.name, p.repos, p.description,
       (CASE WHEN p.startdate IS NULL THEN '?'
        ELSE to_char(p.startdate,'MM/DD/YYYY') END) || ' - '
       || (CASE WHEN p.enddate IS NULL THEN '?'
           ELSE to_char(p.enddate,'MM/DD/YYYY') END) AS dates,
-      comma(l.name) AS langs
+      SUM (pl.lines) AS lines
     FROM projects AS p
     INNER JOIN project_languages AS pl USING (project_id)
-    INNER JOIN languages AS l USING (language_id)
     %(where)s
-    GROUP BY p.project_id, p.name, p.lines, p.cvsmodule, p.description,
+    GROUP BY p.project_id, p.name, p.repos, p.description,
       p.startdate, p.enddate
     ORDER BY %(orderby)s
     %(limit)s
@@ -235,11 +229,31 @@ def get_projects(conn, languages, order, limit, offset):
     if not row:
       break
     project = web.kw()
-    (project.id, project.name, project.lines, project.cvs,
-     project.description, project.dates, project.langs) = row
+    (project.id, project.name, project.repos, project.description,
+     project.dates, lines) = row
+    project.lines = commify(lines)
+    project.langs = project_langs(conn, project.id, lines)
     yield project
 
   cursor.close()
+
+def project_langs(conn, project_id, total_lines):
+  cursor = conn.cursor()
+  #raise "***" + repr(project_id) + "***"
+  cursor.execute("""
+    SELECT l.name, pl.lines
+    FROM project_languages AS pl
+    INNER JOIN languages AS l USING (language_id)
+    WHERE pl.project_id = %i
+    ORDER BY pl.lines DESC""" % project_id)
+
+  while True:
+    row = cursor.fetchone()
+    if not row:
+      break
+    name, lines = row
+    percent = lines and (100.0 * lines / total_lines) or 0.0
+    yield web.kw(name=name, percent="%.1f%%" % percent)
 
 def where_uses_lang(projects_table, languages):
   langs = ",".join([str(int(language_id)) for language_id in languages])
@@ -248,6 +262,12 @@ def where_uses_lang(projects_table, languages):
                         "AND ulpl.language_id IN (%s))"
           % (projects_table, langs))
 
+def commify(number):
+  """Format a non-negative integer with commas"""
+  n = str(number)
+  l = len(n)
+  return ','.join((l%3 and [n[:l%3]] or [])
+                  + [n[i:i+3] for i in range(l%3, l, 3)])
 
 if __name__ == '__main__':
   web.handle_cgi(Page)
