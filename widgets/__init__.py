@@ -240,7 +240,7 @@ class Form:
       self.url = url
     self._url_vars = []
 
-  def get_url(self, extra_vars, remove_vars):
+  def get_url(self, extra_vars=(), remove_vars=()):
     """Return URL to current page with state preserved in URL params
 
       extra_vars is a list of (name, value) tuples to add the URL query string
