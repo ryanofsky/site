@@ -54,9 +54,10 @@ INSERT INTO projects (project_id, name, repos, startdate, enddate, description)
 VALUES (1, 'QuickMan', 'quickman', '2001-11-28', '2001-12-03',
 '<p>Quickman was an assignment for a robotics class that I worked on with 2 other people. The program drives a Pioneer mobile robot from a starting point to an ending point in a room filled with obstacles, trying to avoid collisions. The obstacle shapes and positions are given as input, and then the program plans an optimal path and follows it. Quickman is written in C++ and makes extensive use of the STL.</p>
 
-<p>Quickman uses a commercial but freely available library called <a href="http://www.ai.sri.com/~konolige/saphira/">Saphira</a> that comes with a graphical robot simulator. There are makefiles for GCC under linux and solaris and a Metrowerks Codewarrior project file for windows. It uses features of C++ not supported by MS Visual C++ 6.</p>');
+<p>Quickman uses a commercial but freely available library called <a href="http://www.ai.sri.com/~konolige/">Saphira</a> that comes with a graphical robot simulator. There are makefiles for GCC under Linux and Solaris and a Metrowerks Codewarrior project file for windows. It uses features of C++ not supported by MS Visual C++ 6.</p>');
 
-INSERT INTO project_languages (project_id, language_id, lines) VALUES (1,1,3000);
+INSERT INTO project_languages (project_id, language_id, lines) VALUES (1,1,1545);
+INSERT INTO project_languages (project_id, language_id, lines) VALUES (1,3,504);
 
 -------------------------------------------------------------------------------
 
@@ -64,62 +65,84 @@ INSERT INTO projects (project_id, name, repos, startdate, enddate, description)
 VALUES (2, 'Lost Cities Player', 'lost', '2001-11-12', '2001-11-16',
 '<p>Written as a project for an AI class. It plays a card game called "Lost Cities" with 3 other players. I did very little testing on it, so I''m not sure how good it actually is, but I do like the design and strategies used.
 
-The source is very well documented. It was written in Metrowerks Codewarrior for Windows. It also compiles with GCC and runs on linux and solaris (makefiles included).');
+The source is very well documented. It was written in Metrowerks Codewarrior for Windows. It also compiles with GCC and runs on Linux and Solaris (makefiles included).');
 
-INSERT INTO project_languages (project_id, language_id, lines) VALUES (2,1,2000);
-
--------------------------------------------------------------------------------
-
-INSERT INTO projects (project_id, name, repos, startdate, enddate, description)
-VALUES (3, 'Web Based Course Evaluation System (WCES)', 'wbes', '2001-11-12', NULL,
-'WCES is a project of the Columbia University School of Engineering. Its lets administrators and professors create customized online surveys about courses and to be able to see and download graphical reports showing survey results. The site originally started as a software engineering project by a group of students. I  started working on it part-time for the university in the Fall 2000. Many new features have been added, and at this point almost all of the code is my own. The 25,000 line count is a bit inflated. About a quarter of that is just plain old HTML inside the PHP scripts. About half of it is solid PHP code (class and function definitions), and the rest consists of database schemas, postgres procedural sql (plpgsql) functions, a mini web-crawler written with Delphi, a COM authentication component written in Visual C++ with ATL, and leftover testing and prototype code.');
-
-INSERT INTO project_languages (project_id, language_id, lines) VALUES (3,1,1);
-INSERT INTO project_languages (project_id, language_id, lines) VALUES (3,7,24996);
-INSERT INTO project_languages (project_id, language_id, lines) VALUES (3,10,1);
-INSERT INTO project_languages (project_id, language_id, lines) VALUES (3,4,1);
-INSERT INTO project_languages (project_id, language_id, lines) VALUES (3,8,1);
+INSERT INTO project_languages (project_id, language_id, lines) VALUES (2,1,1582);
 
 -------------------------------------------------------------------------------
 
 INSERT INTO projects (project_id, name, repos, startdate, enddate, description)
-VALUES (4, 'My Home Page', 'site', '2002-02-04', NULL,
-'This website, a set of ASP.NET pages backed by a small postgres database running on win2k.');
+VALUES (3, 'Web Based Course Evaluation System (WCES)', 'wces', '2000-11-12', '2003-06-01',
+'<p>WCES is a project of the Columbia University School of Engineering. It''s a web site that lets administrators and professors create customized online surveys about courses and see reports showing survey results. The site originally started as a project for a software engineering class by a group of students I didn''t know. But it was picked up and used by the engineering school, which hired me in Fall 2000 to work on it part-time. Over time, I added many new features and reimplemented most of the preexisting functionality to make the system more flexible. At this point almost all of the code is my own, though I can''t take credit for most of the graphics and text on the site, and I also had a lot of help dealing with unix administration / server maintenance issues that came up during development.</p>
 
-INSERT INTO project_languages (project_id, language_id, lines) VALUES (4,2,200);
+<p>The site is mostly implemented in PHP, but there''s also a big chunk of core logic written in procedural SQL. And there are a number of smaller components written in other languages, including 2 C++ Postgres extensions, a mini web-crawler written in Delphi, and a COM authentication component written in Visual C++ with ATL. </p>
+
+<p>Since this is one of the biggest projects I''ve worked on, I''ve put up a demo at <a href="http://wces.russ.yanofsky.org/">http://wces.russ.yanofsky.org/</a>.</p>');
+
+-- sloc notes:
+--   mapped .js extension to c_count to get javascript count
+--   deleted include/VHGRAPH directory before counting
+INSERT INTO project_languages (project_id, language_id, lines) VALUES (3,7,19310);
+INSERT INTO project_languages (project_id, language_id, lines) VALUES (3,10,3386);
+INSERT INTO project_languages (project_id, language_id, lines) VALUES (3,4,775);
+INSERT INTO project_languages (project_id, language_id, lines) VALUES (3,1,771);
+INSERT INTO project_languages (project_id, language_id, lines) VALUES (3,8,374);
 
 -------------------------------------------------------------------------------
 
 INSERT INTO projects (project_id, name, repos, startdate, enddate, description)
-VALUES (5, 'EasyCRT/EasyGDI', NULL, '1997-11-01', '1999-03-15',
-'<p>EasyCRT and EasyGDI are libraries that work in Borland''s early releases of Turbo Pascal for windows (circa 1992). I wrote them when I was a junior in high school (1997-1998) and Turbo Pascal was the main programming language used in computer classes there. EasyGDI is a procedural graphics library that wraps around Windows GDI, providing simplified a interface and adding new features like bitmap load and save routines. EasyCRT lets users to write graphical windows programs without dealing with complexities like callback functions, event loops, or class libraries. It is based on Borland''s Wincrt library, and it was used by students in my class and a few classes thereafter to write games. Both libraries come with documentation and sample programs. There is a homepage at <a href="http://russ.hn.org/easycrt/">http://russ.hn.org/easycrt/</a></p>');
+VALUES (4, 'My Old Home Page', 'site_old', '2002-02-04', '2003-07-05',
+'The original version of this website, a set of ASP.NET pages backed by a small Postgres database. The current version of the site is stored in a new repository and is written in python.');
 
-INSERT INTO project_languages (project_id, language_id, lines) VALUES (5,4,4000);
+INSERT INTO project_languages (project_id, language_id, lines) VALUES (4,2,211);
+
+-------------------------------------------------------------------------------
+
+INSERT INTO projects (project_id, name, repos, startdate, enddate, description)
+VALUES (5, 'EasyCRT/EasyGDI', 'easycrt', '1997-11-01', '1999-03-15',
+'<p>EasyCRT and EasyGDI are libraries that work in Borland''s early releases of Turbo Pascal for Windows (circa 1992). I wrote them when I was a junior in my high school, where Turbo Pascal was the main programming language used in computer classes. EasyGDI is a procedural graphics library that wraps around the Windows GDI (graphics device interface), providing a simplified interface and adding new features like bitmap load and save routines. EasyCRT lets users to write graphical windows programs without dealing with complexities like callback functions, event loops, or class libraries. It is based on Borland''s Wincrt library, and it was used by students in my class and a few classes thereafter to write games. Both libraries come with documentation and sample programs. They have a homepage <a href="/easycrt/">here</a> and some documentation viewable <a href="/viewvc.py/easycrt/html/main.html">here</a>.</p>');
+
+-- sloc notes:
+--   deleted samples/stick directory before counting
+--   had to modify really_is_pascal function in break_filelist because it
+--     doesn't recognize half the pascal files as being pascal
+INSERT INTO project_languages (project_id, language_id, lines) VALUES (5,4,3798);
 
 -------------------------------------------------------------------------------
 
 INSERT INTO projects (project_id, name, repos, startdate, enddate, description)
 VALUES (6, 'Ginyuu Calendar', NULL, '2001-03-25', '2001-04-13',
-'<a href="http://russ.hn.org/cs3156/">http://russ.hn.org/cs3156/</a></p>');
+'This was a fun little project for a software engineering class. I was in a team with four other people and our job was to make a web-based calendar / scheduling component to integrate into an online education web site. We were required to implement it using ColdFusion 4 and Microsoft SQL Server. Coldfusion was frustating to work with because it lacked a lot of basic language features like the ability to define functions. Another annoyance was lack of support for database cursors, meaning the only way to access a database result set was to use a looping construct built into the language, which restricted how you could process data. But our language requirements were really not that great, and in the end our web component had a polished, full-featured interface with a pretty clean implementation. There is no CVS repository but there is a copy of the project page <a href="/cs3156/integration/">here</a>. If free ColdFusion/MS-SQL hosting were to fall out of the sky, I would put up a demo too.');
 
-INSERT INTO project_languages (project_id, language_id, lines) VALUES (6,9,500);
-INSERT INTO project_languages (project_id, language_id, lines) VALUES (6,11,500);
-
--------------------------------------------------------------------------------
-
-INSERT INTO projects (project_id, name, repos, startdate, enddate, description)
-VALUES (7, 'Twofish Javascript', NULL, '2000-09-23', '2000-09-25',
-'<a href="http://russ.hn.org/twofish/twofish.html">http://russ.hn.org/twofish/twofish.html</a>');
-
-INSERT INTO project_languages (project_id, language_id, lines) VALUES (7,8,1900);
+-- sloc notes:
+--   extracted 2001-05-02.zip and copied in schema.sql
+--   deleted image/unused directory before counting
+--   handled .js files with c_count and .cfm files with generic_count
+INSERT INTO project_languages (project_id, language_id, lines) VALUES (6,9,1052);
+INSERT INTO project_languages (project_id, language_id, lines) VALUES (6,11,479);
+INSERT INTO project_languages (project_id, language_id, lines) VALUES (6,8,130);
 
 -------------------------------------------------------------------------------
 
 INSERT INTO projects (project_id, name, repos, startdate, enddate, description)
-VALUES (8, 'ViewCVS', NULL, '2001-07-22', NULL,
-'Port of the <a href="http://viewcvs.sourceforge.net/">ViewCVS</a> web interface to windows. My original port is at <a href="http://russ.hn.org/viewcvs/">http://russ.hn.org/viewcvs/</a> which I released as a diff patch, as well as a self-installing standalone package. Since that release I''ve made a lot more changes, including another port to Python ASP (which runs <i>much</i> faster than Python CGI does), and support for ViewCVS''s <a href="http://www.mozilla.org/bonsai.html">Bonsai</a>-like features under windows. I hope to release another package with these features soon.');
+VALUES (7, 'Twofish Javascript', NULL, '2000-02-25', '2000-03-06',
+'In Spring 2000, I ported C implementations of Twofish and SHA-1 over to Javascript as a way of password-protecting the contents of static web pages (this was before I had done any server-side web programming). I never did implement the general password mechanism I was initially planning on, but I did get the encryption code working, and wrote a flexible test interface that can encrypt and decrypt messages, posted <a href="/twofish/twofish.html">here</a>.');
 
-INSERT INTO project_languages (project_id, language_id, lines) VALUES (8,5,800);
+-- sloc notes:
+--   handled .js files with c_count
+--   copied and pasted contents of 2 <script> tags in twofish.html into a
+--     separate .js file so that code would be counted, too
+INSERT INTO project_languages (project_id, language_id, lines) VALUES (7,8,1319);
+
+
+-------------------------------------------------------------------------------
+
+INSERT INTO projects (project_id, name, repos, startdate, enddate, description)
+VALUES (8, 'ViewVC', NULL, '2001-07-22', NULL,
+'<p>ViewVC (formerly ViewCVS) is an open source-project located <a href="http://www.viewvc.org">here</a>.</p>
+<p>At the moment, I''m one of two active developers. The other one is <a href="http://www.cmichaelpilato.com/">C. Michael Pilato</a> and ViewVC''s original author is <a href="http://www.lyra.org/greg/">Greg Stein</a>. The features I originally contributed were support for Windows and support for Mod_Python. Since then I''ve done a lot of bug fixing and code reorganization. The 2,500 line count is a WAG (wild ass guess). The ViewVC sources are around 10,000 lines and I figure I''ve had my grubby hands on about a quarter of them.</p>');
+
+INSERT INTO project_languages (project_id, language_id, lines) VALUES (8,5,2500);
 
 -------------------------------------------------------------------------------
 
