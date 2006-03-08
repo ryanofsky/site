@@ -12,12 +12,16 @@ class Page(web.BasePage):
 r"""[navbar]
 <div class=notugly>
 
+
 <a name="query"></a>
 
 <form action="[form.url]#query" name="[form.name]">
 
 <table border=1 cellpadding=3>
 <tr>
+  <td rowspan=3 valign=top>
+    <p>This page contains descriptions and sources of various programming projects I've worked on over the years. It's not a complete list, but most of the interesting stuff is here. The controls at the right allow you to sort and filter the projects displayed.</p>
+  </td>
   <td>Order by [order "size=\"1\""]</td>
 </tr>
 <tr>
@@ -53,10 +57,10 @@ r"""[navbar]
 </div>
 [footer]""")
 
-  sorts = (("datedown", "Date (descending)"),
-           ("dateup", "Date (ascending)"),
-           ("sizedown", "Size (descending)"),
-           ("sizeup", "Size (ascending)"))
+  sorts = (("dateup", "Date (ascending)"),
+           ("datedown", "Date (descending)"),
+           ("sizeup", "Size (ascending)"),
+           ("sizedown", "Size (descending)"))
 
   def __init__(self, req):
     web.BasePage.__init__(self, req)
@@ -113,7 +117,7 @@ class Pager(widgets.FormWidget):
     [if-any prev_url]<a href="[prev_url]#query">Prev</a>[else]Prev[end] |
     [if-any next_url]<a href="[next_url]#query">Next</a>[else]Next[end]
   [else]
-    [if-any all_url]<a href="[all_url]#query">Show Pages</a>[end]
+    [if-any all_url]<a href="[all_url]#query">Break Pages</a>[end]
   [end]
   </div>
   <div>&nbsp;</div>
@@ -202,7 +206,7 @@ def get_projects(conn, languages, order, limit, offset):
   orderby = {"datedown": "p.startdate DESC",
              "dateup":   "p.startdate",
              "sizedown": "lines DESC",
-             "sizeup":   "lines"}[order or "datedown"]
+             "sizeup":   "lines"}[order or "dateup"]
 
   cursor.execute("""
     SELECT p.project_id, p.name, p.repos, p.description,
