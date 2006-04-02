@@ -7,7 +7,7 @@ class Page(web.BasePage):
   title = "Resume"
   template = web.ezt(
 """[navbar]
-<div class=notugly>
+<div class="notugly">
 <p>[[]This page is out of date, c. 2002]</p>
 <p>Resume in assorted formats:</p>
 <ul>

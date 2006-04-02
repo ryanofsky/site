@@ -63,9 +63,9 @@ INSERT INTO project_languages (project_id, language_id, lines) VALUES (1,3,504);
 
 INSERT INTO projects (project_id, name, repos, startdate, enddate, description)
 VALUES (2, 'Lost Cities Player', 'lost', '2001-11-12', '2001-11-16',
-'<p>Written as a project for an AI class. It plays a card game called "Lost Cities" with 3 other players. I did very little testing on it, so I''m not sure how good it actually is, but I do like the design and strategies used.
+'<p>Written as a project for an AI class. It plays a card game called "Lost Cities" with 3 other players. I did very little testing on it, so I''m not sure how good it actually is, but I do like the design and strategies used.</p>
 
-The source is very well documented. It was written in Metrowerks Codewarrior for Windows. It also compiles with GCC and runs on Linux and Solaris (makefiles included).');
+<p>The source is very well documented. It was written in Metrowerks Codewarrior for Windows. It also compiles with GCC and runs on Linux and Solaris (makefiles included).</p>');
 
 INSERT INTO project_languages (project_id, language_id, lines) VALUES (2,1,1582);
 
@@ -249,7 +249,7 @@ INSERT INTO project_languages (project_id, language_id, lines) VALUES (19,5,996)
 -------------------------------------------------------------------------------
 INSERT INTO projects (project_id, name, repos, startdate, enddate, description)
 VALUES (20, 'Stickfighter', 'stick', '1997-12-18', '1998-01-23',
-'<p>Fighter game written in Turbo Pascal for Windows as an assignment for a high school "Computer Math" class. This project was sort of a milestone for me, as my first foray into object-oriented and GUI programming. A good portion of the month I spent developing it went into puzzling over concepts like encapsulation and inheritance, and reading and re-reading the Turbo Pascal programmers'' guides to figure out how to make things happen with its windowing library. At the end of that period came a frantic programming effort to get menus and high scores screens working, implement game saving and loading, and tweak the gameplay and graphical intro screen into perfection before the assignment was due. It was pretty fun, and as the project went way beyond anything they were teaching in the class, I got a perfect grade too.'); 
+'<p>Fighter game written in Turbo Pascal for Windows as an assignment for a high school "Computer Math" class. This project was sort of a milestone for me, as my first foray into object-oriented and GUI programming. A good portion of the month I spent developing it went into puzzling over concepts like encapsulation and inheritance, and reading and re-reading the Turbo Pascal programmers'' guides to figure out how to make things happen with its windowing library. At the end of that period came a frantic programming effort to get menus and high scores screens working, implement game saving and loading, and tweak the gameplay and graphical intro screen into perfection before the assignment was due. It was pretty fun, and as the project went way beyond anything they were teaching in the class, I got a perfect grade too.</p>'); 
 
 -- sloc notes:
 --   checkout version_1_1, not incomplete HEAD

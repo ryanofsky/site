@@ -14,22 +14,25 @@ ROOT = "/"
 ### Should probably push them out to files if the site grows
 class Outline(widgets.TemplateWidget):
   template = ezt(
-"""<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<html>
+"""
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 <title>Russell Yanofsky - [title]</title>
-<style>
+<style type="text/css">
 <!--
   h2 { text-align: center; }
   body { font-family: Modern, Trebuchet MS, Arial, Helvetica, sans-serif;
-         text-align: center; }
+         text-align: center; 
+	 background: #E0E0E0; }
+  img { border: none; } 
   .notugly { font-family: Trebuchet MS, Arial, Helvetica, sans-serif;
              margin-left: auto; margin-right: auto; width: 600px;
 	     text-align: left; }
 -->
 </style>
 </head>
-<body bgcolor="#E0E0E0">
+<body>
 [body]
 </body>
 </html>""")
@@ -38,7 +41,7 @@ class Outline(widgets.TemplateWidget):
 class NavBar(widgets.TemplateWidget):
   root = ROOT
   template = ezt(
-"""<script>
+"""<script type="text/javascript">
 <!--
 
 function setCaption(c)
@@ -73,17 +76,17 @@ function reallyRevertCaption()
 
 // -->
 </script>
-<p align=center>
+<div style="text-align: center">
 
 [for links]
 [define href][is caption links.caption][else]yes[end][end]
-[define mousey] onmouseover="setCaption('[if-any href]<i>[links.caption]</i>[else][links.caption][end]')" onmouseout="revertCaption()"[end]
-[define img]<img src="[root][if-any href][links.img][else][links.imgglow][end]" width="[links.width]" height="[links.height]" alt="[links.caption]"[mousey] border=0>[end]
+[define mousey] onmouseover="setCaption('[if-any href]&lt;i>[links.caption]&lt;/i>[else][links.caption][end]')" onmouseout="revertCaption()"[end]
+[define img]<img src="[root][if-any href][links.img][else][links.imgglow][end]" width="[links.width]" height="[links.height]" alt="[links.caption]"[mousey] />[end]
 [if-any href]<a href="[root][links.href]"[mousey]>[img]</a>[else][img][end]
 [end]
-</p>
+</div>
 
-<h2 id=caption>[caption]</h2>""")
+<h2 id="caption">[caption]</h2>""")
 
   def __init__(self, req, caption):
     self.caption = caption
@@ -109,9 +112,9 @@ class Footer(widgets.TemplateWidget):
   root = ROOT
   template = ezt(
 """<div class="notugly" style="text-align: right;">
-  <hr>
+  <hr />
   <a href="[date_href]" title="Last Modified">[date]</a>
-  <a href="mailto:[mail]" title="Email"><img src="[root]media/mail.png" border="0" alt="Email"></a>
+  <a href="mailto:[mail]" title="Email"><img src="[root]media/mail.png" alt="Email" /></a>
   </div>""")
 
 

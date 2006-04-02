@@ -594,7 +594,7 @@ class _SelectBox:
     if options.has_key("default"):
       _tag(req, "option", ("value", ""),
            not self.selected and ("selected", None) or None,
-           open=True, *attribs)
+           open=True)
       req.write(_escape_html(options["default"]))
       _ctag(req, "option")
       
@@ -944,7 +944,12 @@ def _tag(req, tag, *attribs, **options):
     if isinstance(attrib, tuple):
       name, value = attrib
       if value is None:
-        req.write(" %s" % (name))
+        # with XHTML must specify name as value
+        req.write(' %s="%s"' % (name, name))
+
+        # Old-style HTML could use the following syntax:
+	# req.write(" %s" % (name))
+
       else:
         req.write(' %s="%s"' % (name, _escape_html(str(value), True)))
     elif attrib is not None:

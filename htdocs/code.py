@@ -10,46 +10,46 @@ class Page(web.BasePage):
   title = "Code"
   template = web.ezt(
 r"""[navbar]
-<div class=notugly>
+<div class="notugly">
 
 
 <a name="query"></a>
 
-<form action="[form.url]#query" name="[form.name]">
+<form action="[form.url]#query" id="[form.name]">
 
-<table border=1 cellpadding=3>
+<table>
 <tr>
-  <td rowspan=3 valign=top>
+  <td rowspan="3">
     <p>This page contains descriptions and sources of various programming projects I've worked on over the years. It's not a complete list, but most of the interesting stuff is here. The controls at the right allow you to sort and filter the projects displayed.</p>
   </td>
   <td>Order by [order "size=\"1\""]</td>
 </tr>
 <tr>
   <td>
-    Filter by Language<br>
+    Filter by Language<br />
     [langs "size=\"5\""]
   </td>
 </tr>
 <tr>
-  <td align=center>
-    <input type=submit name=submit value=Submit>
+  <td>
+    <input type="submit" name="submit" value="Submit" />
    </td>
 </tr>
 </table>
 
-<p>[pager "head"]</p>
+<div>[pager "head"]</div>
 
 </form>
 
 [for projects]
-<table border=1 bordercolor=black cellpadding=3 cellspacing=0>
+<table>
 <tr><td>Name:</td><td>[projects.name]</td></tr>
 <tr><td>Dates:</td><td>[projects.dates]</td></tr>
 <tr><td>Size:</td><td>[if-any projects.lines][projects.lines] lines[else]?[end]</td></tr>
 <tr><td>Language(s):</td><td>[for projects.langs][projects.langs.name] ([projects.langs.percent])[if-index projects.langs last][else], [end][end]</td></tr>
-<tr><td nowrap>Repository:</td><td>[if-any projects.repos]<a href="[root]viewvc.py/[projects.repos]/">[projects.repos]</a>[else]<i>none</i>[end]</td></tr>
-<tr><td valign=top>Description:</td><td>[projects.description]</td></tr>
-</table><br>
+<tr><td>Repository:</td><td>[if-any projects.repos]<a href="[root]viewvc.py/[projects.repos]/">[projects.repos]</a>[else]<i>none</i>[end]</td></tr>
+<tr><td>Description:</td><td>[projects.description]</td></tr>
+</table><br />
 [end]
 
 [pager]
@@ -99,10 +99,11 @@ class Pager(widgets.FormWidget):
   default_limit = 10
 
   template = web.ezt(
-"""[if-any header pages]
+"""[format "html"]
+  [if-any header pages]
   <div style="float: left">
     [if-any pages]
-      Showing [first] - [last] of [num_projects] matches.</a>
+      Showing [first] - [last] of [num_projects] matches.
     [else]
       [num_projects] matches found.
     [end]
@@ -121,6 +122,7 @@ class Pager(widgets.FormWidget):
   [end]
   </div>
   <div>&nbsp;</div>
+  [end]
 [end]""")
 
   def __init__(self, req, parent, id, flags):

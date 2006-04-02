@@ -7,7 +7,7 @@ class Page(web.BasePage):
   title = "Links"
   template = web.ezt(
 """[navbar]
-<div class=notugly>
+<div class="notugly">
 
 <h3>Reading</h3>
 
@@ -38,7 +38,7 @@ class Page(web.BasePage):
 <ul>
   <li><a href="/cs1007/">/cs1007/</a>, <a href="/cs3156/">/cs3156/</a> - web pages for classes</li>
   <li><a href="/cvcomputer/">/cvcomputer/</a> - high school computer club</li>
-  <li><a href="/edit.py">/edit.py</a> - widgets test page
+  <li><a href="/edit.py">/edit.py</a> - widgets test page</li>
   <li><a href="/easycrt/">/easycrt/</a> - EasyCRT pascal graphics library</li>
   <li><a href="/horde/">/horde/</a> - web mail (<a href="http://horde.org/imp/">IMP</a> 4.0)</li>
   <li><a href="/rref/">/rref/</a> - rvalue references for G++</li>
