@@ -7,8 +7,6 @@ class Page(web.BasePage):
   title = "Links"
   template = web.ezt(
 """[navbar]
-<div class="notugly">
-
 <h3>Reading</h3>
 
 <p>
@@ -53,7 +51,6 @@ class Page(web.BasePage):
 <ul>
   <li><a href="http://www.godecookery.com/clipart/clart.htm">Medieval Woodcuts Clipart Collection</a> - site's graphics come from here</li>
 </ul>
-</div>
 [footer]""")
 
 

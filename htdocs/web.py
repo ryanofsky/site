@@ -19,21 +19,12 @@ class Outline(widgets.TemplateWidget):
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 <title>Russell Yanofsky - [title]</title>
-<style type="text/css">
-<!--
-  h2 { text-align: center; }
-  body { font-family: Modern, Trebuchet MS, Arial, Helvetica, sans-serif;
-         text-align: center; 
-	 background: #E0E0E0; }
-  img { border: none; } 
-  .notugly { font-family: Trebuchet MS, Arial, Helvetica, sans-serif;
-             margin-left: auto; margin-right: auto; width: 600px;
-	     text-align: left; }
--->
-</style>
+<link rel="stylesheet" href="media/styles.css" type="text/css" />
 </head>
 <body>
+<div id="main">
 [body]
+</div>
 </body>
 </html>""")
 
@@ -76,17 +67,19 @@ function reallyRevertCaption()
 
 // -->
 </script>
-<div style="text-align: center">
+<div id="navbar">
 
 [for links]
 [define href][is caption links.caption][else]yes[end][end]
-[define mousey] onmouseover="setCaption('[if-any href]&lt;i>[links.caption]&lt;/i>[else][links.caption][end]')" onmouseout="revertCaption()"[end]
-[define img]<img src="[root][if-any href][links.img][else][links.imgglow][end]" width="[links.width]" height="[links.height]" alt="[links.caption]"[mousey] />[end]
+[define mousey] onmouseover="setCaption('[if-any href]&lt;em>[links.caption]&lt;/em>[else][links.caption][end]')" onmouseout="revertCaption()"[end]
+[define img]<img src="[root][if-any href][links.img][else][links.imgglow][end]" width="[links.width]" height="[links.height]" alt="[links.caption]" />[end]
 [if-any href]<a href="[root][links.href]"[mousey]>[img]</a>[else][img][end]
 [end]
-</div>
 
-<h2 id="caption">[caption]</h2>""")
+<div id="caption">[caption]</div>
+
+</div>
+""")
 
   def __init__(self, req, caption):
     self.caption = caption
@@ -111,7 +104,7 @@ function reallyRevertCaption()
 class Footer(widgets.TemplateWidget):
   root = ROOT
   template = ezt(
-"""<div class="notugly" style="text-align: right;">
+"""<div id="footer">
   <hr />
   <a href="[date_href]" title="Last Modified">[date]</a>
   <a href="mailto:[mail]" title="Email"><img src="[root]media/mail.png" alt="Email" /></a>
@@ -127,8 +120,8 @@ class BasePage(widgets.TemplateWidget):
     self.navbar = NavBar(req, self.title).embed()
     self.footer = Footer(req, date =self.reformat_date(self.DATE),
                          date_href="/viewvc.py/site/trunk/htdocs%s?view=log"
-			           % req.script_name(),
-			 mail="russell.yanofsky@us.army.mil").embed()
+                                   % req.script_name(),
+                         mail="russell.yanofsky@us.army.mil").embed()
     self.outline = Outline(req, body=self.embed(), title=self.title)
 
   def write(self, req):
@@ -139,7 +132,7 @@ class BasePage(widgets.TemplateWidget):
       return None
     m = re.match(r"\$Date: (\d{4})-(\d{2})-(\d{2}) "
                  r"(\d{2}):(\d{2}):(\d{2}) ([+-]\d{4}) .*\$$", 
-	         date)
+                 date)
     if not m:
       return None
     year, month, day, hour, min, sec, offset = map(int, m.groups())

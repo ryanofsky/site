@@ -104,11 +104,10 @@ class Page(web.BasePage):
   DATE = "$Date$"
   title = "Table Editor"
   template = web.ezt(
-"""<div class=notugly>
+"""
 <form action="[form.url]" name="[form.name]">
 [editor]
 </form>
-</div>
 [footer]""")
 
   def __init__(self, req):

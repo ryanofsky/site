@@ -1,0 +1,75 @@
+body { 
+  background: #AAAAAA;
+  font-family: Trebuchet MS, Arial, Helvetica, sans-serif;
+}
+
+img {
+  border: none;
+} 
+
+td {
+  vertical-align: top;
+}
+
+#main { 
+  background: #E0E0E0; 
+  border-style: solid;             
+  border-color: black;
+  border-width: 1px 2px 2px 1px; 
+  margin-left: auto;
+  margin-right: auto;
+  padding: 10px 30px 10px 30px;
+  width: 600px;
+}
+
+#navbar {
+  text-align: center;
+}
+
+#caption {
+  margin-top: 1ex;
+  margin-bottom: 1ex;
+  font-size: x-large;
+  font-weight: bold;
+}
+
+#footer {
+  text-align: right;
+}
+
+#code-intro {
+  margin-bottom: 1em;
+}
+
+#code-controls {
+  background: white;
+  border-style: solid;
+  border-color: black;
+  border-width: 1px 2px 2px 1px; 
+  margin-left: 1em;
+  padding: 0.5em;
+}
+
+#code-submit {
+  text-align: center;
+}
+
+.code-pager {
+  margin-bottom: 1em;
+  text-align: right;
+  font-weight: bold;
+}
+
+.code-project {
+  border-style: solid;
+  border-color: black;
+  border-width: 1px;
+  margin-bottom: 1em;
+}
+
+#code-sloc {
+  margin-bottom: 1em;
+  text-align: center;
+  font-size: smaller;
+  font-style: italic;
+}

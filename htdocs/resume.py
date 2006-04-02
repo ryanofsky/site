@@ -7,7 +7,6 @@ class Page(web.BasePage):
   title = "Resume"
   template = web.ezt(
 """[navbar]
-<div class="notugly">
 <p>[[]This page is out of date, c. 2002]</p>
 <p>Resume in assorted formats:</p>
 <ul>
@@ -16,7 +15,6 @@ class Page(web.BasePage):
   <li>PDF (<a href="resume.pdf">resume.pdf</a>, 48,559 bytes)</li>
   <li>Postscript (<a href="resume.ps">resume.ps</a>, 109,844 bytes)</li>
 </ul>
-</div>
 [footer]""")
 
 

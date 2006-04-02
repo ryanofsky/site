@@ -10,51 +10,44 @@ class Page(web.BasePage):
   title = "Code"
   template = web.ezt(
 r"""[navbar]
-<div class="notugly">
-
-
 <a name="query"></a>
 
 <form action="[form.url]#query" id="[form.name]">
 
-<table>
-<tr>
-  <td rowspan="3">
-    <p>This page contains descriptions and sources of various programming projects I've worked on over the years. It's not a complete list, but most of the interesting stuff is here. The controls at the right allow you to sort and filter the projects displayed.</p>
-  </td>
-  <td>Order by [order "size=\"1\""]</td>
-</tr>
+<table id="code-intro">
 <tr>
   <td>
-    Filter by Language<br />
-    [langs "size=\"5\""]
+    This page contains descriptions and sources of various programming projects I've worked on over the years. It's not complete, but most of the interesting stuff is here. The controls at the right allow you to sort and filter the projects displayed.
   </td>
-</tr>
-<tr>
   <td>
-    <input type="submit" name="submit" value="Submit" />
-   </td>
+    <table id="code-controls">
+    <tr><td>Order by [order "size=\"1\""]</td></tr>
+    <tr><td>Filter by Language<br />[langs "size=\"5\""]</td></tr>
+    <tr><td id="code-submit">
+      <input type="submit" name="submit" value="Submit" />
+    </td></tr>
+    </table>
+  </td>
 </tr>
 </table>
 
-<div>[pager "head"]</div>
+[pager "head"]
 
 </form>
 
 [for projects]
-<table>
-<tr><td>Name:</td><td>[projects.name]</td></tr>
-<tr><td>Dates:</td><td>[projects.dates]</td></tr>
-<tr><td>Size:</td><td>[if-any projects.lines][projects.lines] lines[else]?[end]</td></tr>
-<tr><td>Language(s):</td><td>[for projects.langs][projects.langs.name] ([projects.langs.percent])[if-index projects.langs last][else], [end][end]</td></tr>
-<tr><td>Repository:</td><td>[if-any projects.repos]<a href="[root]viewvc.py/[projects.repos]/">[projects.repos]</a>[else]<i>none</i>[end]</td></tr>
-<tr><td>Description:</td><td>[projects.description]</td></tr>
-</table><br />
+<table class="code-project">
+<tr><td><em>Name:</em></td><td>[projects.name]</td></tr>
+<tr><td><em>Dates:</em></td><td>[projects.dates]</td></tr>
+<tr><td><em>Size:</em></td><td>[if-any projects.lines][projects.lines] lines[else]?[end]</td></tr>
+<tr><td><em>Language(s):</em></td><td>[for projects.langs][projects.langs.name] ([projects.langs.percent])[if-index projects.langs last][else], [end][end]</td></tr>
+<tr><td><em>Repository:</em></td><td>[if-any projects.repos]<a href="[root]viewvc.py/[projects.repos]/">[projects.repos]</a>[else]<i>none</i>[end]</td></tr>
+<tr><td><em>Description:</em></td><td>[projects.description]</td></tr>
+</table>
 [end]
 
 [pager]
-<p><em><small>Line counts generated using '<a href="http://www.dwheeler.com/sloccount/">SLOCCount</a>' by David A. Wheeler.</small></em></p>
-</div>
+<div id="code-sloc">Line counts generated using '<a href="http://www.dwheeler.com/sloccount/">SLOCCount</a>' by David A. Wheeler.</div>
 [footer]""")
 
   sorts = (("dateup", "Date (ascending)"),
@@ -101,14 +94,16 @@ class Pager(widgets.FormWidget):
   template = web.ezt(
 """[format "html"]
   [if-any header pages]
-  <div style="float: left">
+  <div class="code-pager">
+  [hidden]
+  <span style="float: left">
     [if-any pages]
       Showing [first] - [last] of [num_projects] matches.
     [else]
       [num_projects] matches found.
     [end]
-  </div>
-  <div style="float: right">
+  </span>
+  &nbsp;
   [if-any pages]
     [for pages]
       [if-any pages.url]<a href="[pages.url]#query">[end]
@@ -121,7 +116,6 @@ class Pager(widgets.FormWidget):
     [if-any all_url]<a href="[all_url]#query">Break Pages</a>[end]
   [end]
   </div>
-  <div>&nbsp;</div>
   [end]
 [end]""")
 
@@ -132,9 +126,6 @@ class Pager(widgets.FormWidget):
                      or self.default_limit)
 
   def write(self, req, num_projects, header=""):
-    # preserve current limit when form is submitted
-    if header:
-      self.write_value(req, "limit", str(self.limit), widgets.WRITE_FORM)
 
     data = web.kw(num_projects=num_projects,
                   header=header,
@@ -143,7 +134,15 @@ class Pager(widgets.FormWidget):
                   pages=[],
                   prev_url=None,
                   next_url=None,
-                  all_url=None)
+                  all_url=None,
+                  hidden=None)
+
+    # preserve current limit when form is submitted
+    if header:
+      data.hidden = self.template.bind_write(self. write_value,
+                                             "limit",
+                                             str(self.limit),
+                                             widgets.WRITE_FORM)
 
     # if there's more than one page...
     if self.limit and (num_projects > self.limit or self.offset):
