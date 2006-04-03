@@ -7,13 +7,14 @@ class Page(web.BasePage):
   title = "Resume"
   template = web.ezt(
 """[navbar]
-<p>[[]This page is out of date, c. 2002]</p>
 <p>Resume in assorted formats:</p>
 <ul>
-  <li>Microsoft Word (<a href="resume.doc">resume.doc</a>, 31,744 bytes)</li>
-  <li>HTML (<a href="resume.htm">resume.htm</a>, 19,070 bytes)</li>
-  <li>PDF (<a href="resume.pdf">resume.pdf</a>, 48,559 bytes)</li>
-  <li>Postscript (<a href="resume.ps">resume.ps</a>, 109,844 bytes)</li>
+  <li>HTML (<a href="resume/resume.html">resume.html</a>, 9,690 bytes)</li>
+  <li>Text (<a href="resume/resume.txt">resume.txt</a>, 2,720 bytes)</li>
+  <li>PDF (<a href="resume/resume.pdf">resume.pdf</a>, 39,093 bytes)</li>
+  <li>Postscript (<a href="resume/resume.ps">resume.ps</a>, 79,795 bytes)</li>
+  <li>OpenOffice (<a href="resume/resume.odt">resume.odt</a>, 19,366 bytes</li>
+  <li>Microsoft Word (<a href="resume/resume.doc">resume.doc</a>, 61,952 bytes)</li>
 </ul>
 [footer]""")
 

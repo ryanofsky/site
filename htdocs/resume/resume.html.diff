@@ -1,0 +1,21 @@
+--- resume.html.orig	2006-04-02 20:42:33.000000000 -0400
++++ resume.html	2006-04-02 20:45:46.000000000 -0400
+@@ -28,15 +28,15 @@
+ 			Yanofsky</B></FONT></FONT></P>
+ 			<P CLASS="western" STYLE="margin-bottom: 0in; font-weight: medium">
+ 			<FONT FACE="Trebuchet MS, sans-serif"><FONT SIZE=3>6590 Luzon St</FONT></FONT></P>
+-			<P CLASS="western" STYLE="margin-bottom: 0in; font-weight: medium">
++			<P CLASS="western" STYLE="margin-top: 0in; margin-bottom: 0in; font-weight: medium">
+ 			<FONT FACE="Trebuchet MS, sans-serif"><FONT SIZE=3>Fort Benning,
+ 			GA 31905</FONT></FONT></P>
+-			<P CLASS="western" STYLE="font-weight: medium"><FONT FACE="Trebuchet MS, sans-serif"><FONT SIZE=3>570-394-1140</FONT></FONT></P>
++			<P CLASS="western" STYLE="margin-top: 0in; font-weight: medium"><FONT FACE="Trebuchet MS, sans-serif"><FONT SIZE=3>570-394-1140</FONT></FONT></P>
+ 		</TD>
+ 		<TD WIDTH=288>
+ 			<P CLASS="western" ALIGN=RIGHT STYLE="margin-top: 0.1in; margin-bottom: 0in">
+ 			<FONT COLOR="#0000ff"><A HREF="http://russ.yanofsky.org/"><B><SPAN STYLE="text-decoration: none"><FONT SIZE=3><FONT FACE="Trebuchet MS, sans-serif"><FONT COLOR="#000000">http://russ.yanofsky.org/</FONT></FONT></FONT></SPAN></B></A></FONT></P>
+-			<P CLASS="western" ALIGN=RIGHT STYLE="margin-bottom: 0in"><FONT COLOR="#0000ff"><A HREF="mailto:russ@yanofsky.org"><B><SPAN STYLE="text-decoration: none"><FONT SIZE=3><FONT FACE="Trebuchet MS, sans-serif"><FONT COLOR="#000000">russ@yanofsky.org</FONT></FONT></FONT></SPAN></B></A></FONT></P>
++			<P CLASS="western" ALIGN=RIGHT STYLE="margin-top: 0in; margin-bottom: 0in"><FONT COLOR="#0000ff"><A HREF="mailto:russ@yanofsky.org"><B><SPAN STYLE="text-decoration: none"><FONT SIZE=3><FONT FACE="Trebuchet MS, sans-serif"><FONT COLOR="#000000">russ@yanofsky.org</FONT></FONT></FONT></SPAN></B></A></FONT></P>
+ 			<P CLASS="western" ALIGN=RIGHT><BR>
+ 			</P>
+ 		</TD>
