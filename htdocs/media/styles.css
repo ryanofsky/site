@@ -33,6 +33,18 @@ td {
   font-weight: bold;
 }
 
+.head {
+  text-align: center;
+  font-size: large;
+  font-weight: bold; 
+}
+
+.subhead {
+  text-align: center;
+  font-size: small;
+  font-style: italic;
+}
+
 #footer {
   text-align: right;
 }
