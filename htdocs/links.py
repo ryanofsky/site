@@ -50,6 +50,7 @@ class Page(web.BasePage):
 <h3>Miscellany</h3>
 <ul>
   <li><a href="http://www.godecookery.com/clipart/clart.htm">Medieval Woodcuts Clipart Collection</a> - site's graphics come from here</li>
+  <li><a href="http://www.johncompanies.com/">JohnCompanies</a> - site host</li>
 </ul>
 [footer]""")
 
