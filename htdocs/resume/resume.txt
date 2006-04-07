@@ -14,7 +14,7 @@ Position as Web Developer or Systems Programmer in New York City
               
               * Pursued Bachelor of Science degree in Computer Science
               * Coursework in Operating System Development, Database Systems,
-                Compiler Development, Networking,  Computer Architecture,
+                Compiler Development, Networking, Computer Architecture,
                 Natural Language Processing, Robotics, Computer Vision,
                 Statistics, History, and Economics
 
@@ -24,9 +24,10 @@ Position as Web Developer or Systems Programmer in New York City
               Infantry Soldier
 
               * Completed basic and advanced training. Promoted to rank of
-                Specialist.
+                Specialist. Recognized on numerous occasions for outstanding
+                performance.
               * Yearlong combat tour to Iraq. Participated in patrols and
-                raids, worked on a personal security detail for the battalion
+                raids, worked on a personal security detail for a battalion
                 commander, and logged hundreds of hours of guard duty and
                 HMMWV driving time.
 
@@ -37,10 +38,10 @@ Position as Web Developer or Systems Programmer in New York City
                 engineering course evaluations. Primary features were a
                 WYSIWYG survey editor, a graphical reporting system, an email
                 reminder system, and various administrative interfaces.
-                Written with PHP, SQL, Javascript, and PL/pgSQL (Postgres
+                Written in PHP, SQL, Javascript, and PL/pgSQL (Postgres
                 procedural query language) in approximately 20,000 lines of
                 code.
-              * Other smaller projects include a Webcrawler written in Delphi,
+              * Other smaller projects include a web crawler written in Delphi,
                 a COM component used for authentication written with ATL in
                 C++, and some additional web development with PHP, Perl, and
                 mySQL.
@@ -50,7 +51,7 @@ Position as Web Developer or Systems Programmer in New York City
     tech support and computer assembly for PA Network, a local ISP in my
     hometown of Harrisburg, PA.
     
-    Open source experience includes lead developer role for ViewVC project,
+    Open source experience includes lead developer role for ViewVC project
     and more minor contributions to Subversion and GCC projects.
 
 == Skills ==
@@ -60,7 +61,7 @@ High Proficiency:
 
 Medium Proficiency:
   Win32 Programming (systems, GDI, windowing, COM), Python, Borland Delphi
-  (GUI, Object Pascal), Java (Swing, GUI Development) 
+  (GUI, Object Pascal), Java (Swing, Servlets, Sockets, JDBC) 
 
 Basic Familiarly:
   Perl, ASP, ASP.NET, C#, Visual Basic

@@ -9,12 +9,12 @@ class Page(web.BasePage):
 """[navbar]
 <p>Resume in assorted formats:</p>
 <ul>
-  <li>HTML (<a href="resume/resume.html">resume.html</a>, 9,690 bytes)</li>
-  <li>Text (<a href="resume/resume.txt">resume.txt</a>, 2,720 bytes)</li>
-  <li>PDF (<a href="resume/resume.pdf">resume.pdf</a>, 39,093 bytes)</li>
-  <li>Postscript (<a href="resume/resume.ps">resume.ps</a>, 79,795 bytes)</li>
-  <li>OpenOffice (<a href="resume/resume.odt">resume.odt</a>, 19,366 bytes</li>
-  <li>Microsoft Word (<a href="resume/resume.doc">resume.doc</a>, 61,952 bytes)</li>
+  <li>HTML (<a href="resume/resume.html">resume.html</a>, 9,800 bytes)</li>
+  <li>Text (<a href="resume/resume.txt">resume.txt</a>, 2,801 bytes)</li>
+  <li>PDF (<a href="resume/resume.pdf">resume.pdf</a>, 38,075 bytes)</li>
+  <li>Postscript (<a href="resume/resume.ps">resume.ps</a>, 78,329 bytes)</li>
+  <li>OpenOffice (<a href="resume/resume.odt">resume.odt</a>, 19,653 bytes</li>
+  <li>Microsoft Word (<a href="resume/resume.doc">resume.doc</a>, 62,464 bytes)</li>
 </ul>
 
 <p>I'm looking for full-time programming work in New York City starting May 2006. A resume doesn't always provide the most complete picture of a person's qualifications, especially for someone like me, who has pretty good geek credentials, but not an abundance of relevant work experience. So I have a few more words to say here.</p>
