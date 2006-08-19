@@ -44,7 +44,7 @@ body {
 <a href="[signs.name].py" onclick="return false;"><img src="[signs.src]" id="sign_[signs.name]" style="width: [signs.width]px; height: [signs.height]px; position: absolute; top: [signs.top]px; left: [signs.left]px; border: none;" onclick="anim_click(this)" /></a>
 [end]
 
-<img src="[rect.src]" id="rect" style="width: [rect.width]px; height: [rect.height]px; position: absolute; top: [rect.top]px; left: [rect.left]px;" />
+<div id="rect" style="background-color: #ff5509; width: [rect.width]px; height: [rect.height]px; position: absolute; top: [rect.top]px; left: [rect.left]px;"></div>
 
 <script>
 <!--
