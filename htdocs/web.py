@@ -221,11 +221,15 @@ function Animation_draw_lines()
         //dot.src = "media/black.png";
 
         var dot = document.createElement("div");
+
+        // IE6 hack needed to set div height < line height
+        dot.appendChild(document.createComment(""));
+	
         dot.style.background = "black";
-      
         dot.style.position = "absolute";
         dot.style.width = "10px";
         dot.style.height = "10px";
+	dot.style.lineHeight = "1px";
         dot.style.left = (x - SQSIZE / 2) + "px";
         dot.style.top = (y - SQSIZE / 2) + "px";
         this.dots.appendChild(dot);
