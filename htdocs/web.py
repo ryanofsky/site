@@ -24,74 +24,81 @@ class Outline(widgets.TemplateWidget):
 body {
   margin: 0px;
   padding: 0px;
-  background-image: url(media/tri.png);
+  background-image: url([root]media/tri.png);
   background-repeat: no-repeat;
 }
 
-#main {
-  margin-top: 0px;
-  margin-left: [tri.width]px;
-  margin-right: [rect.top]px;
-  margin-bottom: [rect.top]20px;
-}
 -->
 </style>
 
 <script>
 <!--
 
-function Sign(name, active, width, height, hat, heels, corn) 
+function Sign(title, name, href, src, width, height, hat, heels, corn, active) 
 {
+  this.title = title;
   this.name = name;
-  this.active = active;
+  this.href = href;
+  this.src = src;
   this.width = width;
   this.height = height;
   this.hat = hat;
   this.heels = heels;
   this.corn = corn;
-  this.elem = document.getElementById("sign_" + name);
-  if (!this.elem)
-  {
-    var rect = document.getElementById("rect");
-    var grect = document.getElementById("grect");
-    var ae = this.aelem = document.createElement("a");
-    ae.href = name + ".py";
-    ae.onclick = anim_onclick;
-    var se = this.elem = document.createElement("img");
-    se.src = "media/" + name + ".png";
-    se.style.position = "absolute";
-    se.style.width = width + "px";
-    se.style.height = height + "px";
-    se.style.left = (grect.offsetLeft + (grect.offsetWidth - width) / 2) + "px";
-    se.style.top = (grect.offsetTop + (grect.offsetHeight - height) / 2) + "px";
-    se.style.border = "none";
-    se.style.visibility = "hidden";
-    ae.appendChild(se);
-    document.body.insertBefore(ae, rect);
-  }
-  else
-  {
-    this.aelem = this.elem.parentNode;
-    this.aelem.onclick = anim_onclick;
-  }
+  this.active = active;
+
   this.left = null;
   this.top = null;
-  this.curLeft = this.elem.offsetLeft;
-  this.curTop = this.elem.offsetTop;
+  this.curLeft = null;
+  this.curTop = null;
   this.clickLeft = null;
   this.clickTop = null;
   this.clickTime = null;
   this.moveTime = null;
 }
 
-function Animation(signs, timer_cb, req, onreadystatechange)
+function Animation(signs, timer_cb, req_cb)
 {
   this.signs = signs;
-  this.timer = null;
   this.timer_cb = timer_cb;
+  this.req_cb = req_cb;
+
+  this.req = http_req();
+  this.timer = null;
   this.load = null;
-  this.req = req;
-  this.onreadystatechange = onreadystatechange;
+
+  for (var i in this.signs)
+  {
+    var sign = this.signs[[]i];
+    sign.elem = document.getElementById("sign_" + sign.name);
+    if (sign.elem)
+    {
+      sign.aelem = sign.elem.parentNode;
+      sign.aelem.onclick = anim_onclick;
+    }
+    else
+    {
+      var rect = document.getElementById("rect");
+      var grect = document.getElementById("grect");
+      var ae = sign.aelem = document.createElement("a");
+      ae.href = sign.href;
+      ae.onclick = anim_onclick;
+      var se = sign.elem = document.createElement("img");
+      se.src = sign.src;
+      se.style.position = "absolute";
+      se.style.width = sign.width + "px";
+      se.style.height = sign.height + "px";
+      se.style.left = (grect.offsetLeft + (grect.offsetWidth - sign.width) / 2) + "px";
+      se.style.top = (grect.offsetTop + (grect.offsetHeight - sign.height) / 2) + "px";
+      se.style.border = "none";
+      se.style.visibility = "hidden";
+      ae.appendChild(se);
+      document.body.insertBefore(ae, rect);
+    }
+    sign.curLeft = sign.elem.offsetLeft;
+    sign.curTop = sign.elem.offsetTop;
+  }
+
 
   this.setpos = Animation_setpos;
   this.start_timer = Animation_start_timer;
@@ -126,7 +133,7 @@ function Animation_setpos()
     {
       y += SP;
       y -= sign.hat;
-      sign.left = (([tri.width]-(y+sign.corn)*[tri.width]/[tri.height])/2
+      sign.left = (([tri_width]-(y+sign.corn)*[tri_width]/[tri_height])/2
                  - se.offsetWidth / 2);
       sign.top = y;
       y -= sign.heels;
@@ -156,14 +163,14 @@ function Animation_start_load(sign)
   if (this.req)
   {
     this.req.abort();
-    this.req.open("GET", sign.name + ".py?plain=1", true);
-    this.req.onreadystatechange = this.onreadystatechange;
+    this.req.open("GET", sign.href + "?plain=1", true);
+    this.req.onreadystatechange = this.req_cb;
     this.load = 0;
     this.req.send(null);
   }
   else
   {
-    this.load = sign.name + ".py";
+    this.load = sign.href;
   }
 }
 
@@ -218,16 +225,16 @@ function Animation_draw_lines()
     x2 = sign.curLeft + sign.width / 2;
     y2 = sign.curTop + sign.height / 2;
     
-    if (x2 > [rect.left] + [rect.width])
+    if (x2 > [rect_pos] + [rect_width])
     {
-      x1 = [rect.left] + [rect.width] + SQDIST - SQSIZE / 2;
-      y1 = [rect.top] + [rect.height] + SQDIST - SQSIZE / 2;
+      x1 = [rect_pos] + [rect_width] + SQDIST - SQSIZE / 2;
+      y1 = [rect_pos] + [rect_height] + SQDIST - SQSIZE / 2;
       if (y2 < y1) y1 = y2;
     }
     else
     {
       x1 = x2;
-      y1 = [rect.top] + [rect.height] + SQDIST - SQSIZE / 2;
+      y1 = [rect_pos] + [rect_height] + SQDIST - SQSIZE / 2;
     }
     
     var x = x1;
@@ -237,8 +244,6 @@ function Animation_draw_lines()
       if (idots >= this.ndots)
       {
         ++this.ndots;
-        //var dot = document.createElement("img");
-        //dot.src = "media/black.png";
 
         var dot = document.createElement("div");
 
@@ -299,7 +304,7 @@ function Animation_hide_active(sign, nsign)
   var grect = document.getElementById("grect");
   var active = document.getElementById("gsign");
   active.style.visibility = "hidden";
-  active.src = "media/" + nsign.name + ".png";
+  active.src = nsign.src;
   active.style.width = nsign.width + "px";
   active.style.height = nsign.height + "px";
   active.style.left = ((grect.offsetWidth - nsign.width) / 2) + "px";
@@ -413,14 +418,14 @@ function http_req()
 [for signs]
 [if-any signs.active]
 [else]
-<a href="[signs.name].py"><img src="[signs.src]" id="sign_[signs.name]" style="width: [signs.width]px; height: [signs.height]px; position: absolute; top: [signs.top]px; left: [signs.left]px; border: none;" /></a>
+<a href="[signs.href]"><img src="[signs.src]" id="sign_[signs.name]" style="width: [signs.width]px; height: [signs.height]px; position: absolute; top: [signs.top]px; left: [signs.left]px; border: none;" /></a>
 [end]
 [end]
 
-<div id="rect" style="background-color: #ff5509; width: [rect.width]px; height: [rect.height]px; position: absolute; top: [rect.top]px; left: [rect.left]px;"></div>
+<div id="rect" style="background-color: #ff5509; width: [rect_width]px; height: [rect_height]px; position: absolute; top: [rect_pos]px; left: [rect_pos]px;"></div>
 
-<div id="main">
-<div id="grect" style="background-color: #848484; width: [rect.width]px; height: [rect.height]px;  margin-left: auto; margin-right: auto; margin-top: [rect.top]px; margin-bottom: [rect.top]px;">
+<div style="margin-top: 0px; margin-left: [tri_width]px; margin-right: [rect_pos]px; margin-bottom: [rect_pos]px;">
+<div id="grect" style="background-color: #848484; width: [rect_width]px; height: [rect_height]px;  margin-left: auto; margin-right: auto; margin-top: [rect_pos]px; margin-bottom: [rect_pos]px;">
 
 [for signs]
 [if-any signs.active]
@@ -463,11 +468,15 @@ function anim_onresize()
   }
 }
 
-anim = new Animation(new Array(new Sign("home", true, 143, 60, 7, 13, 7),
-                               new Sign("resume", false, 149, 48, 6, 10, 48),
-                               new Sign("code", false, 115, 60, 5, 16, 60),
-                               new Sign("links", false, 127, 61, 8, 25, 61)),
-                     anim_tick, http_req(), anim_state_change);
+anim = new Animation(new Array(
+[for signs]
+[if-index signs first][else],[end]
+new Sign("[signs.title]", "[signs.name]", "[signs.href]", "[signs.src]",
+	 [signs.width], [signs.height],
+	 [signs.hat], [signs.heels], [signs.corn],
+         [if-any signs.active]true[else]false[end])
+[end]),
+anim_tick, anim_state_change);
 
 anim.setpos();
 anim.draw_lines();
@@ -486,60 +495,62 @@ window.onresize = anim_onresize;
 
   def __init__(self, *args, **kwargs):
     widgets.TemplateWidget.__init__(self, *args, **kwargs)
-    self.tri = Image('media/tri.png', 271, 1801)
-    self.rect = Image('media/rect.png', 199, 150)
+    self.tri_width = 271
+    self.tri_height = 1801
+    self.rect_width = 199
+    self.rect_height = 150
 
-    self.tri.top = self.tri.left = 0
-
-    # center rectangle in top of triangle
-    self.rect.top = self.rect.left = ((self.tri.height * self.tri.width
-                                       - self.rect.height * self.tri.width
-                                       - self.rect.width * self.tri.height)
-                                      / (2 * self.tri.height + self.tri.width))
+    # rectangle is centered in top of triangle
+    self.rect_pos = ((self.tri_height * self.tri_width
+                      - self.rect_height * self.tri_width
+                      - self.rect_width * self.tri_height)
+                     / (2 * self.tri_height + self.tri_width))
     
-    self.signs = [ Sign("home", 143, 60, 7, 13, 7),
-                   Sign("resume", 149, 48, 6, 10, 48),
-                   Sign("code", 115, 60, 5, 16, 60),
-                   Sign("links", 127, 61, 8, 25, 61) ] # 25 -> 19
-    position_signs(self.signs, self.tri, self.rect, 0)    
+    self.signs = [ Sign("Home", "home", "index.py", "media/home.png",
+                        143, 60, 7, 13, 7),
+                   Sign("Resume", "resume", "resume.py", "media/resume.png",
+		        149, 48, 6, 10, 48),
+                   Sign("Code", "code", "code.py", "media/code.png",
+		        115, 60, 5, 16, 60),
+                   Sign("Links", "links", "links.py", "media/links.png",
+		        127, 61, 8, 25, 61) ] # 25 -> 19
 
-class Image:
-  def __init__(self, src, width, height):
+    self.sign_spacing = 40
+
+    i = j = 0
+    y = self.rect_pos + self.rect_height
+    for sign in self.signs:
+      if self.title == sign.title:
+        sign.active = "yes"
+        sign.left = (self.rect_width - sign.width) / 2
+        sign.top = (self.rect_height - sign.height) / 2
+      else:
+        sign.active = None
+        y += self.sign_spacing
+        y -= sign.hat 
+        sign.top = y
+        sign.left = ((self.tri_width
+	              -(y+sign.corn)*self.tri_width/self.tri_height)/2
+                      - sign.width / 2)
+        y -= sign.heels 
+        y += sign.height
+        j += 1
+      i += 1
+
+
+class Sign:
+  def __init__(self, title, name, href, src, width, height, hat, heels, corn):
+    self.title = title
+    self.name = name
+    self.href = href
     self.src = src
     self.width = width
     self.height = height
     self.top = None
     self.left = None
-
-
-class Sign(Image):
-  def __init__(self, name, width, height, hat, heels, corn):
-    Image.__init__(self, "media/%s.png" % name, width, height)
     self.hat = hat # lower top corner from top
     self.heels = heels # higher bottom corner from bottom
     self.corn = corn # height or right edge
-    self.name = name
-
-def position_signs(signs, tri, rect, active):
-  SP = 40
-  i = j = 0
-  y = rect.top + rect.height
-  for sign in signs:
-    if i == active:
-      sign.active = "yes"
-      sign.left = (rect.width - sign.width) / 2
-      sign.top = (rect.height - sign.height) / 2
-    else:
-      sign.active = None
-      y += SP
-      y -= sign.hat 
-      sign.top = y
-      sign.left = ((tri.width-(y+sign.corn)*tri.width/tri.height)/2
-                   - sign.width / 2)
-      y -= sign.heels 
-      y += sign.height
-      j += 1
-    i += 1
 
 
 class Footer(widgets.TemplateWidget):
