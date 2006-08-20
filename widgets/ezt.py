@@ -198,6 +198,92 @@ Directives
    Python applications using EZT can provide custom formatters as callback
    variables. "[format CALLBACK][QUAL_NAME][end]" is in most cases
    equivalent to "[CALLBACK QUAL_NAME]"
+
+Whitespace
+==========
+
+ By default, EZT collapses whitespace in template text, replacing
+ repeated spaces and newlines in the output with single characters.
+ This allows you to freely add indentation and line breaks to your
+ template code to make it more readable without having to worry about
+ extra whitespace showing up in the output.
+
+ "compress_whitespace" Option
+ ----------------------------
+
+   EZT can be configured to leave whitespace intact by passing a
+   compress_whitespace=False argument to the Template constructor.
+   Note that this can significantly affect the size and appearance
+   of the output. To take a simple example:
+
+     [for items]
+       [if-any items]
+         - [items]
+       [end]
+     [end]
+
+  Without whitespace compression, the spaces around the [if] and [for]
+  directives will cause EZT to output a total of 4 newlines and 8 spaces
+  between each item in the loop. To control the space in the output, the
+  code could be rewritten (at the possible expense of readability) as:
+
+     [for items][if-any items]- [items]
+     [end][end]
+
+  Rewritten this way, the items in this list will be separated by single
+  newlines.
+
+ "trim_whitespace" Option
+ ----------------------------
+
+   There is a second whitespace option which allows for fine-grained
+   control whether EZT will output whitespace. When a
+   trim_whitespace=True argument is passed to the Template
+   constructor, EZT will omit whitespace from template text wherever
+   it encounters special trimming character, "|".
+
+   The "|" character works pretty simply. Putting a "|" in an EZT text
+   block causes any whitespace preceding it not to be outputted.
+
+   Example:
+
+     mary      | had   | a lit |tle lamb.
+
+   is outputted as
+
+     mary had a little lamb.
+
+   When it's used like this, "|" does not suppress newlines, but it
+   takes on a different behavior when it's used at the end of a line,
+   where it will leave any preceding whitespace intact and instead
+   omit the newline following it.
+
+   Example:
+
+     the earth is bill|
+     ions of years old
+
+   is outputted as
+
+     the earth is billions of years old
+
+   Enabling the "trim_whitespace" option also has two more effects.
+   First, it causes EZT to automatically strip whitespace used to
+   indent EZT directives (as if there were an implicit "|" after blocks
+   blocks of template text that end on new lines). Second, it allows
+   escaping of literal "|" characters by doubling them up like "||".
+
+   All together these features allow you to space and indent EZT code
+   in whatever way is convenient, and still maintain control over
+   whitespace in the output by inserting "|" characters as needed.
+   The original example modified to eliminate all spaces except a
+   single newline after each item would look like:
+
+     [for items]|
+       [if-any items]|
+         |- [items]
+       [end]|
+     [end]|
 """
 #
 # Copyright (C) 2001-2005 Greg Stein. All Rights Reserved.
@@ -282,6 +368,18 @@ _block_cmds = _block_cmd_specs.keys()
 _re_newline = re.compile('[ \t\r\f\v]*\n\\s*')
 _re_whitespace = re.compile(r'\s\s+')
 
+# regular expressions for trim_whitespace
+_re_trim = re.compile(r"((?:(?!\n)\s)*)\|(\|)?(\s*?\n)?" # "|" occurrences
+                      r"|(?<=\n)(?:(?!\n)\s)+$(?!\n)")   # trailing whites
+
+def _repl_trim(match):
+  prewhite, slash, postwhite = match.groups()
+  if slash:
+    return prewhite + slash + (postwhite or "")
+  if postwhite: 
+    return prewhite
+  return ""
+
 # this regex is used to substitute arguments into a value. we split the value,
 # replace the relevant pieces, and then put it all back together. splitting
 # will produce a list of: TEXT ( splitter TEXT )*. splitter will be '%' or
@@ -290,9 +388,10 @@ _re_subst = re.compile('%(%|[0-9]+)')
 
 class Template:
 
-  def __init__(self, fname=None, compress_whitespace=1,
+  def __init__(self, fname=None, compress_whitespace=1, trim_whitespace=0,
                base_format=FORMAT_RAW):
     self.compress_whitespace = compress_whitespace
+    self.trim_whitespace = trim_whitespace
     if fname:
       self.parse_file(fname, base_format)
 
@@ -356,6 +455,8 @@ class Template:
       if which == 0:
         # TEXT. append if non-empty.
         if piece:
+          if self.trim_whitespace:
+            piece = _re_trim.sub(_repl_trim, piece)
           if self.compress_whitespace:
             piece = _re_whitespace.sub(' ', _re_newline.sub('\n', piece))
           program.append(piece)
@@ -666,7 +767,7 @@ def _write_value(value, args, ctx):
             piece = args[idx]
           else:
             piece = '<undef>'
-          printer(ctx, piece)
+        printer(ctx, piece)
 
     # plain old value, write to output
     else:

@@ -6,14 +6,14 @@ class Template:
   See widgets.Template docstring for information about the Template class
   interface. See ezt.py module for information about EZT."""
 
-  def __init__(self, string=None, file=None):
+  def __init__(self, string=None, file=None, **kwargs):
     if string is not None:
       assert file is None
-      self._ezt = ezt.Template()
+      self._ezt = ezt.Template(**kwargs)
       self._ezt.parse(string)
     else:
       assert file is not None
-      self._ezt = ezt.Template(file)
+      self._ezt = ezt.Template(file, **kwargs)
 
   def execute(self, req, dataobj):
     self._ezt.generate(req, dataobj)

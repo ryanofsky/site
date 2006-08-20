@@ -15,13 +15,14 @@ ROOT = "/"
 class Outline(widgets.TemplateWidget):
   root = ROOT
   template = ezt(
-"""
+"""|
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 <title>Russell Yanofsky - [title]</title>
 <style>
 <!--
+
 body {
   margin: 0px;
   padding: 0px;
@@ -89,7 +90,6 @@ function Animation(signs, triWidth, triHeight, rectWidth, rectHeight, rectPos, s
     }
     else
     {
-
       var ae = sign.aelem = document.createElement("a");
       ae.href = sign.href;
       ae.onclick = anim_onclick;
@@ -184,7 +184,7 @@ function Animation_start_load(sign)
 
 function Animation_state_change(sign)
 {
-  if (this.req.readyState == 4 || this.req.readyState == "complete")
+  if (this.req.readyState == 4 |||| this.req.readyState == "complete")
   {
     if (++this.load >= 2)
       document.getElementById("contents").innerHTML = this.req.responseText;
@@ -310,7 +310,6 @@ function Animation_hide_active(sign, nsign)
   sign.elem.style.top = sign.curTop + "px";
   sign.elem.style.visibility = "visible";
   this.gsign.style.visibility = "hidden";
-
 }
 
 function Animation_show_active(sign)
@@ -421,24 +420,23 @@ function http_req()
 </head>
 <body>
 
-[for signs]
-[if-any signs.active]
-[else]
-<a href="[signs.href]"><img src="[signs.src]" id="sign_[signs.name]" style="width: [signs.width]px; height: [signs.height]px; position: absolute; top: [signs.top]px; left: [signs.left]px; border: none;" /></a>
-[end]
-[end]
+[for signs]|
+  [if-any signs.active]|
+  [else]|
+    |<a href="[signs.href]"><img src="[signs.src]" id="sign_[signs.name]" style="width: [signs.width]px; height: [signs.height]px; position: absolute; top: [signs.top]px; left: [signs.left]px; border: none;" /></a>
+  [end]|
+[end]|
 
 <div id="rect" style="background-color: #ff5509; width: [rect_width]px; height: [rect_height]px; position: absolute; top: [rect_pos]px; left: [rect_pos]px;"></div>
 
 <div style="margin-top: 0px; margin-left: [tri_width]px; margin-right: [rect_pos]px; margin-bottom: [rect_pos]px;">
+
 <div id="grect" style="background-color: #848484; width: [rect_width]px; height: [rect_height]px;  margin-left: auto; margin-right: auto; margin-top: [rect_pos]px; margin-bottom: [rect_pos]px;">
-
-[for signs]
-[if-any signs.active]
-<img src="[signs.src]" id="gsign" style="width: [signs.width]px; height: [signs.height]px; position: relative; top: [signs.top]px; left: [signs.left]px;" /></a>
-[end]
-[end]
-
+[for signs]|
+  [if-any signs.active]|
+    |<img src="[signs.src]" id="gsign" style="width: [signs.width]px; height: [signs.height]px; position: relative; top: [signs.top]px; left: [signs.left]px;" /></a>
+  [end]|
+[end]|
 </div>
 
 <script>
@@ -474,17 +472,19 @@ function anim_onresize()
   }
 }
 
-anim = new Animation(new Array(
-[for signs]
-[if-index signs first][else],[end]
-new Sign("[signs.title]", "[signs.name]", "[signs.href]", "[signs.src]",
-	 [signs.width], [signs.height],
-	 [signs.hat], [signs.heels], [signs.corn],
-         [if-any signs.active]true[else]false[end])
+anim = new Animation(new Array(|
+[for signs]|
+  [if-index signs first][else],
+  |                               |
+  [end]|
+  |new Sign("[signs.title]", "[signs.name]", "[signs.href]", "[signs.src]", |
+            [signs.width], [signs.height], |
+            [signs.hat], [signs.heels], [signs.corn], |
+            [if-any signs.active]true[else]false[end])|
 [end]),
-[tri_width], [tri_height], [rect_width], [rect_height], [rect_pos],
-[sign_spacing], anim_tick, anim_state_change);
-
+  |                     |
+  [tri_width], [tri_height], [rect_width], [rect_height], [rect_pos], |
+  [sign_spacing], anim_tick, anim_state_change);
 anim.setpos();
 anim.draw_lines();
 
@@ -498,7 +498,7 @@ window.onresize = anim_onresize;
 </div>
 </div>
 </body>
-</html>""")
+</html>""", compress_whitespace=0, trim_whitespace=1)
 
   def __init__(self, *args, **kwargs):
     widgets.TemplateWidget.__init__(self, *args, **kwargs)
