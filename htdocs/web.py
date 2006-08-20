@@ -13,6 +13,7 @@ ROOT = "/"
 ### At the moment, it's convenient to write these templates in python strings.
 ### Should probably push them out to files if the site grows
 class Outline(widgets.TemplateWidget):
+  root = ROOT
   template = ezt(
 """
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
@@ -57,15 +58,25 @@ function Sign(title, name, href, src, width, height, hat, heels, corn, active)
   this.moveTime = null;
 }
 
-function Animation(signs, timer_cb, req_cb)
+function Animation(signs, triWidth, triHeight, rectWidth, rectHeight, rectPos, signSpacing, timer_cb, req_cb)
 {
   this.signs = signs;
+  this.triWidth = triWidth;
+  this.triHeight = triHeight;
+  this.rectWidth = rectWidth;
+  this.rectHeight = rectHeight;
+  this.rectPos = rectPos;
+  this.signSpacing = signSpacing;
   this.timer_cb = timer_cb;
   this.req_cb = req_cb;
 
   this.req = http_req();
   this.timer = null;
   this.load = null;
+
+  this.rect = document.getElementById("rect");
+  this.grect = document.getElementById("grect");
+  this.gsign = document.getElementById("gsign");
 
   for (var i in this.signs)
   {
@@ -78,8 +89,7 @@ function Animation(signs, timer_cb, req_cb)
     }
     else
     {
-      var rect = document.getElementById("rect");
-      var grect = document.getElementById("grect");
+
       var ae = sign.aelem = document.createElement("a");
       ae.href = sign.href;
       ae.onclick = anim_onclick;
@@ -88,17 +98,18 @@ function Animation(signs, timer_cb, req_cb)
       se.style.position = "absolute";
       se.style.width = sign.width + "px";
       se.style.height = sign.height + "px";
-      se.style.left = (grect.offsetLeft + (grect.offsetWidth - sign.width) / 2) + "px";
-      se.style.top = (grect.offsetTop + (grect.offsetHeight - sign.height) / 2) + "px";
+      se.style.left = (this.grect.offsetLeft + (this.rectWidth-sign.width) / 2)
+                      + "px";
+      se.style.top = (this.grect.offsetTop + (this.rectHeight-sign.height) / 2)
+                     + "px";
       se.style.border = "none";
       se.style.visibility = "hidden";
       ae.appendChild(se);
-      document.body.insertBefore(ae, rect);
+      document.body.insertBefore(ae, this.rect);
     }
     sign.curLeft = sign.elem.offsetLeft;
     sign.curTop = sign.elem.offsetTop;
   }
-
 
   this.setpos = Animation_setpos;
   this.start_timer = Animation_start_timer;
@@ -115,25 +126,22 @@ function Animation(signs, timer_cb, req_cb)
 
 function Animation_setpos()
 {
-  var SP = 40;
   var j = 0;
-  var rect = document.getElementById("rect");
-  var grect = document.getElementById("grect");
-  var y = rect.offsetTop + rect.offsetHeight;
+  var y = this.rectPos + this.rectHeight;
   for (var i in this.signs)
   {
     var sign = this.signs[[]i];
     var se = sign.elem;
     if (sign.active)
     {
-      sign.left = grect.offsetLeft + (grect.offsetWidth - se.offsetWidth) / 2;
-      sign.top = grect.offsetTop + (grect.offsetHeight - se.offsetHeight) / 2;
+      sign.left = this.grect.offsetLeft + (this.rectWidth - sign.width) / 2;
+      sign.top = this.grect.offsetTop + (this.rectHeight - sign.height) / 2;
     }
     else
     {
-      y += SP;
+      y += this.signSpacing;
       y -= sign.hat;
-      sign.left = (([tri_width]-(y+sign.corn)*[tri_width]/[tri_height])/2
+      sign.left = ((this.triWidth-(y+sign.corn)*this.triWidth/this.triHeight)/2
                  - se.offsetWidth / 2);
       sign.top = y;
       y -= sign.heels;
@@ -225,16 +233,16 @@ function Animation_draw_lines()
     x2 = sign.curLeft + sign.width / 2;
     y2 = sign.curTop + sign.height / 2;
     
-    if (x2 > [rect_pos] + [rect_width])
+    if (x2 > this.rectPos + this.rectWidth)
     {
-      x1 = [rect_pos] + [rect_width] + SQDIST - SQSIZE / 2;
-      y1 = [rect_pos] + [rect_height] + SQDIST - SQSIZE / 2;
+      x1 = this.rectPos + this.rectWidth + SQDIST - SQSIZE / 2;
+      y1 = this.rectPos + this.rectHeight + SQDIST - SQSIZE / 2;
       if (y2 < y1) y1 = y2;
     }
     else
     {
       x1 = x2;
-      y1 = [rect_pos] + [rect_height] + SQDIST - SQSIZE / 2;
+      y1 = this.rectPos + this.rectHeight + SQDIST - SQSIZE / 2;
     }
     
     var x = x1;
@@ -301,20 +309,18 @@ function Animation_hide_active(sign, nsign)
   sign.elem.style.left = sign.curLeft + "px";
   sign.elem.style.top = sign.curTop + "px";
   sign.elem.style.visibility = "visible";
-  var grect = document.getElementById("grect");
-  var active = document.getElementById("gsign");
-  active.style.visibility = "hidden";
-  active.src = nsign.src;
-  active.style.width = nsign.width + "px";
-  active.style.height = nsign.height + "px";
-  active.style.left = ((grect.offsetWidth - nsign.width) / 2) + "px";
-  active.style.top = ((grect.offsetHeight - nsign.height) / 2) + "px";
+  this.gsign.style.visibility = "hidden";
+
 }
 
 function Animation_show_active(sign)
 {
-  var active = document.getElementById("gsign");
-  active.style.visibility = "visible";
+  this.gsign.src = sign.src;
+  this.gsign.style.width = sign.width + "px";
+  this.gsign.style.height = sign.height + "px";
+  this.gsign.style.left = ((this.rectWidth - sign.width) / 2) + "px";
+  this.gsign.style.top = ((this.rectHeight - sign.height) / 2) + "px";
+  this.gsign.style.visibility = "visible";
   sign.elem.style.visibility = "hidden";
 }
 
@@ -476,7 +482,8 @@ new Sign("[signs.title]", "[signs.name]", "[signs.href]", "[signs.src]",
 	 [signs.hat], [signs.heels], [signs.corn],
          [if-any signs.active]true[else]false[end])
 [end]),
-anim_tick, anim_state_change);
+[tri_width], [tri_height], [rect_width], [rect_height], [rect_pos],
+[sign_spacing], anim_tick, anim_state_change);
 
 anim.setpos();
 anim.draw_lines();
