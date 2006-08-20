@@ -37,15 +37,6 @@ body {
 -->
 </style>
 
-</head>
-<body>
-
-[for signs]
-<a href="[signs.name].py" onclick="return false;"><img src="[signs.src]" id="sign_[signs.name]" style="width: [signs.width]px; height: [signs.height]px; position: absolute; top: [signs.top]px; left: [signs.left]px; border: none;" onclick="anim_click(this)" /></a>
-[end]
-
-<div id="rect" style="background-color: #ff5509; width: [rect.width]px; height: [rect.height]px; position: absolute; top: [rect.top]px; left: [rect.left]px;"></div>
-
 <script>
 <!--
 
@@ -59,6 +50,30 @@ function Sign(name, active, width, height, hat, heels, corn)
   this.heels = heels;
   this.corn = corn;
   this.elem = document.getElementById("sign_" + name);
+  if (!this.elem)
+  {
+    var rect = document.getElementById("rect");
+    var grect = document.getElementById("grect");
+    var ae = this.aelem = document.createElement("a");
+    ae.href = name + ".py";
+    ae.onclick = anim_onclick;
+    var se = this.elem = document.createElement("img");
+    se.src = "media/" + name + ".png";
+    se.style.position = "absolute";
+    se.style.width = width + "px";
+    se.style.height = height + "px";
+    se.style.left = (grect.offsetLeft + (grect.offsetWidth - width) / 2) + "px";
+    se.style.top = (grect.offsetTop + (grect.offsetHeight - height) / 2) + "px";
+    se.style.border = "none";
+    se.style.visibility = "hidden";
+    ae.appendChild(se);
+    document.body.insertBefore(ae, rect);
+  }
+  else
+  {
+    this.aelem = this.elem.parentNode;
+    this.aelem.onclick = anim_onclick;
+  }
   this.left = null;
   this.top = null;
   this.curLeft = this.elem.offsetLeft;
@@ -74,16 +89,21 @@ function Animation(signs, timer_cb, req, onreadystatechange)
   this.signs = signs;
   this.timer = null;
   this.timer_cb = timer_cb;
-  this.setpos = Animation_setpos
   this.load = null;
   this.req = req;
   this.onreadystatechange = onreadystatechange;
+
+  this.setpos = Animation_setpos;
   this.start_timer = Animation_start_timer;
   this.kill_timer = Animation_kill_timer;
   this.start_load = Animation_start_load;
   this.state_change = Animation_state_change;
   this.finish_load = Animation_finish_load;
   this.draw_lines = Animation_draw_lines;
+  this.hide_active = Animation_hide_active;
+  this.show_active = Animation_show_active;
+  this.click = Animation_click;
+  this.tick = Animation_tick;
 }
 
 function Animation_setpos()
@@ -137,7 +157,7 @@ function Animation_start_load(sign)
   {
     this.req.abort();
     this.req.open("GET", sign.name + ".py?plain=1", true);
-    req.onreadystatechange = this.onreadystatechange;
+    this.req.onreadystatechange = this.onreadystatechange;
     this.load = 0;
     this.req.send(null);
   }
@@ -257,9 +277,6 @@ function Animation_draw_lines()
         x += dy ? my * dx / dy : 0;
         y += my;
       }
-    
-
-    
       ++idots;
 
       if ((dx < 0 ? -dx : dx) < SQDIST && (dy < 0 ? -dy : dy) < SQDIST)
@@ -272,47 +289,77 @@ function Animation_draw_lines()
     var dot = this.dots.childNodes[[]idots];
     dot.style.visibility = "hidden";
   }
-
-  
-  
 }
 
-function anim_click(img)
+function Animation_hide_active(sign, nsign)
+{
+  sign.elem.style.left = sign.curLeft + "px";
+  sign.elem.style.top = sign.curTop + "px";
+  sign.elem.style.visibility = "visible";
+  var grect = document.getElementById("grect");
+  var active = document.getElementById("gsign");
+  active.style.visibility = "hidden";
+  active.src = "media/" + nsign.name + ".png";
+  active.style.width = nsign.width + "px";
+  active.style.height = nsign.height + "px";
+  active.style.left = ((grect.offsetWidth - nsign.width) / 2) + "px";
+  active.style.top = ((grect.offsetHeight - nsign.height) / 2) + "px";
+}
+
+function Animation_show_active(sign)
+{
+  var active = document.getElementById("gsign");
+  active.style.visibility = "visible";
+  sign.elem.style.visibility = "hidden";
+}
+
+function Animation_click(img)
 {
   var now = date_now();
-  for (var i in anim.signs)
+  var asign = null;
+  var nsign = null;
+  for (var i in this.signs)
   {
-    var sign = anim.signs[[]i];
-    if (sign.elem == img)
+    var sign = this.signs[[]i];
+    if (sign.aelem == img)
     {
       if (!sign.active)
       {
-        anim.start_load(sign);
+        this.start_load(sign);
       }
       sign.active = true;
+      nsign = sign;
     }
     else if (sign.active)
+    {
       sign.active = false;
+      asign = sign;
+    }
     sign.clickLeft = sign.curLeft;
     sign.clickTop = sign.curTop;
     sign.clickTime = now;
     sign.moveTime = now + 1000;
   }
-  anim.setpos();
-  anim.start_timer();
+  this.setpos();
+  this.start_timer();
+  this.hide_active(asign, nsign);
+  return false;
 }
 
-function anim_tick(img)
+function Animation_tick()
 {
   var now = date_now();
   var kill = true;
+  var asign = null;
   var left;
   var top;
-  for (var i in anim.signs)
+  for (var i in this.signs)
   {
-    var sign = anim.signs[[]i];
+    var sign = this.signs[[]i];
     var se = sign.elem;
     var ss = se.style;
+
+    if (sign.active) asign = sign; 
 
     if (now >= sign.moveTime)
     {
@@ -333,11 +380,12 @@ function anim_tick(img)
     ss.left = left + "px";
     ss.top = top + "px";
   }
-  anim.draw_lines();
+  this.draw_lines();
   if (kill)
   {
-    anim.kill_timer();
-    anim.finish_load();
+    this.kill_timer();
+    this.show_active(asign);
+    this.finish_load();
   }
 }
 
@@ -357,26 +405,78 @@ function http_req()
     return new ActiveXObject("Microsoft.XMLHTTP")
 }
 
-function anim_state_change()
+// -->
+</script>
+</head>
+<body>
+
+[for signs]
+[if-any signs.active]
+[else]
+<a href="[signs.name].py"><img src="[signs.src]" id="sign_[signs.name]" style="width: [signs.width]px; height: [signs.height]px; position: absolute; top: [signs.top]px; left: [signs.left]px; border: none;" /></a>
+[end]
+[end]
+
+<div id="rect" style="background-color: #ff5509; width: [rect.width]px; height: [rect.height]px; position: absolute; top: [rect.top]px; left: [rect.left]px;"></div>
+
+<div id="main">
+<div id="grect" style="background-color: #848484; width: [rect.width]px; height: [rect.height]px;  margin-left: auto; margin-right: auto; margin-top: [rect.top]px; margin-bottom: [rect.top]px;">
+
+[for signs]
+[if-any signs.active]
+<img src="[signs.src]" id="gsign" style="width: [signs.width]px; height: [signs.height]px; position: relative; top: [signs.top]px; left: [signs.left]px;" /></a>
+[end]
+[end]
+
+</div>
+
+<script>
+<!--
+
+function anim_tick(img)
 {
-  anim.state_change()
+  anim.tick(img);
 }
 
-var req = http_req();
+function anim_state_change()
+{
+  anim.state_change();
+}
+
+function anim_onclick()
+{
+  return anim.click(this);
+}
+
+function anim_onresize()
+{
+  anim.setpos();
+  if (!anim.timer)
+  {
+    for (var i in anim.signs)
+    {
+      var sign = anim.signs[[]i];
+      sign.curLeft = sign.left;
+      sign.curTop = sign.top;
+    }
+    anim.draw_lines();
+  }
+}
 
 anim = new Animation(new Array(new Sign("home", true, 143, 60, 7, 13, 7),
                                new Sign("resume", false, 149, 48, 6, 10, 48),
                                new Sign("code", false, 115, 60, 5, 16, 60),
                                new Sign("links", false, 127, 61, 8, 25, 61)),
-                     anim_tick, req, anim_state_change);
+                     anim_tick, http_req(), anim_state_change);
 
--->
+anim.setpos();
+anim.draw_lines();
+
+window.onresize = anim_onresize;
+
+// -->
 </script>
 
-
-<div id="main">
-<div id="grect" style="width: [rect.width]px; height: [rect.height]px; background: #848484; margin-left: auto; margin-right: auto; margin-top: [rect.top]px; margin-bottom: [rect.top]px;">
-</div>
 <div id="contents">
 [body]
 </div>
@@ -427,8 +527,8 @@ def position_signs(signs, tri, rect, active):
   for sign in signs:
     if i == active:
       sign.active = "yes"
-      sign.left = rect.left + (rect.width - sign.width) / 2
-      sign.top = rect.top + (rect.height - sign.height) / 2
+      sign.left = (rect.width - sign.width) / 2
+      sign.top = (rect.height - sign.height) / 2
     else:
       sign.active = None
       y += SP
