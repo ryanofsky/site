@@ -1,0 +1,351 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://web.resource.org/cc/"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns:sodipodi="http://inkscape.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="1024"
+   height="768"
+   id="svg2"
+   sodipodi:version="0.32"
+   inkscape:version="0.43"
+   version="1.0"
+   sodipodi:docbase="/home/russ/site"
+   sodipodi:docname="site.svg">
+  <defs
+     id="defs4">
+    <linearGradient
+       id="linearGradient3057">
+      <stop
+         id="stop3065"
+         offset="0"
+         style="stop-color:#000000;stop-opacity:0.50196081;" />
+      <stop
+         style="stop-color:#000000;stop-opacity:0;"
+         offset="1"
+         id="stop3061" />
+    </linearGradient>
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient3057"
+       id="linearGradient3070"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(2.05691,0,0,0.99187,-2168.101,277.9347)"
+       x1="506.13065"
+       y1="387.55743"
+       x2="591.77991"
+       y2="381.17007" />
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="0.5"
+     inkscape:cx="355.07857"
+     inkscape:cy="660.41053"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer1"
+     inkscape:window-width="837"
+     inkscape:window-height="604"
+     inkscape:window-x="10"
+     inkscape:window-y="73" />
+  <metadata
+     id="metadata7">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <rect
+       style="opacity:1;fill:url(#linearGradient3070);fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-opacity:1"
+       id="rect2182"
+       width="695.47699"
+       height="736.25476"
+       x="-1023.5"
+       y="31.245176"
+       transform="scale(-1,1)"
+       ry="0" />
+    <rect
+       style="fill:none;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-opacity:1"
+       id="rect3963"
+       width="556.44446"
+       height="540.44446"
+       x="340.34964"
+       y="140.51242" />
+    <flowRoot
+       xml:space="preserve"
+       style="font-size:20px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+       id="flowRoot3965"
+       transform="translate(779.1894,168.9734)"><flowRegion
+         id="flowRegion3967"><use
+           x="0"
+           y="0"
+           xlink:href="#rect3963"
+           id="use3969"
+           width="1024"
+           height="768" /></flowRegion><flowPara
+         id="flowPara3971">Yo! Here is some text. Some text? Yes, silly, some text. Yo! Here is some text. Some text? Yes, silly, some text. Yo! Here is some text. Some text? Yes, silly, some text. Yo! Here is some text. Some text? Yes, silly, some text. Yo! Here is some text. Some text? Yes, silly, some text. Yo! Here is some text. Some text? Yes, silly, some text. Yo! Here is some text. Some text? Yes, silly, some text. Yo! Here is some text. Some text? Yes, silly, some text. Yo! Here is some text. Some text? Yes, silly, some text. Yo! Here is some text. Some text? Yes, silly, some text. Yo! Here is some text. Some text? Yes, silly, some text. Yo! Here is some text. Some text? Yes, silly, some text. Yo! Here is some text. Some text? Yes, silly, some text. Yo! Here is some text. Some text? Yes, silly, some text. Yo! Here is some text. Some text? Yes, silly, some text. Yo! Here is some text. Some text? Yes, silly, some text. Yo! Here is some text. Some text? Yes, silly, some text.</flowPara></flowRoot>    <path
+       style="fill:#0f19ec;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:3.75185919px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="M 0.85267291,1.8759296 L 268.14733,1.8759296 L 0.85267291,1799.4016 L 0.85267291,1.8759296 z "
+       id="path3994"
+       sodipodi:nodetypes="cccc"
+       inkscape:export-filename="site-tri.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90" />
+    <rect
+       style="opacity:1;fill:#00000f;fill-opacity:0.94117647;fill-rule:evenodd;stroke:none;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="rect1437"
+       width="198.52942"
+       height="150.47916"
+       x="809.48163"
+       y="22.735315"
+       transform="matrix(1,0,-7.97451e-2,0.996815,0,0)" />
+    <path
+       style="fill:none;fill-opacity:0.75;fill-rule:evenodd;stroke:#000000;stroke-width:10;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:10, 10;stroke-dashoffset:0;stroke-opacity:1"
+       d="M 140.22222,101.11111 L 876.22222,101.11111"
+       id="path5748" />
+    <path
+       id="path6623"
+       d="M 62.222222,58.666667 C 61.777777,172.88889 60.444442,446.93406 60.444442,446.93406"
+       style="fill:none;fill-opacity:0.75;fill-rule:evenodd;stroke:#000000;stroke-width:10;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:10, 10;stroke-dashoffset:0;stroke-opacity:1"
+       sodipodi:nodetypes="cc" />
+    <path
+       id="path6625"
+       d="M 93.333332,61.333328 C 92.888892,175.55556 91.555552,379.55556 91.555552,379.55556"
+       style="fill:none;fill-opacity:0.75;fill-rule:evenodd;stroke:#000000;stroke-width:10;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:10, 10;stroke-dashoffset:0;stroke-opacity:1"
+       sodipodi:nodetypes="cc" />
+    <path
+       id="path6627"
+       d="M 121.77778,57.777774 C 121.33334,172 120,251.55556 120,251.55556"
+       style="fill:none;fill-opacity:0.75;fill-rule:evenodd;stroke:#000000;stroke-width:10;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:10, 10;stroke-dashoffset:0;stroke-opacity:1"
+       sodipodi:nodetypes="cc" />
+    <rect
+       style="opacity:1;fill:#ff5509;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="rect4869"
+       width="198.52942"
+       height="150"
+       x="23.668552"
+       y="22.662922" />
+    <g
+       id="g6653"
+       transform="translate(636.2222,-138.8889)">
+      <path
+         id="path6633"
+         d="M 194,209.77778 L 336.22222,216.88889 L 309.55556,268.44444 L 197.55556,256 L 194,209.77778 z "
+         style="fill:#ffffff;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
+      <text
+         sodipodi:linespacing="125%"
+         id="text6629"
+         y="248.88889"
+         x="208"
+         style="font-size:36px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+         xml:space="preserve"><tspan
+           style="font-size:36px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;font-family:Bitstream Vera Sans"
+           y="248.88889"
+           x="208"
+           id="tspan6631"
+           sodipodi:role="line">Home</tspan></text>
+    </g>
+    <g
+       id="g6658"
+       transform="translate(-144.0001,-79.99999)">
+      <path
+         sodipodi:nodetypes="ccccc"
+         id="path6635"
+         d="M 211.93907,307.99587 L 340.60872,314.123 L 346.73586,355.48109 L 198.15303,346.29041 L 211.93907,307.99587 z "
+         style="fill:#ffffff;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:0.86162716px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
+      <text
+         sodipodi:linespacing="125%"
+         id="text6637"
+         y="342.22223"
+         x="213.33334"
+         style="font-size:36;font-style:normal;font-weight:normal;line-height:125%;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Trebuchet MS;font-stretch:normal;font-variant:normal;text-anchor:start;text-align:start;writing-mode:lr"
+         xml:space="preserve"><tspan
+           style="font-size:36;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr;text-anchor:start;font-family:Trebuchet MS"
+           y="342.22223"
+           x="213.33334"
+           id="tspan6639"
+           sodipodi:role="line">Resume</tspan></text>
+    </g>
+    <g
+       id="g6663"
+       transform="translate(-145.7777,-56.88889)">
+      <path
+         sodipodi:nodetypes="ccccc"
+         id="path6641"
+         d="M 203.65809,376.51859 L 310.24171,381.7604 L 317.23081,435.92585 L 214.14173,420.2004 L 203.65809,376.51859 z "
+         style="fill:#ffffff;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:0.98284078px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
+      <text
+         sodipodi:linespacing="125%"
+         id="text6643"
+         y="416.88889"
+         x="218.66667"
+         style="font-size:36;font-style:normal;font-weight:normal;line-height:125%;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;font-stretch:normal;font-variant:normal;text-anchor:start;text-align:start;writing-mode:lr"
+         xml:space="preserve"><tspan
+           style="font-size:36;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr;text-anchor:start;font-family:Bitstream Vera Sans"
+           y="416.88889"
+           x="218.66667"
+           id="tspan6645"
+           sodipodi:role="line">Code</tspan></text>
+    </g>
+    <g
+       id="g6668"
+       transform="translate(-147.5552,-53.33332)">
+      <path
+         sodipodi:nodetypes="ccccc"
+         id="path6647"
+         d="M 207.82504,469.42863 L 305.95275,488.36556 L 319.72507,529.68249 L 194.05273,522.79633 L 207.82504,469.42863 z "
+         style="fill:#ffffff;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:0.96836555px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
+      <text
+         sodipodi:linespacing="125%"
+         id="text6649"
+         y="516.44446"
+         x="204.44444"
+         style="font-size:36;font-style:normal;font-weight:normal;line-height:125%;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;font-stretch:normal;font-variant:normal;text-anchor:start;text-align:start;writing-mode:lr"
+         xml:space="preserve"><tspan
+           style="font-size:36;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr;text-anchor:start;font-family:Bitstream Vera Sans"
+           y="516.44446"
+           x="204.44444"
+           id="tspan6651"
+           sodipodi:role="line">Links</tspan></text>
+    </g>
+    <rect
+       style="opacity:1;fill:#d4d4d4;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:10;stroke-miterlimit:4;stroke-dasharray:10, 10;stroke-dashoffset:0;stroke-opacity:1"
+       id="rect7553"
+       width="632.01611"
+       height="587.20325"
+       x="2354.2334"
+       y="390.16498" />
+    <rect
+       style="opacity:1;fill:#ff5509;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="rect1348"
+       width="198.52942"
+       height="150"
+       x="-271.26471"
+       y="593"
+       inkscape:export-filename="/home/russ/site-rect.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90" />
+    <g
+       id="g1350"
+       transform="translate(-555.1111,-171.1111)"
+       inkscape:export-filename="/home/russ/site-home.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90">
+      <path
+         id="path1352"
+         d="M 194,209.77778 L 336.22222,216.88889 L 309.55556,268.44444 L 197.55556,256 L 194,209.77778 z "
+         style="fill:#ffffff;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
+      <text
+         sodipodi:linespacing="125%"
+         id="text1354"
+         y="248.88889"
+         x="208"
+         style="font-size:36px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+         xml:space="preserve"><tspan
+           style="font-size:36px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;font-family:Bitstream Vera Sans"
+           y="248.88889"
+           x="208"
+           id="tspan1356"
+           sodipodi:role="line">Home</tspan></text>
+    </g>
+    <g
+       id="g1358"
+       transform="translate(-532.4444,-173.7385)"
+       inkscape:export-filename="/home/russ/site-resume.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90">
+      <path
+         sodipodi:nodetypes="ccccc"
+         id="path1360"
+         d="M 211.93907,307.99587 L 340.60872,314.123 L 346.73586,355.48109 L 198.15303,346.29041 L 211.93907,307.99587 z "
+         style="fill:#ffffff;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:0.86162716px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
+      <text
+         sodipodi:linespacing="125%"
+         id="text1362"
+         y="342.22223"
+         x="213.33334"
+         style="font-size:36px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Trebuchet MS"
+         xml:space="preserve"><tspan
+           style="font-size:36px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;font-family:Trebuchet MS"
+           y="342.22223"
+           x="213.33334"
+           id="tspan1364"
+           sodipodi:role="line">Resume</tspan></text>
+    </g>
+    <g
+       id="g1366"
+       transform="translate(-562.4444,-166.2222)"
+       inkscape:export-filename="/home/russ/site-code.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90">
+      <path
+         sodipodi:nodetypes="ccccc"
+         id="path1368"
+         d="M 203.65809,376.51859 L 310.24171,381.7604 L 317.23081,435.92585 L 214.14173,420.2004 L 203.65809,376.51859 z "
+         style="fill:#ffffff;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:0.98284078px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
+      <text
+         sodipodi:linespacing="125%"
+         id="text1370"
+         y="416.88889"
+         x="218.66667"
+         style="font-size:36px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+         xml:space="preserve"><tspan
+           style="font-size:36px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;font-family:Bitstream Vera Sans"
+           y="416.88889"
+           x="218.66667"
+           id="tspan1372"
+           sodipodi:role="line">Code</tspan></text>
+    </g>
+    <g
+       id="g1374"
+       transform="translate(-564.8889,-159.5556)"
+       inkscape:export-filename="/home/russ/site-links.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90">
+      <path
+         sodipodi:nodetypes="ccccc"
+         id="path1376"
+         d="M 207.82504,469.42863 L 305.95275,488.36556 L 319.72507,529.68249 L 194.05273,522.79633 L 207.82504,469.42863 z "
+         style="fill:#ffffff;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:0.96836555px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
+      <text
+         sodipodi:linespacing="125%"
+         id="text1378"
+         y="516.44446"
+         x="204.44444"
+         style="font-size:36px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+         xml:space="preserve"><tspan
+           style="font-size:36px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;font-family:Bitstream Vera Sans"
+           y="516.44446"
+           x="204.44444"
+           id="tspan1380"
+           sodipodi:role="line">Links</tspan></text>
+    </g>
+    <rect
+       style="opacity:1;fill:#44e40c;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="rect2312"
+       width="198.52942"
+       height="150"
+       x="390.73529"
+       y="-249"
+       inkscape:export-filename="/home/russ/site/site-grect.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90" />
+  </g>
+</svg>
