@@ -20,7 +20,7 @@ class Outline(widgets.TemplateWidget):
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 <title>Russell Yanofsky - [title]</title>
-<style>
+<style type="text/css">
 <!--
 
 body {
@@ -28,12 +28,74 @@ body {
   padding: 0px;
   background-image: url([root]media/tri.png);
   background-repeat: no-repeat;
+  font-family: Trebuchet MS, Arial, Helvetica, sans-serif;
+}
+
+img {
+  border: none;
+} 
+
+td {
+  vertical-align: top;
+}
+
+.head {
+  text-align: center;
+  font-size: large;
+  font-weight: bold; 
+}
+
+.subhead {
+  text-align: center;
+  font-size: small;
+  font-style: italic;
+}
+
+#footer {
+  text-align: right;
+}
+
+#code-intro {
+  margin-bottom: 1em;
+}
+
+#code-controls {
+  background: white;
+  border-style: solid;
+  border-color: black;
+  border-width: 1px 2px 2px 1px; 
+  margin-left: 1em;
+  padding: 0.5em;
+}
+
+#code-submit {
+  text-align: center;
+}
+
+.code-pager {
+  margin-bottom: 1em;
+  text-align: right;
+  font-weight: bold;
+}
+
+.code-project {
+  border-style: solid;
+  border-color: black;
+  border-width: 1px;
+  margin-bottom: 1em;
+}
+
+#code-sloc {
+  margin-bottom: 1em;
+  text-align: center;
+  font-size: smaller;
+  font-style: italic;
 }
 
 -->
 </style>
 
-<script>
+<script type="text/javascript">
 <!--
 
 function Sign(title, id, href, src, width, height, hat, heels, corn, active) 
@@ -106,7 +168,6 @@ function Animation(signs, triWidth, triHeight, rectWidth, rectHeight, rectPos,
                       + "px";
       se.style.top = (this.rectPos + (this.rectHeight-sign.height) / 2)
                      + "px";
-      se.style.border = "none";
       se.style.visibility = "hidden";
       ae.appendChild(se);
       document.body.insertBefore(ae, this.rect);
@@ -473,7 +534,7 @@ function http_req()
 [for signs]|
   [if-any signs.active]|
   [else]|
-    |<a href="[signs.href]"><img src="[signs.src]" id="[signs.id]" style="width: [signs.width]px; height: [signs.height]px; position: absolute; top: [signs.top]px; left: [signs.left]px; border: none;" /></a>
+    |<a href="[signs.href]"><img src="[signs.src]" id="[signs.id]" alt="[signs.title]" style="width: [signs.width]px; height: [signs.height]px; position: absolute; top: [signs.top]px; left: [signs.left]px;" /></a>
   [end]|
 [end]|
 
@@ -484,14 +545,14 @@ function http_req()
 <div id="grect" style="background-color: #848484; width: [rect_width]px; height: [rect_height]px;  margin-left: auto; margin-right: auto; margin-top: [rect_pos]px; margin-bottom: [rect_pos]px;">
 [for signs]|
   [if-any signs.active]|
-    |<img src="[signs.src]" id="gsign" style="width: [signs.width]px; height: [signs.height]px; position: relative; top: [signs.top]px; left: [signs.left]px;" /></a>
+    |<img src="[signs.src]" id="gsign" alt="[signs.title]" style="width: [signs.width]px; height: [signs.height]px; position: relative; top: [signs.top]px; left: [signs.left]px;" />
   [end]|
 [end]|
 </div>
 
 <div id="load" style="position: absolute; right: [rect_pos]px; margin-top: [rect_pos]px; background-color: #FFFFCC; padding: 5px; border: 1px solid black; visibility: hidden"></div>
 
-<script>
+<script type="text/javascript">
 <!--
 
 function anim_tick(img)
