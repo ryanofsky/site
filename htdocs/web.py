@@ -39,20 +39,34 @@ td {
   vertical-align: top;
 }
 
+a {
+  text-decoration: none;
+  color: #0f18ec;
+}
+
+#fronthead {
+  text-align: left;
+  margin-top: 3em;
+  margin-bottom: 3em;
+}
+
 .head {
-  text-align: center;
-  font-size: large;
+  font-size: xx-large;
   font-weight: bold; 
 }
 
 .subhead {
-  text-align: center;
-  font-size: small;
+  font-size: large;
   font-style: italic;
 }
 
 #footer {
+  margin-top: 3em;
   text-align: right;
+}
+
+.outlink {
+  font-style: italic;
 }
 
 #code-intro {
@@ -186,7 +200,9 @@ function Animation(signs, triWidth, triHeight, rectWidth, rectHeight, rectPos,
   this.draw_lines = Animation_draw_lines;
   this.hide_active = Animation_hide_active;
   this.show_active = Animation_show_active;
+  this.move = Animation_move;
   this.click = Animation_click;
+  this.go = Animation_go;
   this.tick = Animation_tick;
 }
 
@@ -437,19 +453,15 @@ function Animation_show_active(sign)
   sign.elem.style.visibility = "hidden";
 }
 
-function Animation_click(img)
+function Animation_move(nsign)
 {
   var now = date_now();
   var asign = null;
-  var nsign = null;
   for (var i in this.signs)
   {
     var sign = this.signs[[]i];
-    if (sign.aelem == img)
-    {
+    if (sign == nsign)
       sign.active = true;
-      nsign = sign;
-    }
     else if (sign.active)
     {
       sign.active = false;
@@ -465,6 +477,29 @@ function Animation_click(img)
   this.start_load(nsign.href);
   this.hide_active(asign, nsign);
   return false;
+}
+
+function Animation_click(aelem)
+{
+  var sign;
+  for (var i in this.signs)
+  {
+    sign = this.signs[[]i];
+    if (sign.aelem == aelem)
+      return this.move(sign)
+  }
+}
+
+function Animation_go(id, url)
+{
+  var elem = document.getElementById(id);
+  var sign;
+  for (var i in this.signs)
+  {
+    sign = this.signs[[]i];
+    if (sign.elem == elem)
+      return this.move(sign)
+  }
 }
 
 function Animation_tick()
@@ -629,10 +664,10 @@ window.onresize = anim_onresize;
     
     self.signs = [ Sign("Home", "home", "index.py", "media/home.png",
                         143, 60, 7, 13, 7),
-                   Sign("Resume", "resume", "resume.py", "media/resume.png",
-                        149, 48, 6, 10, 48),
                    Sign("Code", "code", "code.py", "media/code.png",
                         115, 60, 5, 16, 60),
+                   Sign("Resume", "resume", "resume.py", "media/resume.png",
+                        149, 48, 6, 10, 48),
                    Sign("Links", "links", "links.py", "media/links.png",
                         127, 61, 8, 25, 61) ] # 25 -> 19
 
