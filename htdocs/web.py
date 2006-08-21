@@ -36,10 +36,10 @@ body {
 <script>
 <!--
 
-function Sign(title, name, href, src, width, height, hat, heels, corn, active) 
+function Sign(title, id, href, src, width, height, hat, heels, corn, active) 
 {
   this.title = title;
-  this.name = name;
+  this.id = id;
   this.href = href;
   this.src = src;
   this.width = width;
@@ -59,7 +59,9 @@ function Sign(title, name, href, src, width, height, hat, heels, corn, active)
   this.moveTime = null;
 }
 
-function Animation(signs, triWidth, triHeight, rectWidth, rectHeight, rectPos, signSpacing, timer_cb, req_cb)
+function Animation(signs, triWidth, triHeight, rectWidth, rectHeight, rectPos,
+                   signSpacing, rectId, grectId, gsignId, statusId, contentsId,
+                   timer_cb, req_cb)
 {
   this.signs = signs;
   this.triWidth = triWidth;
@@ -73,16 +75,18 @@ function Animation(signs, triWidth, triHeight, rectWidth, rectHeight, rectPos, s
 
   this.req = http_req();
   this.timer = null;
-  this.load = null;
+  this.loadUrl = null;
 
-  this.rect = document.getElementById("rect");
-  this.grect = document.getElementById("grect");
-  this.gsign = document.getElementById("gsign");
+  this.rect = document.getElementById(rectId);
+  this.grect = document.getElementById(grectId);
+  this.gsign = document.getElementById(gsignId);
+  this.status = document.getElementById(statusId);
+  this.contentsId = contentsId;
 
   for (var i in this.signs)
   {
     var sign = this.signs[[]i];
-    sign.elem = document.getElementById("sign_" + sign.name);
+    sign.elem = document.getElementById(sign.id);
     if (sign.elem)
     {
       sign.aelem = sign.elem.parentNode;
@@ -100,7 +104,7 @@ function Animation(signs, triWidth, triHeight, rectWidth, rectHeight, rectPos, s
       se.style.height = sign.height + "px";
       se.style.left = (this.grect.offsetLeft + (this.rectWidth-sign.width) / 2)
                       + "px";
-      se.style.top = (this.grect.offsetTop + (this.rectHeight-sign.height) / 2)
+      se.style.top = (this.rectPos + (this.rectHeight-sign.height) / 2)
                      + "px";
       se.style.border = "none";
       se.style.visibility = "hidden";
@@ -116,6 +120,7 @@ function Animation(signs, triWidth, triHeight, rectWidth, rectHeight, rectPos, s
   this.kill_timer = Animation_kill_timer;
   this.start_load = Animation_start_load;
   this.state_change = Animation_state_change;
+  this.set_status = Animation_set_status;
   this.finish_load = Animation_finish_load;
   this.draw_lines = Animation_draw_lines;
   this.hide_active = Animation_hide_active;
@@ -135,7 +140,7 @@ function Animation_setpos()
     if (sign.active)
     {
       sign.left = this.grect.offsetLeft + (this.rectWidth - sign.width) / 2;
-      sign.top = this.grect.offsetTop + (this.rectHeight - sign.height) / 2;
+      sign.top = this.rectPos + (this.rectHeight - sign.height) / 2;
     }
     else
     {
@@ -154,7 +159,7 @@ function Animation_setpos()
 function Animation_start_timer()
 {
   if (!this.timer)
-    this.timer = setInterval(this.timer_cb, 1);
+    this.timer = setInterval(this.timer_cb, 20);
 }
 
 function Animation_kill_timer()
@@ -166,28 +171,76 @@ function Animation_kill_timer()
   }
 }
 
-function Animation_start_load(sign)
+function Animation_start_load(url)
 {
   if (this.req)
   {
+    this.loadUrl = null;
     this.req.abort();
-    this.req.open("GET", sign.href + "?plain=1", true);
-    this.req.onreadystatechange = this.req_cb;
-    this.load = 0;
-    this.req.send(null);
   }
-  else
+
+  this.loadUrl = url;
+
+  if (this.req)
   {
-    this.load = sign.href;
+    this.set_status(url)
+    this.req.open("GET", url + "?plain=1", true);
+    this.req.onreadystatechange = this.req_cb;
+    this.req.send(null);
   }
 }
 
-function Animation_state_change(sign)
+function Animation_state_change()
 {
+  if (!this.loadUrl) return;
+    
   if (this.req.readyState == 4 |||| this.req.readyState == "complete")
   {
-    if (++this.load >= 2)
-      document.getElementById("contents").innerHTML = this.req.responseText;
+    var status, statusText; 
+    try
+    { 
+      status = this.req.status;
+      statusText = this.req.statusText;
+    }
+    catch(e)
+    {}
+    
+    if (status == 200)
+    {
+      this.set_status(this.loadUrl, "Done.");
+      this.loadUrl = null;
+      this.finish_load();
+    }
+    else if (status)
+      this.set_status(this.loadUrl, "Error: " + status + " " + statusText);
+    else
+      this.set_status(this.loadUrl, "Error: connection failed");
+  }
+  else
+  {
+    var status = "Unrecognized status";
+    if (this.req.readyState == 0 |||| this.req.readyState == "uninitialized")
+      status = "Initializing...";
+    else if (this.req.readyState == 1 |||| this.req.readyState == "loading")
+      status = "Retrieving headers...";
+    else if (this.req.readyState == 2 |||| this.req.readyState == "loaded")
+      status = "Retrieving contents...";
+    else if (this.req.readyState == 3 |||| this.req.readyState == "interactive")
+      status = "Downloading contents...";
+    this.set_status(this.loadUrl, status);
+  }
+}
+
+function Animation_set_status(url, message)
+{
+  if (url)
+  {
+    this.status.innerHTML = 'Loading <a href="' + url + '">' + url + "</a>" + (message ? "<br /><em>" + message + "</em>" : "");
+    this.status.style.visibility = "visible";
+  }
+  else
+  {
+    this.status.style.visibility = "hidden";
   }
 }
 
@@ -195,10 +248,10 @@ function Animation_finish_load()
 {
   if (this.req)
   {
-    if (++this.load >= 2)
+    if (!this.loadUrl && !this.timer)
     {
-      bum = this.req.responseText;
-      document.getElementById("contents").innerHTML = bum;
+      this.set_status();
+      document.getElementById(this.contentsId).innerHTML = this.req.responseText;
     }
   }
   else
@@ -257,12 +310,12 @@ function Animation_draw_lines()
 
         // IE6 hack needed to set div height < line height
         dot.appendChild(document.createComment(""));
-	
+        
         dot.style.background = "black";
         dot.style.position = "absolute";
         dot.style.width = "10px";
         dot.style.height = "10px";
-	dot.style.lineHeight = "1px";
+        dot.style.lineHeight = "1px";
         dot.style.left = (x - SQSIZE / 2) + "px";
         dot.style.top = (y - SQSIZE / 2) + "px";
         this.dots.appendChild(dot);
@@ -333,10 +386,6 @@ function Animation_click(img)
     var sign = this.signs[[]i];
     if (sign.aelem == img)
     {
-      if (!sign.active)
-      {
-        this.start_load(sign);
-      }
       sign.active = true;
       nsign = sign;
     }
@@ -352,6 +401,7 @@ function Animation_click(img)
   }
   this.setpos();
   this.start_timer();
+  this.start_load(nsign.href);
   this.hide_active(asign, nsign);
   return false;
 }
@@ -423,7 +473,7 @@ function http_req()
 [for signs]|
   [if-any signs.active]|
   [else]|
-    |<a href="[signs.href]"><img src="[signs.src]" id="sign_[signs.name]" style="width: [signs.width]px; height: [signs.height]px; position: absolute; top: [signs.top]px; left: [signs.left]px; border: none;" /></a>
+    |<a href="[signs.href]"><img src="[signs.src]" id="[signs.id]" style="width: [signs.width]px; height: [signs.height]px; position: absolute; top: [signs.top]px; left: [signs.left]px; border: none;" /></a>
   [end]|
 [end]|
 
@@ -438,6 +488,8 @@ function http_req()
   [end]|
 [end]|
 </div>
+
+<div id="load" style="position: absolute; right: [rect_pos]px; margin-top: [rect_pos]px; background-color: #FFFFCC; padding: 5px; border: 1px solid black; visibility: hidden"></div>
 
 <script>
 <!--
@@ -477,14 +529,15 @@ anim = new Animation(new Array(|
   [if-index signs first][else],
   |                               |
   [end]|
-  |new Sign("[signs.title]", "[signs.name]", "[signs.href]", "[signs.src]", |
+  |new Sign("[signs.title]", "[signs.id]", "[signs.href]", "[signs.src]", |
             [signs.width], [signs.height], |
             [signs.hat], [signs.heels], [signs.corn], |
             [if-any signs.active]true[else]false[end])|
 [end]),
   |                     |
   [tri_width], [tri_height], [rect_width], [rect_height], [rect_pos], |
-  [sign_spacing], anim_tick, anim_state_change);
+  [sign_spacing], "rect", "grect", "gsign", "load", "contents", |
+  |anim_tick, anim_state_change);
 anim.setpos();
 anim.draw_lines();
 
@@ -516,11 +569,11 @@ window.onresize = anim_onresize;
     self.signs = [ Sign("Home", "home", "index.py", "media/home.png",
                         143, 60, 7, 13, 7),
                    Sign("Resume", "resume", "resume.py", "media/resume.png",
-		        149, 48, 6, 10, 48),
+                        149, 48, 6, 10, 48),
                    Sign("Code", "code", "code.py", "media/code.png",
-		        115, 60, 5, 16, 60),
+                        115, 60, 5, 16, 60),
                    Sign("Links", "links", "links.py", "media/links.png",
-		        127, 61, 8, 25, 61) ] # 25 -> 19
+                        127, 61, 8, 25, 61) ] # 25 -> 19
 
     self.sign_spacing = 40
 
@@ -537,7 +590,7 @@ window.onresize = anim_onresize;
         y -= sign.hat 
         sign.top = y
         sign.left = ((self.tri_width
-	              -(y+sign.corn)*self.tri_width/self.tri_height)/2
+                      -(y+sign.corn)*self.tri_width/self.tri_height)/2
                       - sign.width / 2)
         y -= sign.heels 
         y += sign.height
@@ -546,9 +599,9 @@ window.onresize = anim_onresize;
 
 
 class Sign:
-  def __init__(self, title, name, href, src, width, height, hat, heels, corn):
+  def __init__(self, title, id, href, src, width, height, hat, heels, corn):
     self.title = title
-    self.name = name
+    self.id = id
     self.href = href
     self.src = src
     self.width = width
