@@ -681,7 +681,12 @@ class Footer(widgets.TemplateWidget):
   <hr />
   <a href="[date_href]" title="Last Modified">[date]</a>
   <a href="mailto:[mail]" title="Email"><img src="[root]media/mail.png" alt="Email" /></a>
+  <a href="[href]" title="Current Page Link"><img src="[root]media/link.png" alt="Current Page" /></a>
   </div>""")
+ 
+  def __init__(self, req, **kwargs):
+    widgets.TemplateWidget.__init__(self, req, **kwargs)
+    self.href = (req.request_uri() or "").replace("?plain=1", "")
 
 
 class BasePage(widgets.TemplateWidget):
