@@ -133,6 +133,7 @@ function Sign(title, id, href, src, width, height, hat, heels, corn, active)
   this.clickTop = null;
   this.clickTime = null;
   this.moveTime = null;
+  this.retract = null;
 }
 
 function Animation(signs, triWidth, triHeight, rectWidth, rectHeight, rectPos,
@@ -460,17 +461,23 @@ function Animation_move(nsign)
   for (var i in this.signs)
   {
     var sign = this.signs[[]i];
+
+    if (!sign.retract)
+    {
+      sign.clickLeft = sign.curLeft;
+      sign.clickTop = sign.curTop;
+      sign.clickTime = now;
+    }
+    sign.moveTime = now + 1000;
+    
     if (sign == nsign)
       sign.active = true;
     else if (sign.active)
     {
       sign.active = false;
+      sign.retract = true;
       asign = sign;
     }
-    sign.clickLeft = sign.curLeft;
-    sign.clickTop = sign.curTop;
-    sign.clickTime = now;
-    sign.moveTime = now + 1000;
   }
   this.setpos();
   this.start_timer();
@@ -517,10 +524,32 @@ function Animation_tick()
 
     if (sign.active) asign = sign; 
 
+    var left, top;
+
     if (now >= sign.moveTime)
     {
-      var left = sign.left;
-      var top = sign.top;
+      left = sign.left;
+      top = sign.top;
+    }
+    else if (sign.retract)
+    {
+      kill = false;
+      left = this.rectPos + (this.rectWidth - sign.width) / 2;
+      top = this.rectPos + (this.rectHeight - sign.height) / 2;
+      i = (now - sign.clickTime) / 500.0;
+      i = i * i;
+      if (i >= 1.0)
+      {
+	sign.retract = false;
+        sign.clickTime = now;
+	sign.clickLeft = left;
+	sign.clickTop = top;
+      }
+      else
+      {
+        left = sign.clickLeft + i * (left - sign.clickLeft); 
+        top = sign.clickTop + i * (top - sign.clickTop); 
+      }
     }
     else
     {
