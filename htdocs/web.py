@@ -136,15 +136,16 @@ function Sign(title, id, href, src, width, height, hat, heels, corn, active)
   this.retract = null;
 }
 
-function Animation(signs, triWidth, triHeight, rectWidth, rectHeight, rectPos,
-                   signSpacing, rectId, grectId, gsignId, statusId, contentsId,
-                   timer_cb, req_cb)
+function Animation(signs, triWidth, triHeight, rectWidth, rectHeight, 
+                   rectSWidth, rectPos, signSpacing, rectId, grectId,
+                   gsignId, statusId, contentsId, timer_cb, req_cb)
 {
   this.signs = signs;
   this.triWidth = triWidth;
   this.triHeight = triHeight;
   this.rectWidth = rectWidth;
   this.rectHeight = rectHeight;
+  this.rectSWidth = rectSWidth;
   this.rectPos = rectPos;
   this.signSpacing = signSpacing;
   this.timer_cb = timer_cb;
@@ -179,7 +180,7 @@ function Animation(signs, triWidth, triHeight, rectWidth, rectHeight, rectPos,
       se.style.position = "absolute";
       se.style.width = sign.width + "px";
       se.style.height = sign.height + "px";
-      se.style.left = (this.grect.offsetLeft + (this.rectWidth-sign.width) / 2)
+      se.style.left = (this.grect.offsetLeft + (this.rectSWidth-sign.width) / 2)
                       + "px";
       se.style.top = (this.rectPos + (this.rectHeight-sign.height) / 2)
                      + "px";
@@ -217,7 +218,7 @@ function Animation_setpos()
     var se = sign.elem;
     if (sign.active)
     {
-      sign.left = this.grect.offsetLeft + (this.rectWidth - sign.width) / 2;
+      sign.left = this.grect.offsetLeft + (this.rectSWidth - sign.width) / 2;
       sign.top = this.rectPos + (this.rectHeight - sign.height) / 2;
     }
     else
@@ -448,7 +449,7 @@ function Animation_show_active(sign)
   this.gsign.src = sign.src;
   this.gsign.style.width = sign.width + "px";
   this.gsign.style.height = sign.height + "px";
-  this.gsign.style.left = ((this.rectWidth - sign.width) / 2) + "px";
+  this.gsign.style.left = ((this.rectSWidth - sign.width) / 2) + "px";
   this.gsign.style.top = ((this.rectHeight - sign.height) / 2) + "px";
   this.gsign.style.visibility = "visible";
   sign.elem.style.visibility = "hidden";
@@ -606,7 +607,7 @@ function http_req()
 
 <div style="margin-top: 0px; margin-left: [tri_width]px; margin-right: [rect_pos]px; margin-bottom: [rect_pos]px;">
 
-<div id="grect" style="background-color: #848484; width: [rect_width]px; height: [rect_height]px;  margin-left: auto; margin-right: auto; margin-top: [rect_pos]px; margin-bottom: [rect_pos]px;">
+<div id="grect" style="background-image: url([root]media/grect.png); width: [rect_swidth]px; height: [rect_height]px;  margin-left: auto; margin-right: 0px; margin-top: [rect_pos]px; margin-bottom: [rect_pos]px;">
 [for signs]|
   [if-any signs.active]|
     |<img src="[signs.src]" id="gsign" alt="[signs.title]" style="width: [signs.width]px; height: [signs.height]px; position: relative; top: [signs.top]px; left: [signs.left]px;" />
@@ -660,8 +661,8 @@ anim = new Animation(new Array(|
             [if-any signs.active]true[else]false[end])|
 [end]),
   |                     |
-  [tri_width], [tri_height], [rect_width], [rect_height], [rect_pos], |
-  [sign_spacing], "rect", "grect", "gsign", "load", "contents", |
+  [tri_width], [tri_height], [rect_width], [rect_height], [rect_swidth], |
+  [rect_pos], [sign_spacing], "rect", "grect", "gsign", "load", "contents", |
   |anim_tick, anim_state_change);
 anim.setpos();
 anim.draw_lines();
@@ -684,6 +685,7 @@ window.onresize = anim_onresize;
     self.tri_height = 1801
     self.rect_width = 199
     self.rect_height = 150
+    self.rect_swidth = 222
 
     # rectangle is centered in top of triangle
     self.rect_pos = ((self.tri_height * self.tri_width
@@ -707,7 +709,7 @@ window.onresize = anim_onresize;
     for sign in self.signs:
       if self.title == sign.title:
         sign.active = "yes"
-        sign.left = (self.rect_width - sign.width) / 2
+        sign.left = (self.rect_swidth - sign.width) / 2
         sign.top = (self.rect_height - sign.height) / 2
       else:
         sign.active = None

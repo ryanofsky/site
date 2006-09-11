@@ -15,7 +15,7 @@
    sodipodi:version="0.32"
    inkscape:version="0.43"
    version="1.0"
-   sodipodi:docbase="/home/russ/site"
+   sodipodi:docbase="/home/russ"
    sodipodi:docname="site.svg">
   <defs
      id="defs4">
@@ -111,11 +111,11 @@
     <rect
        style="opacity:1;fill:#00000f;fill-opacity:0.94117647;fill-rule:evenodd;stroke:none;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        id="rect1437"
-       width="198.52942"
-       height="150.47916"
+       width="199"
+       height="150"
        x="809.48163"
-       y="22.735315"
-       transform="matrix(1,0,-7.97451e-2,0.996815,0,0)" />
+       y="23.214472"
+       transform="matrix(1,0,-0.15047,1,0,0)" />
     <path
        style="fill:none;fill-opacity:0.75;fill-rule:evenodd;stroke:#000000;stroke-width:10;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:10, 10;stroke-dashoffset:0;stroke-opacity:1"
        d="M 140.22222,101.11111 L 876.22222,101.11111"
@@ -345,6 +345,17 @@
        x="390.73529"
        y="-249"
        inkscape:export-filename="/home/russ/site/site-grect.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90" />
+    <rect
+       style="opacity:1;fill:#848484;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="rect1439"
+       width="199"
+       height="151.68858"
+       x="-300.69119"
+       y="-272.0282"
+       transform="matrix(1,0,-0.148795,0.988868,0,0)"
+       inkscape:export-filename="/home/russ/grect.png"
        inkscape:export-xdpi="90"
        inkscape:export-ydpi="90" />
   </g>
