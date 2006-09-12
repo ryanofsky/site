@@ -138,7 +138,7 @@ function Sign(title, id, href, src, width, height, hat, heels, corn, active)
 
 function Animation(signs, triWidth, triHeight, rectWidth, rectHeight, 
                    rectSWidth, rectPos, signSpacing, rectId, grectId,
-                   gsignId, statusId, contentsId, timer_cb, req_cb)
+                   gsignId, statusId, contentsId, timerCb, reqCb, clickCb)
 {
   this.signs = signs;
   this.triWidth = triWidth;
@@ -148,8 +148,9 @@ function Animation(signs, triWidth, triHeight, rectWidth, rectHeight,
   this.rectSWidth = rectSWidth;
   this.rectPos = rectPos;
   this.signSpacing = signSpacing;
-  this.timer_cb = timer_cb;
-  this.req_cb = req_cb;
+  this.timerCb = timerCb;
+  this.reqCb = reqCb;
+  this.clickCb = clickCb;
 
   this.req = http_req();
   this.timer = null;
@@ -168,13 +169,13 @@ function Animation(signs, triWidth, triHeight, rectWidth, rectHeight,
     if (sign.elem)
     {
       sign.aelem = sign.elem.parentNode;
-      sign.aelem.onclick = anim_onclick;
+      sign.aelem.onclick = clickCb;
     }
     else
     {
       var ae = sign.aelem = document.createElement("a");
       ae.href = sign.href;
-      ae.onclick = anim_onclick;
+      ae.onclick = clickCb;
       var se = sign.elem = document.createElement("img");
       se.src = sign.src;
       se.style.position = "absolute";
@@ -238,7 +239,7 @@ function Animation_setpos()
 function Animation_start_timer()
 {
   if (!this.timer)
-    this.timer = setInterval(this.timer_cb, 20);
+    this.timer = setInterval(this.timerCb, 20);
 }
 
 function Animation_kill_timer()
@@ -264,7 +265,7 @@ function Animation_start_load(url)
   {
     this.set_status(url)
     this.req.open("GET", url + "?plain=1", true);
-    this.req.onreadystatechange = this.req_cb;
+    this.req.onreadystatechange = this.reqCb;
     this.req.send(null);
   }
 }
@@ -663,7 +664,7 @@ anim = new Animation(new Array(|
   |                     |
   [tri_width], [tri_height], [rect_width], [rect_height], [rect_swidth], |
   [rect_pos], [sign_spacing], "rect", "grect", "gsign", "load", "contents", |
-  |anim_tick, anim_state_change);
+  |anim_tick, anim_state_change, anim_onclick);
 anim.setpos();
 anim.draw_lines();
 
