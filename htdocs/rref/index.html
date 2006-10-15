@@ -1,0 +1,56 @@
+<html>
+<head><title>Rvalue references for G++</title></head>
+<body>
+<h2>Rvalue references for G++</h2>
+
+<p>Hi, this is a little project page for my attempt to add rvalue
+references to G++. My current implementation includes all the language
+changes described in the rvalue reference proposals except for automatic
+cast to rvalue in return statements (which is just syntactic sugar that
+doesn't prevent rvalue references from providing move semantics or perfect
+forwarding.)</p>
+
+<p>I need to do more testing and hash out some issues with the
+proposal on comp.std.c++, but eventually, I should have a complete patch
+that I'll submit for inclusion in GCC. For now, I'm working off a slightly
+out of date mirror of the GCC HEAD sources and tracking my changes in a
+local Subversion repository. The address of the repository and a copy of the
+latest diff are available below.<p>
+
+<p>Russell Yanofsky<br>
+<a href="mailto:russell.yanofsky@us.army.mil">russell.yanofsky@us.army.mil</a></p>
+
+<h3>Download</h3>
+
+<p>My changes are available from a public Subversion repository at
+<a href="../svn/rref/">http://russ.yanofsky.org/svn/rref/</a></p>
+
+<p>If you don't have Subversion, you can see a cached copy of the
+<a href="diff.txt">latest diff</a>, see a summary of 
+<a href="../viewvc.py/rref/trunk/gcc/?view=query&dir=&file=&file_match=exact&who=&who_match=exact&querysort=date&hours=2&date=all&mindate=&maxdate=&limit_changes=10">code changes</a>, or browse the 
+<a href="../viewvc.py/rref/trunk/">repository root</a>.</p>
+
+<p>If you do have Subversion, you can check out the sources with</p>
+
+<blockquote><code>svn co http://russ.yanofsky.org/svn/rref/trunk/ rref</code></blockquote>
+<p>or get the latest diff with</p>
+
+<blockquote><code>svn diff http://russ.yanofsky.org/svn/rref/vendor/gcc/current http://russ.yanofsky.org/svn/rref/trunk</code></blockquote>
+
+<h3>Links</h3>
+<ul>
+  <li>Rvalue reference proposals 
+    <a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2002/n1377.htm">N1377</a>,
+    <a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2002/n1385.htm">N1385</a>,
+    <a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2004/n1690.html">N1690</a>,
+    <a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2005/n1770.html">N1770</a>,
+    and
+    <a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2005/n1771.html">N1771</a>
+  </li>
+  <li>My posts: <a href="http://gcc.gnu.org/ml/gcc/2005-07/msg00660.html">GCC</a> and <a href="http://groups-beta.google.com/group/comp.std.c++/browse_thread/thread/64bf775bdf069dad">comp.std.c++</a> <a href="http://groups-beta.google.com/group/comp.std.c++/browse_thread/thread/ac9ba419a0d95b2d">[1]</a> <a href="http://groups-beta.google.com/group/comp.std.c++/browse_thread/thread/e97341b39c359883">[2]</a>
+  <li>Pedro Lamar&#227;o's <a href="http://mndfck.org/~pedro.lamarao/projects/c++0x/">C++0x Project</a></li>
+  <li><a href="http://gcc.gnu.org">GCC Home Page</a></li>
+  <li><a href="http://subversion.tigris.org">Subversion</a></li>
+</ul>
+</body>
+</html>
