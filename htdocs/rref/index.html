@@ -4,25 +4,26 @@
 <h2>Rvalue references for G++</h2>
 
 <p>Hi, this is a little project page for my attempt to add rvalue
-references to G++. My current implementation includes all the language
-changes described in the rvalue reference proposals except for automatic
-cast to rvalue in return statements (which is just syntactic sugar that
-doesn't prevent rvalue references from providing move semantics or perfect
-forwarding.)</p>
+references to G++. The current implementation includes all the language
+changes described in the rvalue reference proposals and is being
+submitted for inclusion in GCC.</p>
 
-<p>I need to do more testing and hash out some issues with the
-proposal on comp.std.c++, but eventually, I should have a complete patch
-that I'll submit for inclusion in GCC. For now, I'm working off a slightly
-out of date mirror of the GCC HEAD sources and tracking my changes in a
-local Subversion repository. The address of the repository and a copy of the
-latest diff are available below.<p>
+<p>I received help from a number of people while implementing these
+changes. <strong>Pedro Lamar&atilde;o</strong> assisted with testing 
+and implemented support for GCC's <code>--std=c++0x</code> option.
+<strong>Doug Gregor</strong> added support for automatic rvalue casting
+in <code>return</code> and <code>throw</code> statements. 
+<strong>Howard Hinnant</strong> provided a ton of help and support by
+email, and also wrote a whole suite of unit tests which are included
+in the GCC patch.<p>
 
-<p>Russell Yanofsky<br>
+<p>Russell Yanofsky<br />
 <a href="mailto:russ@yanofsky.org">russ@yanofsky.org</a></p>
 
 <h3>Download</h3>
 
-<p>My changes are available from a public Subversion repository at
+<p>The project's changes are available from a public Subversion repository
+which mirrors the GCC trunk. The repository address is:</p>
 <a href="../svn/rref/">http://russ.yanofsky.org/svn/rref/</a></p>
 
 <p>If you don't have Subversion, you can see a cached copy of the
