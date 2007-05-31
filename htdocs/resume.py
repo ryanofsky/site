@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import os.path
 import web
 
 
@@ -9,16 +10,30 @@ class Page(web.BasePage):
 """[navbar]
 <p>Resume in assorted formats:</p>
 <ul>
-  <li>HTML (<a href="resume/resume.html">resume.html</a>, 9,800 bytes)</li>
-  <li>Text (<a href="resume/resume.txt">resume.txt</a>, 2,801 bytes)</li>
-  <li>PDF (<a href="resume/resume.pdf">resume.pdf</a>, 38,075 bytes)</li>
-  <li>Postscript (<a href="resume/resume.ps">resume.ps</a>, 78,329 bytes)</li>
-  <li>OpenOffice (<a href="resume/resume.odt">resume.odt</a>, 19,653 bytes</li>
-  <li>Microsoft Word (<a href="resume/resume.doc">resume.doc</a>, 62,464 bytes)</li>
+  <li>HTML ([file "resume.html"])</li>
+  <li>Text ([file "resume.txt"])</li>
+  <li>PDF ([file "resume.pdf"])</li>
+  <li>Postscript ([file "resume.ps"])</li>
+  <li>OpenOffice ([file "resume.odt"])</li>
+  <li>Microsoft Word ([file "resume.doc"])</li>
 </ul>
 
 [footer]""")
 
+  def file(self, out, path):
+    size = str(os.path.getsize(os.path.join(DIR, "resume", path)))
+    out.write('<a href="resume/%s">%s</a>, %s bytes'
+              % (path, path, commify(size)))
+
+
+def commify(number):
+  """Format a non-negative integer with commas"""
+  n = str(number)
+  l = len(n)
+  return ','.join((l%3 and [n[:l%3]] or [])
+                  + [n[i:i+3] for i in range(l%3, l, 3)])
+
+DIR = os.path.dirname(__file__)
 
 if __name__ == '__main__':
   web.handle_cgi(Page)
