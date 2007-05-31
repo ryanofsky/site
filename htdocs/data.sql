@@ -259,7 +259,7 @@ INSERT INTO project_languages (project_id, language_id, lines) VALUES (20,4,1928
 -------------------------------------------------------------------------------
 
 INSERT INTO projects (project_id, name, repos, startdate, enddate, description)
-VALUES (21, 'Tiger Compiler', 'tiger', '2003-02-12', '2002-05-07',
+VALUES (21, 'Tiger Compiler', 'tiger', '2002-02-12', '2002-05-07',
 'Project for a compilers class to write an interpreter and MIPS compiler for a simple procedural language called "tiger" using Java and the ANTLR parser generator. Worked on with 2 other people and we all contributed about evenly (this was one of the few school projects I worked on with competent teammates). The code isn''t pretty or even fully functional, but it is the kind of hairy, mind-bending type of programming I truly enjoy working on.');
 
 -- sloc notes:

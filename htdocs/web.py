@@ -766,7 +766,7 @@ class BasePage(widgets.TemplateWidget):
     self.footer = Footer(req, date =self.reformat_date(self.DATE),
                          date_href="/viewvc.py/site/trunk/htdocs%s?view=log"
                                    % req.script_name(),
-                         mail="russell.yanofsky@us.army.mil").embed()
+                         mail="russ@yanofsky.org").embed()
     if req.get.getfirst("plain"):
       self.outline = None
     else:
