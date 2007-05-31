@@ -29,12 +29,15 @@ class Page(web.BasePage):
 <a href="http://www.google.com/">Google</a>,
 <a href="http://groups.google.com/">Google Groups</a>,
 <a href="http://www.google.com/univ/columbia">Google Columbia</a>,
+<a href="http://en.wikipedia.org/wiki/Main_Page">Wikipedia</a>,
 <a href="http://www.onelook.com/">Dictionary</a>
 </p>
 
 <h3>Pages and Sites on this Machine</h3>
 <ul>
-  <li><a href="/cs1007/">/cs1007/</a>, <a href="/cs3156/">/cs3156/</a> - web pages for classes</li>
+  <li><a href="/cs1007/">/cs1007/</a>,
+      <a href="/cs3156/">/cs3156/</a>,
+      <a href="/cs4281/">/cs4281/</a> - web pages for classes</li>
   <li><a href="/cvcomputer/">/cvcomputer/</a> - high school computer club</li>
   <li><a href="/edit.py">/edit.py</a> - widgets test page</li>
   <li><a href="/easycrt/">/easycrt/</a> - EasyCRT pascal graphics library</li>
@@ -49,8 +52,7 @@ class Page(web.BasePage):
 
 <h3>Miscellany</h3>
 <ul>
-  <li><a href="http://www.godecookery.com/clipart/clart.htm">Medieval Woodcuts Clipart Collection</a> - site's graphics come from here</li>
-  <li><a href="http://www.johncompanies.com/">JohnCompanies</a> - site host</li>
+  <li><a href="https://www.rapidvps.com/">RapidVPS</a> - site host</li>
 </ul>
 [footer]""")
 
