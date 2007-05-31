@@ -1,67 +1,64 @@
-=== Russell Yanofsky ===
+= Russell Yanofsky =
 
-6590 Luzon St                                     http://russ.yanofsky.org/
-Fort Benning, GA 31905                                   russ@yanofsky.org
+522 W 123rd Street, Apt 3W                        http://russ.yanofsky.org/
+New York, NY 10027                                       russ@yanofsky.org
 570-394-1140
 
 == Objective ==
 
-Position as Web Developer or Systems Programmer in New York City
+Position in software development.
 
 == Education ==
 
-1999-2003     Columbia University, School of Engineering
-              
-              * Pursued Bachelor of Science degree in Computer Science
-              * Coursework in Operating System Development, Database Systems,
-                Compiler Development, Networking, Computer Architecture,
-                Natural Language Processing, Robotics, Computer Vision,
-                Statistics, History, and Economics
+Spring 2007   Columbia University School of Engineering
+and
+1999-2003     * B.S. in Computer Science.
+              * Coursework in Operating System Development, Database
+                Systems, Compilers, Networking, Digital Logic, Natural
+                Language Processing, Robotics, Computer Vision, Statistics,
+                History, and Economics
 
-== Work History ==
+== Experience ==
 
-2003-2006     United States Army, Fort Benning, GA
-              Infantry Soldier
+2002-Present  Major open-source contributions
 
-              * Completed basic and advanced training. Promoted to rank of
-                Specialist. Recognized on numerous occasions for outstanding
-                performance.
-              * Yearlong combat tour to Iraq. Participated in patrols and
-                raids, worked on a personal security detail for a battalion
-                commander, and logged hundreds of hours of guard duty and
-                HMMWV driving time.
+              * GCC - implementation of rvalue references, a C++0x language
+                feature for GCC 4.3
+              * Subversion - port of Python and Perl language bindings to
+                Windows
+              * ViewVC - Windows port, code reorganization and active
+                maintenance from 2002-2005
 
-2000-2003     Columbia University School of Engineering, New York, NY
-              Web Developer
+2000-2003     Web Development, Columbia University School of Engineering
 
               * Wrote and deployed a web-based evaluation system for
                 engineering course evaluations. Primary features were a
-                WYSIWYG survey editor, a graphical reporting system, an email
-                reminder system, and various administrative interfaces.
-                Written in PHP, SQL, Javascript, and PL/pgSQL (Postgres
-                procedural query language) in approximately 20,000 lines of
-                code.
-              * Other smaller projects include a web crawler written in Delphi,
-                a COM component used for authentication written with ATL in
-                C++, and some additional web development with PHP, Perl, and
-                mySQL.
+                WYSIWYG survey editor, a graphical reporting system, an
+                email reminder system, and various administrative
+                interfaces. Written in PHP, SQL, Javascript, and PL/pgSQL
+                (Postgres procedural query language) in approximately
+                20,000 lines of code.
+              * Other smaller projects include a web crawler written in
+                Delphi, a COM component used for authentication written
+                with ATL in C++, and some additional web development with
+                PHP, Perl, and mySQL.
 
-    Past jobs include temp work for Kelly Services and JFC staffing, phone
-    tech support for Earthlink, electronics sales at Montgomery Ward's, and
-    tech support and computer assembly for PA Network, a local ISP in my
-    hometown of Harrisburg, PA.
-    
-    Open source experience includes lead developer role for ViewVC project
-    and more minor contributions to Subversion and GCC projects.
+Other         I served in the US Army from 2004-2006, with a deployment to
+              Iraq in 2005. Past jobs (high school) include temp work for
+              Kelly Services and JFC staffing, phone tech support for
+              Earthlink, electronics sales at Montgomery Ward's, and tech
+              support and computer assembly for PA Network, a local ISP in
+              my hometown of Harrisburg, PA.
 
 == Skills ==
 
 High Proficiency:
-  C++ Language (STL, generic programming), Python, PHP, Javascript, DHTML, SQL
+  C++ Language (STL, generic programming), Python, PHP, Javascript,
+  Ajax/DHTML, SQL
 
 Medium Proficiency:
   Win32 Programming (systems, GDI, windowing, COM), Python, Borland Delphi
-  (GUI, Object Pascal), Java (Swing, Servlets, Sockets, JDBC) 
+  (GUI, Object Pascal), Java (Swing, Servlets, Sockets, JDBC)
 
 Basic Familiarly:
   Perl, ASP, ASP.NET, C#, Visual Basic
