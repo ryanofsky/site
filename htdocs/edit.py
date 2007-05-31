@@ -81,11 +81,11 @@ class DbError(Exception):
 
 tables = {
   "projects": Table("projects", "project_id", "project_ids",
-                    ("name", "lines", "cvsmodule", "startdate", "enddate",
+                    ("name", "repos", "startdate", "enddate",
                      "description")),
   "languages": Table("languages", "language_id", "language_ids", ("name",)),
   "project_languages": Table("project_languages", None, None,
-                             ("project_id", "language_id"))
+                             ("project_id", "language_id", "lines"))
 }
 
 def connect(form):
