@@ -3,40 +3,10 @@
 <body>
 <h2>Rvalue references for G++</h2>
 
-<p>Hi, this is a little project page for my attempt to add rvalue
-references to G++. The current implementation includes all the language
-changes described in the rvalue reference proposals and is being
-submitted for inclusion in GCC.</p>
+<p><strong>Update 6/8/07:</strong> Rvalue references have now been incorporated into GCC 4.3. To use them in your code, just specify the <code>-std=c++0x</code> option to GCC. Other C++0x features enabled by this mode are listed <a href="http://www.gnu.org/software/gcc/gcc-4.3/cxx0x_status.html">here</a>. The original rvalue reference proposal, <a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2002/n1377.htm">N1377</a>, is probably the best available guide to using rvalue references in practice.</p>
 
-<p>I received help from a number of people while implementing these
-changes. <strong>Pedro Lamar&atilde;o</strong> assisted with testing 
-and implemented support for GCC's <code>--std=c++0x</code> option.
-<strong>Doug Gregor</strong> added support for automatic rvalue casting
-in <code>return</code> and <code>throw</code> statements. 
-<strong>Howard Hinnant</strong> provided a ton of help and support by
-email, and also wrote a whole suite of unit tests which are included
-in the GCC patch.<p>
-
-<p>Russell Yanofsky<br />
-<a href="mailto:russ@yanofsky.org">russ@yanofsky.org</a></p>
-
-<h3>Download</h3>
-
-<p>The project's changes are available from a public Subversion repository
-which mirrors the GCC trunk. The repository address is:</p>
-<p><a href="../svn/rref/">http://russ.yanofsky.org/svn/rref/</a></p>
-
-<p>If you don't have Subversion, you can see a cached copy of the
-<a href="diff.txt">latest diff</a>, see a summary of 
-<a href="../viewvc.py/rref/trunk/gcc/?view=query&amp;dir=&amp;file=&amp;file_match=exact&amp;who=&amp;who_match=exact&amp;querysort=date&amp;hours=2&amp;date=all&amp;mindate=&amp;maxdate=&amp;limit_changes=10">code changes</a>, or browse the 
-<a href="../viewvc.py/rref/trunk/">repository root</a>.</p>
-
-<p>If you do have Subversion, you can check out the sources with</p>
-
-<blockquote><code>svn co http://russ.yanofsky.org/svn/rref/trunk/ rref</code></blockquote>
-<p>or get the latest diff with</p>
-
-<blockquote><code>svn diff http://russ.yanofsky.org/svn/rref/vendor/gcc/current http://russ.yanofsky.org/svn/rref/trunk</code></blockquote>
+<p>Much thanks goes to <strong>Doug Gregor</strong>, without whose efforts, rvalue references would not be a part of GCC right now. He implemented the <a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2002/n1377.htm#Moving%20from%20local%20values">implicit rvalue cast logic</a> used in <code>return</code> and <code>throw</code> statements, elision of move constructors, and other fixes to get the patch accepted into GCC. Also, <strong>Pedro Lamar&atilde;o</strong> assisted with testing and implemented support for the <code>-std=c++0x</code> option. <strong>Howard Hinnant</strong> provided a ton of help and support by
+email, and wrote a whole suite of unit tests which were included in the GCC patch.<p>
 
 <h3>Links</h3>
 <ul>
@@ -70,15 +40,24 @@ which mirrors the GCC trunk. The repository address is:</p>
     <a href="http://gcc.gnu.org/ml/gcc/2005-07/msg00660.html">[1]</a>
     <a href="http://gcc.gnu.org/ml/gcc-patches/2007-02/msg01760.html">[2]</a>
     <a href="http://gcc.gnu.org/ml/gcc-patches/2007-03/msg00548.html">[3]</a>
+    <a href="http://gcc.gnu.org/ml/gcc-patches/2007-04/msg01658.html">[4]</a>
     and comp.std.c++
     <a href="http://groups-beta.google.com/group/comp.std.c++/browse_thread/thread/64bf775bdf069dad">[1]</a>
     <a href="http://groups-beta.google.com/group/comp.std.c++/browse_thread/thread/ac9ba419a0d95b2d">[2]</a>
     <a href="http://groups-beta.google.com/group/comp.std.c++/browse_thread/thread/e97341b39c359883">[3]</a>
   </li>
+  <li>GCC
+    <a href="http://gcc.gnu.org/bugzilla/show_bug.cgi?id=29939">PR</a> and commits
+    <a href="http://gcc.gnu.org/viewcvs?view=rev&amp;revision=124351">[1]</a>
+    <a href="http://gcc.gnu.org/viewcvs?view=rev&amp;revision=125211">[2]</a>
+  </li>
+  <li>Doug Gregor's
+    <a href="http://www.generic-programming.org/software/ConceptGCC/">ConceptGCC</a> and
+    <a href="http://gcc.gnu.org/projects/cxx0x.html">C++0x</a> pages
+  </li>
   <li>Pedro Lamar&atilde;o's <a href="http://mndfck.org/~pedro.lamarao/projects/c++0x/">C++0x Project</a></li>
   <li>Howard Hinnant's <a href="http://home.twcny.rr.com/hinnant/cpp_extensions/rvalue_ref_test/">Test Cases</a> (<a href="http://russ.yanofsky.org/viewvc.py/rref/trunk/gcc/testsuite/g%2B%2B.dg/cpp0x/rref.hh/">Local Copy</a>)
   <li><a href="http://gcc.gnu.org">GCC Home Page</a></li>
-  <li><a href="http://subversion.tigris.org">Subversion</a></li>
 </ul>
 </body>
 </html>
