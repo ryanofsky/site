@@ -27,6 +27,7 @@ body {
   padding: 0px;
   background-image: url([root]media/tri.png);
   background-repeat: no-repeat;
+  background-color: white;
   font-family: Trebuchet MS, Arial, Helvetica, sans-serif;
 }
 
