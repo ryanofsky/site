@@ -134,19 +134,10 @@ a {
 <!--
 (function(){
 
-function Sign(title, id, href, src, width, height, hat, heels, corn, active)
+function Sign(info, active)
 {
-  this.title = title;
-  this.id = id;
-  this.href = href;
-  this.src = src;
-  this.width = width;
-  this.height = height;
-  this.hat = hat;
-  this.heels = heels;
-  this.corn = corn;
+  this.info = info;
   this.active = active;
-
   this.curLeft = null;
   this.curTop = null;
   this.finalLeft = null;
@@ -158,54 +149,47 @@ function Sign(title, id, href, src, width, height, hat, heels, corn, active)
   this.retracting = null;
 }
 
-function Animation(signs, triWidth, triHeight, rectWidth, rectHeight,
-                   rectSWidth, rectPos, signSpacing, rectId, grectId,
-                   gsignId, statusId, contentsId)
+function Animation(signs, info)
 {
   this.signs = signs;
-  this.triWidth = triWidth;
-  this.triHeight = triHeight;
-  this.rectWidth = rectWidth;
-  this.rectHeight = rectHeight;
-  this.rectSWidth = rectSWidth;
-  this.rectPos = rectPos;
-  this.signSpacing = signSpacing;
+  this.info = info;
 
   this.req = http_req();
   this.timer = null;
   this.loadUrl = null;
 
-  this.rect = document.getElementById(rectId);
-  this.grect = document.getElementById(grectId);
-  this.gsign = document.getElementById(gsignId);
-  this.status = document.getElementById(statusId);
-  this.contentsId = contentsId;
+  this.rect = document.getElementById(info.rectId);
+  this.grect = document.getElementById(info.grectId);
+  this.gsign = document.getElementById(info.gsignId);
+  this.status = document.getElementById(info.statusId);
 
   for (var i = 0; i < this.signs.length; ++i)
   {
     var sign = this.signs[[]i];
 
-    sign.elem = document.getElementById(sign.id);
+    sign.elem = document.getElementById(sign.info.id);
     if (!sign.elem)
     {
       // Create LHS sign element if there isn't one in the static HTML (because
       // the sign is active and located on top instead of on the left).
       sign.elem = document.createElement("img");
-      sign.elem.src = sign.src;
+      sign.elem.src = sign.info.src;
       sign.elem.style.position = "absolute";
-      sign.elem.style.width = sign.width + "px";
-      sign.elem.style.height = sign.height + "px";
+      sign.elem.style.width = sign.info.width + "px";
+      sign.elem.style.height = sign.info.height + "px";
       // Compute top/left position even though element is not visible so
       // curLeft/curTop will be initialized correctly below and animation code
       // will use the right start position.
       sign.elem.style.left = (this.grect.offsetLeft
-                              + (this.rectSWidth-sign.width) / 2) + "px";
-      sign.elem.style.top = (this.rectPos
-                             + (this.rectHeight-sign.height) / 2) + "px";
+                              + (this.info.rectSWidth - sign.info.width) / 2
+                              + "px");
+      sign.elem.style.top = (this.info.rectPos
+                             + (this.info.rectHeight - sign.info.height) / 2
+                             + "px");
       sign.elem.style.visibility = "hidden";
 
       var sa = document.createElement("a");
-      sa.href = sign.href;
+      sa.href = sign.info.href;
       sa.appendChild(sign.elem);
       document.body.insertBefore(sa, this.rect);
     }
@@ -250,33 +234,35 @@ Animation.prototype.updateSigns = function(nsign)
   }
   this.updateLayout();
   this.startTimer();
-  this.startLoad(nsign.href);
+  this.startLoad(nsign.info.href);
   this.hideTopSign(asign, nsign);
 }
 
 Animation.prototype.updateLayout = function()
 {
   var j = 0;
-  var y = this.rectPos + this.rectHeight;
+  var y = this.info.rectPos + this.info.rectHeight;
   for (var i = 0; i < this.signs.length; ++i)
   {
     var sign = this.signs[[]i];
     if (sign.active)
     {
       sign.finalLeft = this.grect.offsetLeft
-                       + (this.rectSWidth - sign.width) / 2;
-      sign.finalTop = this.rectPos + (this.rectHeight - sign.height) / 2;
+                       + (this.info.rectSWidth - sign.info.width) / 2;
+      sign.finalTop = (this.info.rectPos
+                       + (this.info.rectHeight - sign.info.height) / 2);
     }
     else
     {
-      y += this.signSpacing;
-      y -= sign.hat;
-      sign.finalLeft = (this.triWidth
-                        - (y + sign.corn) * this.triWidth / this.triHeight
+      y += this.info.signSpacing;
+      y -= sign.info.hat;
+      sign.finalLeft = (this.info.triWidth
+                        - (y + sign.info.corn)
+                          * this.info.triWidth / this.info.triHeight
                         - sign.elem.offsetWidth) / 2;
       sign.finalTop = y;
-      y -= sign.heels;
-      y += sign.height;
+      y -= sign.info.heels;
+      y += sign.info.height;
       j += 1
     }
   }
@@ -307,8 +293,8 @@ Animation.prototype.timerTick = function()
     else if (sign.retracting)
     {
       kill = false;
-      left = this.rectPos + (this.rectWidth - sign.width) / 2;
-      top = this.rectPos + (this.rectHeight - sign.height) / 2;
+      left = this.info.rectPos + (this.info.rectWidth - sign.info.width) / 2;
+      top = this.info.rectPos + (this.info.rectHeight - sign.info.height) / 2;
       var t = (now - sign.startTime) / 500.0;
       t = t * t;
       if (t >= 1.0)
@@ -357,11 +343,11 @@ Animation.prototype.hideTopSign = function(sign)
 
 Animation.prototype.showTopSign = function(sign)
 {
-  this.gsign.src = sign.src;
-  this.gsign.style.width = sign.width + "px";
-  this.gsign.style.height = sign.height + "px";
-  this.gsign.style.left = ((this.rectSWidth - sign.width) / 2) + "px";
-  this.gsign.style.top = ((this.rectHeight - sign.height) / 2) + "px";
+  this.gsign.src = sign.info.src;
+  this.gsign.style.width = sign.info.width + "px";
+  this.gsign.style.height = sign.info.height + "px";
+  this.gsign.style.left = ((this.info.rectSWidth - sign.info.width) / 2) + "px";
+  this.gsign.style.top = ((this.info.rectHeight - sign.info.height) / 2) + "px";
   this.gsign.style.visibility = "visible";
   sign.elem.style.visibility = "hidden";
 }
@@ -389,19 +375,19 @@ Animation.prototype.drawLines = function()
   {
     var sign = this.signs[[]i];
 
-    x2 = sign.curLeft + sign.width / 2;
-    y2 = sign.curTop + sign.height / 2;
+    x2 = sign.curLeft + sign.info.width / 2;
+    y2 = sign.curTop + sign.info.height / 2;
 
-    if (x2 > this.rectPos + this.rectWidth)
+    if (x2 > this.info.rectPos + this.info.rectWidth)
     {
-      x1 = this.rectPos + this.rectWidth + SQDIST - SQSIZE / 2;
-      y1 = this.rectPos + this.rectHeight + SQDIST - SQSIZE / 2;
+      x1 = this.info.rectPos + this.info.rectWidth + SQDIST - SQSIZE / 2;
+      y1 = this.info.rectPos + this.info.rectHeight + SQDIST - SQSIZE / 2;
       if (y2 < y1) y1 = y2;
     }
     else
     {
       x1 = x2;
-      y1 = this.rectPos + this.rectHeight + SQDIST - SQSIZE / 2;
+      y1 = this.info.rectPos + this.info.rectHeight + SQDIST - SQSIZE / 2;
     }
 
     var x = x1;
@@ -504,7 +490,7 @@ Animation.prototype.finishLoad = function()
     if (!this.loadUrl && !this.timer)
     {
       this.setLoadStatus();
-      document.getElementById(this.contentsId).innerHTML
+      document.getElementById(this.info.contentsId).innerHTML
           = this.req.responseText;
     }
   }
@@ -622,20 +608,17 @@ function http_req()
     return new ActiveXObject("Microsoft.XMLHTTP")
 }
 
-window.anim = new Animation([[]|
-[for signs]|
-  [if-index signs first][else],
-  |                             |
-  [end]|
-  |new Sign("[signs.title]", "[signs.id]", "[signs.href]", "[signs.src]", |
-            [signs.width], [signs.height], |
-            [signs.hat], [signs.heels], [signs.corn], |
-            [if-any signs.active]true[else]false[end])|
-[end]],
-  |                            |
-  [tri_width], [tri_height], [rect_width], [rect_height], [rect_swidth], |
-  [rect_pos], [sign_spacing], "rect", "grect", "gsign", "load", "contents");
-
+window.anim = new Animation([[][for signs]
+  new Sign({title: "[signs.title]", id: "[signs.id]", href: "[signs.href]",
+            src: "[signs.src]", width: [signs.width], height: [signs.height],
+            hat: [signs.hat], heels: [signs.heels], corn: [signs.corn]}, |
+           [if-any signs.active]true[else]false[end])|
+           [if-index signs last][else],[end][end]],
+  {triWidth:[tri_width], triHeight: [tri_height], |
+   | rectWidth: [rect_width], rectHeight: [rect_height],
+   rectSWidth: [rect_swidth], rectPos: [rect_pos], signSpacing: [sign_spacing],
+   rectId: "rect", grectId: "grect", gsignId: "gsign", statusId: "load",
+   contentsId: "contents"});
 }());
 // -->
 </script>
