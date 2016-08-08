@@ -145,7 +145,6 @@ function Sign(info, active)
   this.startLeft = null;
   this.startTop = null;
   this.startTime = null;
-  this.finishTime = null;
   this.retracting = null;
 }
 
@@ -155,8 +154,10 @@ function Animation(signs, info)
   this.info = info;
 
   this.req = http_req();
-  this.timer = null;
   this.loadUrl = null;
+
+  this.animationStarted = null;
+  this.timer = null;
 
   this.rect = document.getElementById(info.rectId);
   this.grect = document.getElementById(info.grectId);
@@ -220,7 +221,6 @@ function Animation(signs, info)
 Animation.prototype.updateSigns = function(nsign)
 {
   var now = date_now();
-  var asign = null;
   for (var i = 0; i < this.signs.length; ++i)
   {
     var sign = this.signs[[]i];
@@ -231,7 +231,6 @@ Animation.prototype.updateSigns = function(nsign)
       sign.startTop = sign.curTop;
       sign.startTime = now;
     }
-    sign.finishTime = now + 1000;
 
     if (sign === nsign)
       sign.active = true;
@@ -239,13 +238,15 @@ Animation.prototype.updateSigns = function(nsign)
     {
       sign.active = false;
       sign.retracting = true;
-      asign = sign;
     }
   }
-  this.updateLayout();
-  this.startTimer();
+
+  // Call startAnimation before startLoad, so this.animationStarted will be set.
+  // Otherwise after a really fast response, loading code waiting for the
+  // animation to complete might think the animation is finished before it
+  // starts.
+  this.startAnimation(now);
   this.startLoad(nsign.info.href);
-  if (asign) this.hideTopSign(asign);
 }
 
 Animation.prototype.updateLayout = function()
@@ -278,34 +279,36 @@ Animation.prototype.updateLayout = function()
   }
 }
 
-Animation.prototype.timerTick = function()
+Animation.prototype.updateStyle = function()
 {
   var now = date_now();
-  var kill = true;
+  var duration = 1000;
+  if (this.animationStarted)
+  {
+    var finishTime = this.animationStarted + duration;
+    if (now >= finishTime) this.animationStarted = null;
+  }
+
   var asign = null;
-  var left;
-  var top;
   for (var i = 0; i < this.signs.length; ++i)
   {
     var sign = this.signs[[]i];
-    var se = sign.elem;
-    var ss = se.style;
 
     if (sign.active) asign = sign;
 
     var left, top;
 
-    if (now >= sign.finishTime)
+    if (!this.animationStarted)
     {
       left = sign.finalLeft;
       top = sign.finalTop;
+      sign.retracting = false;
     }
     else if (sign.retracting)
     {
-      kill = false;
       left = this.info.rectPos + (this.info.rectWidth - sign.info.width) / 2;
       top = this.info.rectPos + (this.info.rectHeight - sign.info.height) / 2;
-      var t = (now - sign.startTime) / 500.0;
+      var t = (now - sign.startTime) / duration * 2;
       t = t * t;
       if (t >= 1.0)
       {
@@ -322,44 +325,37 @@ Animation.prototype.timerTick = function()
     }
     else
     {
-      kill = false;
       left = sign.startLeft + (sign.finalLeft - sign.startLeft)
-             * (now - sign.startTime) / (sign.finishTime - sign.startTime);
+             * (now - sign.startTime) / (finishTime - sign.startTime);
       top = sign.startTop + (sign.finalTop - sign.startTop)
-            * (now - sign.startTime) / (sign.finishTime - sign.startTime);
+            * (now - sign.startTime) / (finishTime - sign.startTime);
     }
 
     sign.curLeft = left;
     sign.curTop = top;
-    ss.left = left + "px";
-    ss.top = top + "px";
+    sign.elem.style.left = left + "px";
+    sign.elem.style.top = top + "px";
+    sign.elem.style.visibility = !sign.active |||| this.animationStarted
+                                 ? "visible" : "hidden";
   }
+
   this.drawLines();
-  if (kill)
+
+  if (asign && !this.animationStarted)
   {
-    this.killTimer();
-    this.showTopSign(asign);
-    this.finishLoad();
+    this.gsign.src = asign.info.src;
+    this.gsign.style.width = asign.info.width + "px";
+    this.gsign.style.height = asign.info.height + "px";
+    this.gsign.style.left = ((this.info.rectSWidth - asign.info.width) / 2
+                             + "px");
+    this.gsign.style.top = ((this.info.rectHeight - asign.info.height) / 2
+                            + "px");
+    this.gsign.style.visibility = "visible";
   }
-}
-
-Animation.prototype.hideTopSign = function(sign)
-{
-  sign.elem.style.left = sign.curLeft + "px";
-  sign.elem.style.top = sign.curTop + "px";
-  sign.elem.style.visibility = "visible";
-  this.gsign.style.visibility = "hidden";
-}
-
-Animation.prototype.showTopSign = function(sign)
-{
-  this.gsign.src = sign.info.src;
-  this.gsign.style.width = sign.info.width + "px";
-  this.gsign.style.height = sign.info.height + "px";
-  this.gsign.style.left = ((this.info.rectSWidth - sign.info.width) / 2) + "px";
-  this.gsign.style.top = ((this.info.rectHeight - sign.info.height) / 2) + "px";
-  this.gsign.style.visibility = "visible";
-  sign.elem.style.visibility = "hidden";
+  else
+  {
+    this.gsign.style.visibility = "hidden";
+  }
 }
 
 Animation.prototype.drawLines = function()
@@ -459,18 +455,22 @@ Animation.prototype.drawLines = function()
   }
 }
 
-Animation.prototype.startTimer = function()
+Animation.prototype.startAnimation = function(now)
 {
+  this.animationStarted = now;
+  this.updateLayout();
   if (!this.timer)
     this.timer = setInterval(this.timerTick.bind(this), 20);
 }
 
-Animation.prototype.killTimer = function()
+Animation.prototype.timerTick = function()
 {
-  if (this.timer)
+  this.updateStyle();
+  if (!this.animationStarted)
   {
     clearInterval(this.timer);
     this.timer = null;
+    this.finishLoad();
   }
 }
 
@@ -590,16 +590,8 @@ Animation.prototype.onclick = function(sign)
 Animation.prototype.onresize = function()
 {
   this.updateLayout();
-  if (!this.timer)
-  {
-    for (var i in this.signs)
-    {
-      var sign = this.signs[[]i];
-      sign.curLeft = sign.finalLeft;
-      sign.curTop = sign.finalTop;
-    }
-    this.drawLines();
-  }
+  this.updateStyle();
+  return true;
 }
 
 function date_now()
