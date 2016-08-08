@@ -16,9 +16,8 @@ class Outline(widgets.TemplateWidget):
   root = ROOT
   template = Template(
 """|
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<head>
+<!DOCTYPE html>
+<meta charset="UTF-8">
 <title>Russell Yanofsky - [title]</title>
 <style type="text/css">
 <!--
@@ -594,7 +593,6 @@ function http_req()
 
 // -->
 </script>
-</head>
 <body>
 
 [for signs]|
@@ -677,8 +675,7 @@ window.onresize = anim_onresize;
 [body]
 </div>
 </div>
-</body>
-</html>""", compress_whitespace=0, trim_whitespace=1)
+</body>""", compress_whitespace=0, trim_whitespace=1)
 
   def __init__(self, *args, **kwargs):
     widgets.TemplateWidget.__init__(self, *args, **kwargs)
