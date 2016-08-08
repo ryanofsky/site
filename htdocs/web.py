@@ -191,24 +191,9 @@ function Animation(signs, triWidth, triHeight, rectWidth, rectHeight,
     sign.curLeft = sign.elem.offsetLeft;
     sign.curTop = sign.elem.offsetTop;
   }
-
-  this.setpos = Animation_setpos;
-  this.start_timer = Animation_start_timer;
-  this.kill_timer = Animation_kill_timer;
-  this.start_load = Animation_start_load;
-  this.state_change = Animation_state_change;
-  this.set_status = Animation_set_status;
-  this.finish_load = Animation_finish_load;
-  this.draw_lines = Animation_draw_lines;
-  this.hide_active = Animation_hide_active;
-  this.show_active = Animation_show_active;
-  this.move = Animation_move;
-  this.click = Animation_click;
-  this.go = Animation_go;
-  this.tick = Animation_tick;
 }
 
-function Animation_setpos()
+Animation.prototype.setpos = function()
 {
   var j = 0;
   var y = this.rectPos + this.rectHeight;
@@ -235,13 +220,13 @@ function Animation_setpos()
   }  
 }
 
-function Animation_start_timer()
+Animation.prototype.start_timer = function()
 {
   if (!this.timer)
     this.timer = setInterval(this.timerCb, 20);
 }
 
-function Animation_kill_timer()
+Animation.prototype.kill_timer = function()
 {
   if (this.timer)
   {
@@ -250,7 +235,7 @@ function Animation_kill_timer()
   }
 }
 
-function Animation_start_load(url)
+Animation.prototype.start_load = function(url)
 {
   if (this.req)
   {
@@ -269,7 +254,7 @@ function Animation_start_load(url)
   }
 }
 
-function Animation_state_change()
+Animation.prototype.state_change = function()
 {
   if (!this.loadUrl) return;
     
@@ -310,7 +295,7 @@ function Animation_state_change()
   }
 }
 
-function Animation_set_status(url, message)
+Animation.prototype.set_status = function(url, message)
 {
   if (url)
   {
@@ -325,7 +310,7 @@ function Animation_set_status(url, message)
   }
 }
 
-function Animation_finish_load()
+Animation.prototype.finish_load = function()
 {
   if (this.req)
   {
@@ -341,7 +326,7 @@ function Animation_finish_load()
   }
 }
 
-function Animation_draw_lines()
+Animation.prototype.draw_lines = function()
 {
   if (!this.dots)
   {
@@ -438,7 +423,7 @@ function Animation_draw_lines()
   }
 }
 
-function Animation_hide_active(sign, nsign)
+Animation.prototype.hide_active = function(sign, nsign)
 {
   sign.elem.style.left = sign.curLeft + "px";
   sign.elem.style.top = sign.curTop + "px";
@@ -446,7 +431,7 @@ function Animation_hide_active(sign, nsign)
   this.gsign.style.visibility = "hidden";
 }
 
-function Animation_show_active(sign)
+Animation.prototype.show_active = function(sign)
 {
   this.gsign.src = sign.src;
   this.gsign.style.width = sign.width + "px";
@@ -457,7 +442,7 @@ function Animation_show_active(sign)
   sign.elem.style.visibility = "hidden";
 }
 
-function Animation_move(nsign)
+Animation.prototype.move = function(nsign)
 {
   var now = date_now();
   var asign = null;
@@ -489,7 +474,7 @@ function Animation_move(nsign)
   return false;
 }
 
-function Animation_click(aelem)
+Animation.prototype.click = function(aelem)
 {
   var sign;
   for (var i = 0; i < this.signs.length; ++i)
@@ -500,7 +485,7 @@ function Animation_click(aelem)
   }
 }
 
-function Animation_go(id, url)
+Animation.prototype.go = function(id, url)
 {
   var elem = document.getElementById(id);
   var sign;
@@ -512,7 +497,7 @@ function Animation_go(id, url)
   }
 }
 
-function Animation_tick()
+Animation.prototype.tick = function()
 {
   var now = date_now();
   var kill = true;
