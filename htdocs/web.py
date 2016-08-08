@@ -32,7 +32,7 @@ body {
 
 img {
   border: none;
-} 
+}
 
 td {
   vertical-align: top;
@@ -51,7 +51,7 @@ a {
 
 .head {
   font-size: xx-large;
-  font-weight: bold; 
+  font-weight: bold;
 }
 
 .subhead {
@@ -76,7 +76,7 @@ a {
   background: white;
   border-style: solid;
   border-color: black;
-  border-width: 1px 2px 2px 1px; 
+  border-width: 1px 2px 2px 1px;
   margin-left: 1em;
   padding: 0.5em;
 }
@@ -111,7 +111,7 @@ a {
 <script type="text/javascript">
 <!--
 
-function Sign(title, id, href, src, width, height, hat, heels, corn, active) 
+function Sign(title, id, href, src, width, height, hat, heels, corn, active)
 {
   this.title = title;
   this.id = id;
@@ -135,7 +135,7 @@ function Sign(title, id, href, src, width, height, hat, heels, corn, active)
   this.retract = null;
 }
 
-function Animation(signs, triWidth, triHeight, rectWidth, rectHeight, 
+function Animation(signs, triWidth, triHeight, rectWidth, rectHeight,
                    rectSWidth, rectPos, signSpacing, rectId, grectId,
                    gsignId, statusId, contentsId)
 {
@@ -217,7 +217,7 @@ Animation.prototype.setpos = function()
       y += sign.height;
       j += 1
     }
-  }  
+  }
 }
 
 Animation.prototype.start_timer = function()
@@ -257,18 +257,18 @@ Animation.prototype.start_load = function(url)
 Animation.prototype.state_change = function()
 {
   if (!this.loadUrl) return;
-    
+
   if (this.req.readyState === 4 |||| this.req.readyState === "complete")
   {
-    var status, statusText; 
+    var status, statusText;
     try
-    { 
+    {
       status = this.req.status;
       statusText = this.req.statusText;
     }
     catch(e)
     {}
-    
+
     if (status === 200)
     {
       this.set_status(this.loadUrl, "Done.");
@@ -334,7 +334,7 @@ Animation.prototype.draw_lines = function()
     this.dots.style.position = "absolute";
     this.dots.style.left = "0px";
     this.dots.style.top = "0px";
-    
+
     document.body.insertBefore(this.dots, document.body.firstChild);
     this.ndots = 0
   }
@@ -348,10 +348,10 @@ Animation.prototype.draw_lines = function()
   for (var i = 0; i < this.signs.length; ++i)
   {
     var sign = this.signs[[]i];
-    
+
     x2 = sign.curLeft + sign.width / 2;
     y2 = sign.curTop + sign.height / 2;
-    
+
     if (x2 > this.rectPos + this.rectWidth)
     {
       x1 = this.rectPos + this.rectWidth + SQDIST - SQSIZE / 2;
@@ -363,7 +363,7 @@ Animation.prototype.draw_lines = function()
       x1 = x2;
       y1 = this.rectPos + this.rectHeight + SQDIST - SQSIZE / 2;
     }
-    
+
     var x = x1;
     var y = y1;
     for (;;)
@@ -376,7 +376,7 @@ Animation.prototype.draw_lines = function()
 
         // IE6 hack needed to set div height < line height
         dot.appendChild(document.createComment(""));
-        
+
         dot.style.background = "black";
         dot.style.position = "absolute";
         dot.style.width = "10px";
@@ -393,7 +393,7 @@ Animation.prototype.draw_lines = function()
         dot.style.left = (x - SQSIZE / 2) + "px";
         dot.style.top = (y - SQSIZE / 2) + "px";
       }
-    
+
       var dx = x2 - x;
       var dy = y2 - y;
 
@@ -457,7 +457,7 @@ Animation.prototype.move = function(nsign)
       sign.clickTime = now;
     }
     sign.moveTime = now + 1000;
-    
+
     if (sign === nsign)
       sign.active = true;
     else if (sign.active)
@@ -507,7 +507,7 @@ Animation.prototype.tick = function()
     var se = sign.elem;
     var ss = se.style;
 
-    if (sign.active) asign = sign; 
+    if (sign.active) asign = sign;
 
     var left, top;
 
@@ -525,10 +525,10 @@ Animation.prototype.tick = function()
       t = t * t;
       if (t >= 1.0)
       {
-	sign.retract = false;
+        sign.retract = false;
         sign.clickTime = now;
-	sign.clickLeft = left;
-	sign.clickTop = top;
+        sign.clickLeft = left;
+        sign.clickTop = top;
       }
       else
       {
@@ -539,12 +539,12 @@ Animation.prototype.tick = function()
     else
     {
       kill = false;
-      left = sign.clickLeft + (sign.left - sign.clickLeft) 
+      left = sign.clickLeft + (sign.left - sign.clickLeft)
              * (now - sign.clickTime) / (sign.moveTime - sign.clickTime);
-      top = sign.clickTop + (sign.top - sign.clickTop) 
+      top = sign.clickTop + (sign.top - sign.clickTop)
             * (now - sign.clickTime) / (sign.moveTime - sign.clickTime);
     }
-    
+
     sign.curLeft = left;
     sign.curTop = top;
     ss.left = left + "px";
@@ -568,7 +568,7 @@ function date_now()
 }
 
 function http_req()
-{ 
+{
   if (window.XMLHttpRequest)
     return new XMLHttpRequest;
   else if (window.ActiveXObject)
@@ -656,7 +656,7 @@ anim.draw_lines();
                       - self.rect_height * self.tri_width
                       - self.rect_width * self.tri_height)
                      / (2 * self.tri_height + self.tri_width))
-    
+
     self.signs = [ Sign("Home", "home", "index.py", "media/home.png",
                         143, 60, 7, 13, 7),
                    Sign("Code", "code", "code.py", "media/code.png",
@@ -678,12 +678,12 @@ anim.draw_lines();
       else:
         sign.active = None
         y += self.sign_spacing
-        y -= sign.hat 
+        y -= sign.hat
         sign.top = y
         sign.left = ((self.tri_width
                       -(y+sign.corn)*self.tri_width/self.tri_height)/2
                       - sign.width / 2)
-        y -= sign.heels 
+        y -= sign.heels
         y += sign.height
         j += 1
       i += 1
@@ -713,7 +713,7 @@ class Footer(widgets.TemplateWidget):
   <a href="mailto:[mail]" title="Email"><img src="[root]media/mail.png" alt="Email" /></a>
   <a href="[href]" title="Current Page Link"><img src="[root]media/link.png" alt="Current Page" /></a>
   </div>""")
- 
+
   def __init__(self, req, **kwargs):
     widgets.TemplateWidget.__init__(self, req, **kwargs)
     self.href = (req.request_uri() or "").replace("?plain=1", "")
@@ -725,7 +725,7 @@ class BasePage(widgets.TemplateWidget):
   root = ROOT
 
   def __init__(self, req):
-    self.navbar = ""; 
+    self.navbar = "";
     self.footer = Footer(req, date =self.reformat_date(self.DATE),
                          date_href="/viewvc.py/site/trunk/htdocs%s?view=log"
                                    % req.script_name(),
@@ -745,7 +745,7 @@ class BasePage(widgets.TemplateWidget):
     if date is None:
       return None
     m = re.match(r"\$Date: (\d{4})-(\d{2})-(\d{2}) "
-                 r"(\d{2}):(\d{2}):(\d{2}) ([+-]\d{4}) .*\$$", 
+                 r"(\d{2}):(\d{2}):(\d{2}) ([+-]\d{4}) .*\$$",
                  date)
     if not m:
       return None
