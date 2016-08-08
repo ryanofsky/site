@@ -209,7 +209,7 @@ function Animation(signs, info)
     }
 
     sign.aelem = sign.elem.parentNode;
-    sign.aelem.onclick = this.onclick.bind(this, sign.info.href);
+    sign.aelem.onclick = bind(this.onclick, this, sign.info.href);
 
     sign.curLeft = sign.elem.offsetLeft;
     sign.curTop = sign.elem.offsetTop;
@@ -219,8 +219,8 @@ function Animation(signs, info)
 
   this.initialHref = this.loadUrl;
 
-  window.onhashchange = this.onhashchange.bind(this);
-  window.onresize = this.onresize.bind(this);
+  window.onhashchange = bind(this.onhashchange, this);
+  window.onresize = bind(this.onresize, this);
 
   this.updateSigns(true /* immediate */);
   this.updateLayout();
@@ -485,7 +485,7 @@ Animation.prototype.startAnimation = function(now)
   this.animationStarted = now;
   this.updateLayout();
   if (!this.timer)
-    this.timer = setInterval(this.timerTick.bind(this), 20);
+    this.timer = setInterval(bind(this.timerTick, this), 20);
 }
 
 Animation.prototype.timerTick = function()
@@ -506,7 +506,7 @@ Animation.prototype.startLoad = function()
     this.setLoadStatus(this.loadUrl);
     this.req.abort();
     this.req.open("GET", this.loadUrl + "?plain=1", true);
-    this.req.onreadystatechange = this.loadStateChange.bind(this);
+    this.req.onreadystatechange = bind(this.loadStateChange, this);
     this.req.send(null);
   }
   else
@@ -601,7 +601,8 @@ Animation.prototype.setLoadStatus = function(url, message)
 
 Animation.prototype.click = function(target, event)
 {
-  var href = target.getAttribute("href");
+  // Nonstandard flag needed for IE6 to get it to return raw href string.
+  var href = target.getAttribute("href", 2);
   return this.onclick(href, event);
 }
 
@@ -642,6 +643,16 @@ function http_req()
     return new XMLHttpRequest;
   else if (window.ActiveXObject)
     return new ActiveXObject("Microsoft.XMLHTTP")
+}
+
+// IE6 compatible equivalent for func.bind(this_arg, ...other_args)
+function bind(func, this_arg, other_args)
+{
+  var bound_args = Array.apply(null, arguments).slice(2);
+  return (function() {
+    return func.apply(this_arg,
+                      bound_args.concat(Array.apply(null, arguments)));
+  });
 }
 
 window.anim = new Animation([[][for signs]
