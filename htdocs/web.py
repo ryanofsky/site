@@ -18,7 +18,7 @@ class Outline(widgets.TemplateWidget):
 """|
 <!DOCTYPE html>
 <meta charset="UTF-8">
-<title>Russell Yanofsky - [title]</title>
+<title>[doc_title]</title>
 <style type="text/css">
 <!--
 
@@ -525,6 +525,9 @@ Animation.prototype.finishLoad = function()
     {
       this.setLoadStatus();
       this.loadDestination.innerHTML = this.req.responseText;
+      var outline = this.loadDestination.firstChild;
+      var doc_title = outline && outline.getAttribute("data-doc-title");
+      if (doc_title) document.title = doc_title;
       this.loadPending = false;
     }
   }
@@ -750,6 +753,10 @@ class Footer(widgets.TemplateWidget):
     self.href = (req.request_uri() or "").replace("?plain=1", "")
 
 
+class PlainOutline(widgets.TemplateWidget):
+  template = Template('<div data-doc-title="[doc_title]">[body]</div>')
+
+
 class BasePage(widgets.TemplateWidget):
   """Base class for all the site's pages, sets up outline and navbar"""
   DATE = None
@@ -761,16 +768,14 @@ class BasePage(widgets.TemplateWidget):
                          date_href="/viewvc.py/site/trunk/htdocs%s?view=log"
                                    % req.script_name(),
                          mail="russ@yanofsky.org").embed()
-    if req.get.getfirst("plain"):
-      self.outline = None
-    else:
-      self.outline = Outline(req, body=self.embed(), title=self.title)
+    outline_cls = PlainOutline if req.get.getfirst("plain") else Outline
+    self.outline = outline_cls(req,
+                               body=self.embed(),
+                               title=self.title,
+                               doc_title = "Russell Yanofsky - " + self.title)
 
   def write(self, req):
-    if self.outline:
-      self.outline.write(req)
-    else:
-      widgets.TemplateWidget.write(self, req)
+    self.outline.write(req)
 
   def reformat_date(self, date):
     if date is None:
