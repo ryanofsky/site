@@ -137,7 +137,7 @@ function Sign(title, id, href, src, width, height, hat, heels, corn, active)
 
 function Animation(signs, triWidth, triHeight, rectWidth, rectHeight, 
                    rectSWidth, rectPos, signSpacing, rectId, grectId,
-                   gsignId, statusId, contentsId, timerCb, reqCb, clickCb)
+                   gsignId, statusId, contentsId)
 {
   this.signs = signs;
   this.triWidth = triWidth;
@@ -147,9 +147,6 @@ function Animation(signs, triWidth, triHeight, rectWidth, rectHeight,
   this.rectSWidth = rectSWidth;
   this.rectPos = rectPos;
   this.signSpacing = signSpacing;
-  this.timerCb = timerCb;
-  this.reqCb = reqCb;
-  this.clickCb = clickCb;
 
   this.req = http_req();
   this.timer = null;
@@ -168,13 +165,11 @@ function Animation(signs, triWidth, triHeight, rectWidth, rectHeight,
     if (sign.elem)
     {
       sign.aelem = sign.elem.parentNode;
-      sign.aelem.onclick = clickCb;
     }
     else
     {
       var ae = sign.aelem = document.createElement("a");
       ae.href = sign.href;
-      ae.onclick = clickCb;
       var se = sign.elem = document.createElement("img");
       se.src = sign.src;
       se.style.position = "absolute";
@@ -188,9 +183,14 @@ function Animation(signs, triWidth, triHeight, rectWidth, rectHeight,
       ae.appendChild(se);
       document.body.insertBefore(ae, this.rect);
     }
+
+    sign.aelem.onclick = this.onclick.bind(this, sign);
+
     sign.curLeft = sign.elem.offsetLeft;
     sign.curTop = sign.elem.offsetTop;
   }
+
+  window.onresize = this.onresize.bind(this);
 }
 
 Animation.prototype.setpos = function()
@@ -223,7 +223,7 @@ Animation.prototype.setpos = function()
 Animation.prototype.start_timer = function()
 {
   if (!this.timer)
-    this.timer = setInterval(this.timerCb, 20);
+    this.timer = setInterval(this.tick.bind(this), 20);
 }
 
 Animation.prototype.kill_timer = function()
@@ -249,7 +249,7 @@ Animation.prototype.start_load = function(url)
   {
     this.set_status(url)
     this.req.open("GET", url + "?plain=1", true);
-    this.req.onreadystatechange = this.reqCb;
+    this.req.onreadystatechange = this.state_change.bind(this);
     this.req.send(null);
   }
 }
@@ -471,18 +471,12 @@ Animation.prototype.move = function(nsign)
   this.start_timer();
   this.start_load(nsign.href);
   this.hide_active(asign, nsign);
-  return false;
 }
 
-Animation.prototype.click = function(aelem)
+Animation.prototype.onclick = function(sign)
 {
-  var sign;
-  for (var i = 0; i < this.signs.length; ++i)
-  {
-    sign = this.signs[[]i];
-    if (sign.aelem === aelem)
-      return this.move(sign)
-  }
+  this.move(sign);
+  return false;
 }
 
 Animation.prototype.go = function(id, url)
@@ -493,7 +487,10 @@ Animation.prototype.go = function(id, url)
   {
     sign = this.signs[[]i];
     if (sign.elem == elem)
-      return this.move(sign)
+    {
+      this.move(sign);
+      return false;
+    }
   }
 }
 
@@ -606,33 +603,18 @@ function http_req()
 <script type="text/javascript">
 <!--
 
-function anim_tick(img)
+Animation.prototype.onresize = function()
 {
-  anim.tick(img);
-}
-
-function anim_state_change()
-{
-  anim.state_change();
-}
-
-function anim_onclick()
-{
-  return anim.click(this);
-}
-
-function anim_onresize()
-{
-  anim.setpos();
-  if (!anim.timer)
+  this.setpos();
+  if (!this.timer)
   {
-    for (var i in anim.signs)
+    for (var i in this.signs)
     {
-      var sign = anim.signs[[]i];
+      var sign = this.signs[[]i];
       sign.curLeft = sign.left;
       sign.curTop = sign.top;
     }
-    anim.draw_lines();
+    this.draw_lines();
   }
 }
 
@@ -648,12 +630,9 @@ anim = new Animation(new Array(|
 [end]),
   |                     |
   [tri_width], [tri_height], [rect_width], [rect_height], [rect_swidth], |
-  [rect_pos], [sign_spacing], "rect", "grect", "gsign", "load", "contents", |
-  |anim_tick, anim_state_change, anim_onclick);
+  [rect_pos], [sign_spacing], "rect", "grect", "gsign", "load", "contents");
 anim.setpos();
 anim.draw_lines();
-
-window.onresize = anim_onresize;
 
 // -->
 </script>
