@@ -4,6 +4,8 @@ DROP TABLE languages CASCADE;
 DROP SEQUENCE language_ids;
 DROP TABLE project_languages CASCADE;
 
+CREATE SEQUENCE project_ids INCREMENT 1 START 10;
+
 CREATE TABLE projects
 (
   project_id INTEGER NOT NULL PRIMARY KEY DEFAULT NEXTVAL('project_ids'),
@@ -14,15 +16,13 @@ CREATE TABLE projects
   description TEXT NOT NULL
 );
 
-CREATE SEQUENCE project_ids INCREMENT 1 START 10;
+CREATE SEQUENCE language_ids INCREMENT 1 START 15;
 
 CREATE TABLE languages
 (
   language_id INTEGER NOT NULL PRIMARY KEY DEFAULT NEXTVAL('language_ids'),
   name TEXT
 );
-
-CREATE SEQUENCE language_ids INCREMENT 1 START 15;
 
 CREATE TABLE project_languages
 (
