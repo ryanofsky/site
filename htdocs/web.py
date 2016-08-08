@@ -618,16 +618,16 @@ Animation.prototype.onresize = function()
   }
 }
 
-anim = new Animation(new Array(|
+anim = new Animation([[]|
 [for signs]|
   [if-index signs first][else],
-  |                               |
+  |                      |
   [end]|
   |new Sign("[signs.title]", "[signs.id]", "[signs.href]", "[signs.src]", |
             [signs.width], [signs.height], |
             [signs.hat], [signs.heels], [signs.corn], |
             [if-any signs.active]true[else]false[end])|
-[end]),
+[end]],
   |                     |
   [tri_width], [tri_height], [rect_width], [rect_height], [rect_swidth], |
   [rect_pos], [sign_spacing], "rect", "grect", "gsign", "load", "contents");
