@@ -161,6 +161,16 @@ function Animation(signs, info)
   this.rect = document.getElementById(info.rectId);
   this.grect = document.getElementById(info.grectId);
   this.gsign = document.getElementById(info.gsignId);
+  if (!this.gsign)
+  {
+    // Create top stationary sign element if there isn't one already in the
+    // static HTML (needed for pages like edit.py that don't have sign links
+    // pointing at them).
+    this.gsign = document.createElement("img");
+    this.gsign.style.position = "relative";
+    this.gsign.style.visibility = "hidden";
+    this.grect.appendChild(this.gsign);
+  }
   this.status = document.getElementById(info.statusId);
 
   for (var i = 0; i < this.signs.length; ++i)
@@ -235,7 +245,7 @@ Animation.prototype.updateSigns = function(nsign)
   this.updateLayout();
   this.startTimer();
   this.startLoad(nsign.info.href);
-  this.hideTopSign(asign, nsign);
+  if (asign) this.hideTopSign(asign);
 }
 
 Animation.prototype.updateLayout = function()
