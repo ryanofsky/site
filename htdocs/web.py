@@ -598,24 +598,17 @@ Animation.prototype.setLoadStatus = function(url, message)
   }
 }
 
-Animation.prototype.go = function(id, url)
+Animation.prototype.click = function(target, event)
 {
-  var elem = document.getElementById(id);
-  var sign;
-  for (var i = 0; i < this.signs.length; ++i)
-  {
-    sign = this.signs[[]i];
-    if (sign.elem == elem)
-    {
-      this.setCurrentHref(sign.info.href);
-      this.updateSigns();
-      return false;
-    }
-  }
+  var href = target.getAttribute("href");
+  return this.onclick(href, event);
 }
 
-Animation.prototype.onclick = function(href)
+Animation.prototype.onclick = function(href, event)
 {
+  // Let the browser handle right and middle clicks by itself.
+  if (event && event.which > 1) return true;
+
   this.setCurrentHref(href);
   this.updateSigns();
   return false;
@@ -811,7 +804,13 @@ def ezt(string):
   string = string.replace("http://memepool.com/",
                           "https://en.wikipedia.org/wiki/Memepool")
   string = string.replace('href="/ssh/ssh.html"', 'href="/ssh/"')
+  string = string.replace('href="/edit.py"',
+                          'href="/edit.py" onclick="return anim.click(this, event)"')
 
+  # For compatibility, replace old anim.go event handlers with anim.click event
+  # handlers.
+  string = re.sub("onclick=\"return anim\\.go\('.*?'\)\"",
+                  "onclick=\"return anim.click(this, event)\"", string)
   return Template(string)
 
 
