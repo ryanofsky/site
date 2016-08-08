@@ -147,15 +147,15 @@ function Sign(title, id, href, src, width, height, hat, heels, corn, active)
   this.corn = corn;
   this.active = active;
 
-  this.left = null;
-  this.top = null;
+  this.finalLeft = null;
+  this.finalTop = null;
   this.curLeft = null;
   this.curTop = null;
-  this.clickLeft = null;
-  this.clickTop = null;
-  this.clickTime = null;
-  this.moveTime = null;
-  this.retract = null;
+  this.startLeft = null;
+  this.startTop = null;
+  this.startTime = null;
+  this.finishTime = null;
+  this.retracting = null;
 }
 
 function Animation(signs, triWidth, triHeight, rectWidth, rectHeight,
@@ -215,11 +215,11 @@ function Animation(signs, triWidth, triHeight, rectWidth, rectHeight,
 
   window.onresize = this.onresize.bind(this);
 
-  this.setpos();
-  this.draw_lines();
+  this.updateLayout();
+  this.drawLines();
 }
 
-Animation.prototype.move = function(nsign)
+Animation.prototype.updateSigns = function(nsign)
 {
   var now = date_now();
   var asign = null;
@@ -227,30 +227,30 @@ Animation.prototype.move = function(nsign)
   {
     var sign = this.signs[[]i];
 
-    if (!sign.retract)
+    if (!sign.retracting)
     {
-      sign.clickLeft = sign.curLeft;
-      sign.clickTop = sign.curTop;
-      sign.clickTime = now;
+      sign.startLeft = sign.curLeft;
+      sign.startTop = sign.curTop;
+      sign.startTime = now;
     }
-    sign.moveTime = now + 1000;
+    sign.finishTime = now + 1000;
 
     if (sign === nsign)
       sign.active = true;
     else if (sign.active)
     {
       sign.active = false;
-      sign.retract = true;
+      sign.retracting = true;
       asign = sign;
     }
   }
-  this.setpos();
-  this.start_timer();
-  this.start_load(nsign.href);
-  this.hide_active(asign, nsign);
+  this.updateLayout();
+  this.startTimer();
+  this.startLoad(nsign.href);
+  this.hideTopSign(asign, nsign);
 }
 
-Animation.prototype.setpos = function()
+Animation.prototype.updateLayout = function()
 {
   var j = 0;
   var y = this.rectPos + this.rectHeight;
@@ -260,16 +260,18 @@ Animation.prototype.setpos = function()
     var se = sign.elem;
     if (sign.active)
     {
-      sign.left = this.grect.offsetLeft + (this.rectSWidth - sign.width) / 2;
-      sign.top = this.rectPos + (this.rectHeight - sign.height) / 2;
+      sign.finalLeft = this.grect.offsetLeft
+                       + (this.rectSWidth - sign.width) / 2;
+      sign.finalTop = this.rectPos + (this.rectHeight - sign.height) / 2;
     }
     else
     {
       y += this.signSpacing;
       y -= sign.hat;
-      sign.left = ((this.triWidth-(y+sign.corn)*this.triWidth/this.triHeight)/2
-                 - se.offsetWidth / 2);
-      sign.top = y;
+      sign.finalLeft = ((this.triWidth
+                         - (y + sign.corn) * this.triWidth / this.triHeight) / 2
+                        - se.offsetWidth / 2);
+      sign.finalTop = y;
       y -= sign.heels;
       y += sign.height;
       j += 1
@@ -277,7 +279,7 @@ Animation.prototype.setpos = function()
   }
 }
 
-Animation.prototype.tick = function()
+Animation.prototype.timerTick = function()
 {
   var now = date_now();
   var kill = true;
@@ -294,38 +296,38 @@ Animation.prototype.tick = function()
 
     var left, top;
 
-    if (now >= sign.moveTime)
+    if (now >= sign.finishTime)
     {
-      left = sign.left;
-      top = sign.top;
+      left = sign.finalLeft;
+      top = sign.finalTop;
     }
-    else if (sign.retract)
+    else if (sign.retracting)
     {
       kill = false;
       left = this.rectPos + (this.rectWidth - sign.width) / 2;
       top = this.rectPos + (this.rectHeight - sign.height) / 2;
-      var t = (now - sign.clickTime) / 500.0;
+      var t = (now - sign.startTime) / 500.0;
       t = t * t;
       if (t >= 1.0)
       {
-        sign.retract = false;
-        sign.clickTime = now;
-        sign.clickLeft = left;
-        sign.clickTop = top;
+        sign.retracting = false;
+        sign.startTime = now;
+        sign.startLeft = left;
+        sign.startTop = top;
       }
       else
       {
-        left = sign.clickLeft + t * (left - sign.clickLeft);
-        top = sign.clickTop + t * (top - sign.clickTop);
+        left = sign.startLeft + t * (left - sign.startLeft);
+        top = sign.startTop + t * (top - sign.startTop);
       }
     }
     else
     {
       kill = false;
-      left = sign.clickLeft + (sign.left - sign.clickLeft)
-             * (now - sign.clickTime) / (sign.moveTime - sign.clickTime);
-      top = sign.clickTop + (sign.top - sign.clickTop)
-            * (now - sign.clickTime) / (sign.moveTime - sign.clickTime);
+      left = sign.startLeft + (sign.finalLeft - sign.startLeft)
+             * (now - sign.startTime) / (sign.finishTime - sign.startTime);
+      top = sign.startTop + (sign.finalTop - sign.startTop)
+            * (now - sign.startTime) / (sign.finishTime - sign.startTime);
     }
 
     sign.curLeft = left;
@@ -333,16 +335,16 @@ Animation.prototype.tick = function()
     ss.left = left + "px";
     ss.top = top + "px";
   }
-  this.draw_lines();
+  this.drawLines();
   if (kill)
   {
-    this.kill_timer();
-    this.show_active(asign);
-    this.finish_load();
+    this.killTimer();
+    this.showTopSign(asign);
+    this.finishLoad();
   }
 }
 
-Animation.prototype.hide_active = function(sign, nsign)
+Animation.prototype.hideTopSign = function(sign, nsign)
 {
   sign.elem.style.left = sign.curLeft + "px";
   sign.elem.style.top = sign.curTop + "px";
@@ -350,7 +352,7 @@ Animation.prototype.hide_active = function(sign, nsign)
   this.gsign.style.visibility = "hidden";
 }
 
-Animation.prototype.show_active = function(sign)
+Animation.prototype.showTopSign = function(sign)
 {
   this.gsign.src = sign.src;
   this.gsign.style.width = sign.width + "px";
@@ -361,7 +363,7 @@ Animation.prototype.show_active = function(sign)
   sign.elem.style.visibility = "hidden";
 }
 
-Animation.prototype.draw_lines = function()
+Animation.prototype.drawLines = function()
 {
   if (!this.dots)
   {
@@ -458,13 +460,13 @@ Animation.prototype.draw_lines = function()
   }
 }
 
-Animation.prototype.start_timer = function()
+Animation.prototype.startTimer = function()
 {
   if (!this.timer)
-    this.timer = setInterval(this.tick.bind(this), 20);
+    this.timer = setInterval(this.timerTick.bind(this), 20);
 }
 
-Animation.prototype.kill_timer = function()
+Animation.prototype.killTimer = function()
 {
   if (this.timer)
   {
@@ -473,7 +475,7 @@ Animation.prototype.kill_timer = function()
   }
 }
 
-Animation.prototype.start_load = function(url)
+Animation.prototype.startLoad = function(url)
 {
   if (this.req)
   {
@@ -485,20 +487,20 @@ Animation.prototype.start_load = function(url)
 
   if (this.req)
   {
-    this.set_status(url)
+    this.setLoadStatus(url)
     this.req.open("GET", url + "?plain=1", true);
-    this.req.onreadystatechange = this.state_change.bind(this);
+    this.req.onreadystatechange = this.loadStateChange.bind(this);
     this.req.send(null);
   }
 }
 
-Animation.prototype.finish_load = function()
+Animation.prototype.finishLoad = function()
 {
   if (this.req)
   {
     if (!this.loadUrl && !this.timer)
     {
-      this.set_status();
+      this.setLoadStatus();
       document.getElementById(this.contentsId).innerHTML = this.req.responseText;
     }
   }
@@ -508,7 +510,7 @@ Animation.prototype.finish_load = function()
   }
 }
 
-Animation.prototype.state_change = function()
+Animation.prototype.loadStateChange = function()
 {
   if (!this.loadUrl) return;
 
@@ -525,14 +527,14 @@ Animation.prototype.state_change = function()
 
     if (status === 200)
     {
-      this.set_status(this.loadUrl, "Done.");
+      this.setLoadStatus(this.loadUrl, "Done.");
       this.loadUrl = null;
-      this.finish_load();
+      this.finishLoad();
     }
     else if (status)
-      this.set_status(this.loadUrl, "Error: " + status + " " + statusText);
+      this.setLoadStatus(this.loadUrl, "Error: " + status + " " + statusText);
     else
-      this.set_status(this.loadUrl, "Error: connection failed");
+      this.setLoadStatus(this.loadUrl, "Error: connection failed");
   }
   else
   {
@@ -545,11 +547,11 @@ Animation.prototype.state_change = function()
       status = "Retrieving contents...";
     else if (this.req.readyState === 3 |||| this.req.readyState === "interactive")
       status = "Downloading contents...";
-    this.set_status(this.loadUrl, status);
+    this.setLoadStatus(this.loadUrl, status);
   }
 }
 
-Animation.prototype.set_status = function(url, message)
+Animation.prototype.setLoadStatus = function(url, message)
 {
   if (url)
   {
@@ -573,7 +575,7 @@ Animation.prototype.go = function(id, url)
     sign = this.signs[[]i];
     if (sign.elem == elem)
     {
-      this.move(sign);
+      this.updateSigns(sign);
       return false;
     }
   }
@@ -581,22 +583,22 @@ Animation.prototype.go = function(id, url)
 
 Animation.prototype.onclick = function(sign)
 {
-  this.move(sign);
+  this.updateSigns(sign);
   return false;
 }
 
 Animation.prototype.onresize = function()
 {
-  this.setpos();
+  this.updateLayout();
   if (!this.timer)
   {
     for (var i in this.signs)
     {
       var sign = this.signs[[]i];
-      sign.curLeft = sign.left;
-      sign.curTop = sign.top;
+      sign.curLeft = sign.finalLeft;
+      sign.curTop = sign.finalTop;
     }
-    this.draw_lines();
+    this.drawLines();
   }
 }
 
