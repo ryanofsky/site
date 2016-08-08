@@ -154,7 +154,9 @@ function Animation(signs, info)
   this.info = info;
 
   this.req = http_req();
-  this.loadUrl = null;
+  this.loadUrl = window.location.pathname;
+  this.loadDestination = null;
+  this.loadPending = false;
 
   this.animationStarted = null;
   this.timer = null;
@@ -206,26 +208,53 @@ function Animation(signs, info)
     }
 
     sign.aelem = sign.elem.parentNode;
-    sign.aelem.onclick = this.onclick.bind(this, sign);
+    sign.aelem.onclick = this.onclick.bind(this, sign.info.href);
 
     sign.curLeft = sign.elem.offsetLeft;
     sign.curTop = sign.elem.offsetTop;
+
+    if (sign.active) this.loadUrl = sign.info.href;
   }
 
+  this.initialHref = this.loadUrl;
+
+  window.onhashchange = this.onhashchange.bind(this);
   window.onresize = this.onresize.bind(this);
 
+  this.updateSigns(true /* immediate */);
   this.updateLayout();
-  this.drawLines();
+  this.updateStyle();
 }
 
-Animation.prototype.updateSigns = function(nsign)
+Animation.prototype.getCurrentHref = function()
 {
+  var hashHref = window.location.hash.substring(1);
+  return /\.py\\b/.test(hashHref) ? hashHref : this.initialHref;
+}
+
+Animation.prototype.setCurrentHref = function(href)
+{
+  if (!this.req)
+    this.initialHref = href;
+  else
+    window.location.hash = "#" + href;
+}
+
+Animation.prototype.updateSigns = function(immediate)
+{
+  var href = this.getCurrentHref();
+
+  // Don't do anything if the right URL is already loaded.
+  if (this.loadUrl === href) return;
+
+  this.loadUrl = href;
+
   var now = date_now();
   for (var i = 0; i < this.signs.length; ++i)
   {
     var sign = this.signs[[]i];
     var prevActive = sign.active;
-    sign.active = sign === nsign;
+    sign.active = sign.info.href === href;
     if (sign.active |||| !sign.retracting)
     {
       sign.startLeft = sign.curLeft;
@@ -239,8 +268,8 @@ Animation.prototype.updateSigns = function(nsign)
   // Otherwise after a really fast response, loading code waiting for the
   // animation to complete might think the animation is finished before it
   // starts.
-  this.startAnimation(now);
-  this.startLoad(nsign.info.href);
+  if (!immediate) this.startAnimation(now);
+  this.startLoad();
 }
 
 Animation.prototype.updateLayout = function()
@@ -468,46 +497,51 @@ Animation.prototype.timerTick = function()
   }
 }
 
-Animation.prototype.startLoad = function(url)
+Animation.prototype.startLoad = function()
 {
   if (this.req)
   {
-    this.loadUrl = null;
+    this.setLoadStatus(this.loadUrl);
     this.req.abort();
-  }
-
-  this.loadUrl = url;
-
-  if (this.req)
-  {
-    this.setLoadStatus(url)
-    this.req.open("GET", url + "?plain=1", true);
+    this.req.open("GET", this.loadUrl + "?plain=1", true);
     this.req.onreadystatechange = this.loadStateChange.bind(this);
     this.req.send(null);
+  }
+  else
+  {
+    this.loadPending = true;
+    this.finishLoad();
   }
 }
 
 Animation.prototype.finishLoad = function()
 {
+  if (this.animationStarted |||| !this.loadPending) return;
+
   if (this.req)
   {
-    if (!this.loadUrl && !this.timer)
+    if (this.loadDestination !== null)
     {
       this.setLoadStatus();
-      document.getElementById(this.info.contentsId).innerHTML
-          = this.req.responseText;
+      this.loadDestination.innerHTML = this.req.responseText;
+      this.loadPending = false;
     }
   }
   else
   {
-    window.location = this.load;
+    window.location = this.loadUrl;
+    this.loadPending = false;
   }
+}
+
+Animation.prototype.setLoadDestination = function(contentsId)
+{
+  this.loadDestination = document.getElementById(contentsId) |||| undefined;
+  this.finishLoad();
 }
 
 Animation.prototype.loadStateChange = function()
 {
-  if (!this.loadUrl) return;
-
   if (this.req.readyState === 4 |||| this.req.readyState === "complete")
   {
     var status, statusText;
@@ -522,7 +556,7 @@ Animation.prototype.loadStateChange = function()
     if (status === 200)
     {
       this.setLoadStatus(this.loadUrl, "Done.");
-      this.loadUrl = null;
+      this.loadPending = true;
       this.finishLoad();
     }
     else if (status)
@@ -569,16 +603,24 @@ Animation.prototype.go = function(id, url)
     sign = this.signs[[]i];
     if (sign.elem == elem)
     {
-      this.updateSigns(sign);
+      this.setCurrentHref(sign.info.href);
+      this.updateSigns();
       return false;
     }
   }
 }
 
-Animation.prototype.onclick = function(sign)
+Animation.prototype.onclick = function(href)
 {
-  this.updateSigns(sign);
+  this.setCurrentHref(href);
+  this.updateSigns();
   return false;
+}
+
+Animation.prototype.onhashchange = function()
+{
+  this.updateSigns();
+  return true;
 }
 
 Animation.prototype.onresize = function()
@@ -613,8 +655,7 @@ window.anim = new Animation([[][for signs]
   {triWidth:[tri_width], triHeight: [tri_height], |
    | rectWidth: [rect_width], rectHeight: [rect_height],
    rectSWidth: [rect_swidth], rectPos: [rect_pos], signSpacing: [sign_spacing],
-   rectId: "rect", grectId: "grect", gsignId: "gsign", statusId: "load",
-   contentsId: "contents"});
+   rectId: "rect", grectId: "grect", gsignId: "gsign", statusId: "load"});
 }());
 // -->
 </script>
@@ -622,6 +663,13 @@ window.anim = new Animation([[][for signs]
 <div id="contents">
 [body]
 </div>
+
+<script type="text/javascript">
+<!--
+anim.setLoadDestination("contents");
+// -->
+</script>
+
 </div>
 </body>""", compress_whitespace=0, trim_whitespace=1)
 
