@@ -224,21 +224,15 @@ Animation.prototype.updateSigns = function(nsign)
   for (var i = 0; i < this.signs.length; ++i)
   {
     var sign = this.signs[[]i];
-
-    if (!sign.retracting)
+    var prevActive = sign.active;
+    sign.active = sign === nsign;
+    if (sign.active |||| !sign.retracting)
     {
       sign.startLeft = sign.curLeft;
       sign.startTop = sign.curTop;
       sign.startTime = now;
     }
-
-    if (sign === nsign)
-      sign.active = true;
-    else if (sign.active)
-    {
-      sign.active = false;
-      sign.retracting = true;
-    }
+    sign.retracting = !sign.active && (prevActive |||| sign.retracting);
   }
 
   // Call startAnimation before startLoad, so this.animationStarted will be set.
