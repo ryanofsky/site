@@ -314,7 +314,9 @@ function Animation_set_status(url, message)
 {
   if (url)
   {
-    this.status.innerHTML = 'Loading <a href="' + url + '">' + url + "</a>" + (message ? "<br /><em>" + message + "</em>" : "");
+    this.status.innerHTML = ('Loading <a href="' + url + '">' + url + "<\\/a>"
+                             + (message ? "<br /><em>" + message + "<\\/em>"
+                                        : ""));
     this.status.style.visibility = "visible";
   }
   else
