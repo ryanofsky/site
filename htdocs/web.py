@@ -107,6 +107,28 @@ a {
 
 -->
 </style>
+<body>
+
+[for signs]|
+  [if-any signs.active]|
+  [else]|
+    |<a href="[signs.href]"><img src="[signs.src]" id="[signs.id]" alt="[signs.title]" style="width: [signs.width]px; height: [signs.height]px; position: absolute; top: [signs.top]px; left: [signs.left]px;" /></a>
+  [end]|
+[end]|
+
+<div id="rect" style="background-color: #ff5509; width: [rect_width]px; height: [rect_height]px; position: absolute; top: [rect_pos]px; left: [rect_pos]px;"></div>
+
+<div style="margin-top: 0px; margin-left: [tri_width]px; margin-right: [rect_pos]px; margin-bottom: [rect_pos]px;">
+
+<div id="grect" style="background-image: url([root]media/grect.png); width: [rect_swidth]px; height: [rect_height]px;  margin-left: auto; margin-right: 0px; margin-top: [rect_pos]px; margin-bottom: [rect_pos]px;">
+[for signs]|
+  [if-any signs.active]|
+    |<img src="[signs.src]" id="gsign" alt="[signs.title]" style="width: [signs.width]px; height: [signs.height]px; position: relative; top: [signs.top]px; left: [signs.left]px;" />
+  [end]|
+[end]|
+</div>
+
+<div id="load" style="position: absolute; right: [rect_pos]px; margin-top: [rect_pos]px; background-color: #FFFFCC; padding: 5px; border: 1px solid black; visibility: hidden"></div>
 
 <script type="text/javascript">
 <!--
@@ -193,6 +215,37 @@ function Animation(signs, triWidth, triHeight, rectWidth, rectHeight,
   window.onresize = this.onresize.bind(this);
 }
 
+Animation.prototype.move = function(nsign)
+{
+  var now = date_now();
+  var asign = null;
+  for (var i = 0; i < this.signs.length; ++i)
+  {
+    var sign = this.signs[[]i];
+
+    if (!sign.retract)
+    {
+      sign.clickLeft = sign.curLeft;
+      sign.clickTop = sign.curTop;
+      sign.clickTime = now;
+    }
+    sign.moveTime = now + 1000;
+
+    if (sign === nsign)
+      sign.active = true;
+    else if (sign.active)
+    {
+      sign.active = false;
+      sign.retract = true;
+      asign = sign;
+    }
+  }
+  this.setpos();
+  this.start_timer();
+  this.start_load(nsign.href);
+  this.hide_active(asign, nsign);
+}
+
 Animation.prototype.setpos = function()
 {
   var j = 0;
@@ -220,110 +273,88 @@ Animation.prototype.setpos = function()
   }
 }
 
-Animation.prototype.start_timer = function()
+Animation.prototype.tick = function()
 {
-  if (!this.timer)
-    this.timer = setInterval(this.tick.bind(this), 20);
-}
-
-Animation.prototype.kill_timer = function()
-{
-  if (this.timer)
+  var now = date_now();
+  var kill = true;
+  var asign = null;
+  var left;
+  var top;
+  for (var i = 0; i < this.signs.length; ++i)
   {
-    clearInterval(this.timer);
-    this.timer = null;
-  }
-}
+    var sign = this.signs[[]i];
+    var se = sign.elem;
+    var ss = se.style;
 
-Animation.prototype.start_load = function(url)
-{
-  if (this.req)
-  {
-    this.loadUrl = null;
-    this.req.abort();
-  }
+    if (sign.active) asign = sign;
 
-  this.loadUrl = url;
+    var left, top;
 
-  if (this.req)
-  {
-    this.set_status(url)
-    this.req.open("GET", url + "?plain=1", true);
-    this.req.onreadystatechange = this.state_change.bind(this);
-    this.req.send(null);
-  }
-}
-
-Animation.prototype.state_change = function()
-{
-  if (!this.loadUrl) return;
-
-  if (this.req.readyState === 4 |||| this.req.readyState === "complete")
-  {
-    var status, statusText;
-    try
+    if (now >= sign.moveTime)
     {
-      status = this.req.status;
-      statusText = this.req.statusText;
+      left = sign.left;
+      top = sign.top;
     }
-    catch(e)
-    {}
-
-    if (status === 200)
+    else if (sign.retract)
     {
-      this.set_status(this.loadUrl, "Done.");
-      this.loadUrl = null;
-      this.finish_load();
+      kill = false;
+      left = this.rectPos + (this.rectWidth - sign.width) / 2;
+      top = this.rectPos + (this.rectHeight - sign.height) / 2;
+      var t = (now - sign.clickTime) / 500.0;
+      t = t * t;
+      if (t >= 1.0)
+      {
+        sign.retract = false;
+        sign.clickTime = now;
+        sign.clickLeft = left;
+        sign.clickTop = top;
+      }
+      else
+      {
+        left = sign.clickLeft + t * (left - sign.clickLeft);
+        top = sign.clickTop + t * (top - sign.clickTop);
+      }
     }
-    else if (status)
-      this.set_status(this.loadUrl, "Error: " + status + " " + statusText);
     else
-      this.set_status(this.loadUrl, "Error: connection failed");
-  }
-  else
-  {
-    var status = "Unrecognized status";
-    if (this.req.readyState === 0 |||| this.req.readyState === "uninitialized")
-      status = "Initializing...";
-    else if (this.req.readyState === 1 |||| this.req.readyState === "loading")
-      status = "Retrieving headers...";
-    else if (this.req.readyState === 2 |||| this.req.readyState === "loaded")
-      status = "Retrieving contents...";
-    else if (this.req.readyState === 3 |||| this.req.readyState === "interactive")
-      status = "Downloading contents...";
-    this.set_status(this.loadUrl, status);
-  }
-}
-
-Animation.prototype.set_status = function(url, message)
-{
-  if (url)
-  {
-    this.status.innerHTML = ('Loading <a href="' + url + '">' + url + "<\\/a>"
-                             + (message ? "<br /><em>" + message + "<\\/em>"
-                                        : ""));
-    this.status.style.visibility = "visible";
-  }
-  else
-  {
-    this.status.style.visibility = "hidden";
-  }
-}
-
-Animation.prototype.finish_load = function()
-{
-  if (this.req)
-  {
-    if (!this.loadUrl && !this.timer)
     {
-      this.set_status();
-      document.getElementById(this.contentsId).innerHTML = this.req.responseText;
+      kill = false;
+      left = sign.clickLeft + (sign.left - sign.clickLeft)
+             * (now - sign.clickTime) / (sign.moveTime - sign.clickTime);
+      top = sign.clickTop + (sign.top - sign.clickTop)
+            * (now - sign.clickTime) / (sign.moveTime - sign.clickTime);
     }
+
+    sign.curLeft = left;
+    sign.curTop = top;
+    ss.left = left + "px";
+    ss.top = top + "px";
   }
-  else
+  this.draw_lines();
+  if (kill)
   {
-    window.location = this.load;
+    this.kill_timer();
+    this.show_active(asign);
+    this.finish_load();
   }
+}
+
+Animation.prototype.hide_active = function(sign, nsign)
+{
+  sign.elem.style.left = sign.curLeft + "px";
+  sign.elem.style.top = sign.curTop + "px";
+  sign.elem.style.visibility = "visible";
+  this.gsign.style.visibility = "hidden";
+}
+
+Animation.prototype.show_active = function(sign)
+{
+  this.gsign.src = sign.src;
+  this.gsign.style.width = sign.width + "px";
+  this.gsign.style.height = sign.height + "px";
+  this.gsign.style.left = ((this.rectSWidth - sign.width) / 2) + "px";
+  this.gsign.style.top = ((this.rectHeight - sign.height) / 2) + "px";
+  this.gsign.style.visibility = "visible";
+  sign.elem.style.visibility = "hidden";
 }
 
 Animation.prototype.draw_lines = function()
@@ -423,60 +454,110 @@ Animation.prototype.draw_lines = function()
   }
 }
 
-Animation.prototype.hide_active = function(sign, nsign)
+Animation.prototype.start_timer = function()
 {
-  sign.elem.style.left = sign.curLeft + "px";
-  sign.elem.style.top = sign.curTop + "px";
-  sign.elem.style.visibility = "visible";
-  this.gsign.style.visibility = "hidden";
+  if (!this.timer)
+    this.timer = setInterval(this.tick.bind(this), 20);
 }
 
-Animation.prototype.show_active = function(sign)
+Animation.prototype.kill_timer = function()
 {
-  this.gsign.src = sign.src;
-  this.gsign.style.width = sign.width + "px";
-  this.gsign.style.height = sign.height + "px";
-  this.gsign.style.left = ((this.rectSWidth - sign.width) / 2) + "px";
-  this.gsign.style.top = ((this.rectHeight - sign.height) / 2) + "px";
-  this.gsign.style.visibility = "visible";
-  sign.elem.style.visibility = "hidden";
-}
-
-Animation.prototype.move = function(nsign)
-{
-  var now = date_now();
-  var asign = null;
-  for (var i = 0; i < this.signs.length; ++i)
+  if (this.timer)
   {
-    var sign = this.signs[[]i];
+    clearInterval(this.timer);
+    this.timer = null;
+  }
+}
 
-    if (!sign.retract)
-    {
-      sign.clickLeft = sign.curLeft;
-      sign.clickTop = sign.curTop;
-      sign.clickTime = now;
-    }
-    sign.moveTime = now + 1000;
+Animation.prototype.start_load = function(url)
+{
+  if (this.req)
+  {
+    this.loadUrl = null;
+    this.req.abort();
+  }
 
-    if (sign === nsign)
-      sign.active = true;
-    else if (sign.active)
+  this.loadUrl = url;
+
+  if (this.req)
+  {
+    this.set_status(url)
+    this.req.open("GET", url + "?plain=1", true);
+    this.req.onreadystatechange = this.state_change.bind(this);
+    this.req.send(null);
+  }
+}
+
+Animation.prototype.finish_load = function()
+{
+  if (this.req)
+  {
+    if (!this.loadUrl && !this.timer)
     {
-      sign.active = false;
-      sign.retract = true;
-      asign = sign;
+      this.set_status();
+      document.getElementById(this.contentsId).innerHTML = this.req.responseText;
     }
   }
-  this.setpos();
-  this.start_timer();
-  this.start_load(nsign.href);
-  this.hide_active(asign, nsign);
+  else
+  {
+    window.location = this.load;
+  }
 }
 
-Animation.prototype.onclick = function(sign)
+Animation.prototype.state_change = function()
 {
-  this.move(sign);
-  return false;
+  if (!this.loadUrl) return;
+
+  if (this.req.readyState === 4 |||| this.req.readyState === "complete")
+  {
+    var status, statusText;
+    try
+    {
+      status = this.req.status;
+      statusText = this.req.statusText;
+    }
+    catch(e)
+    {}
+
+    if (status === 200)
+    {
+      this.set_status(this.loadUrl, "Done.");
+      this.loadUrl = null;
+      this.finish_load();
+    }
+    else if (status)
+      this.set_status(this.loadUrl, "Error: " + status + " " + statusText);
+    else
+      this.set_status(this.loadUrl, "Error: connection failed");
+  }
+  else
+  {
+    var status = "Unrecognized status";
+    if (this.req.readyState === 0 |||| this.req.readyState === "uninitialized")
+      status = "Initializing...";
+    else if (this.req.readyState === 1 |||| this.req.readyState === "loading")
+      status = "Retrieving headers...";
+    else if (this.req.readyState === 2 |||| this.req.readyState === "loaded")
+      status = "Retrieving contents...";
+    else if (this.req.readyState === 3 |||| this.req.readyState === "interactive")
+      status = "Downloading contents...";
+    this.set_status(this.loadUrl, status);
+  }
+}
+
+Animation.prototype.set_status = function(url, message)
+{
+  if (url)
+  {
+    this.status.innerHTML = ('Loading <a href="' + url + '">' + url + "<\\/a>"
+                             + (message ? "<br /><em>" + message + "<\\/em>"
+                                        : ""));
+    this.status.style.visibility = "visible";
+  }
+  else
+  {
+    this.status.style.visibility = "hidden";
+  }
 }
 
 Animation.prototype.go = function(id, url)
@@ -494,68 +575,24 @@ Animation.prototype.go = function(id, url)
   }
 }
 
-Animation.prototype.tick = function()
+Animation.prototype.onclick = function(sign)
 {
-  var now = date_now();
-  var kill = true;
-  var asign = null;
-  var left;
-  var top;
-  for (var i = 0; i < this.signs.length; ++i)
+  this.move(sign);
+  return false;
+}
+
+Animation.prototype.onresize = function()
+{
+  this.setpos();
+  if (!this.timer)
   {
-    var sign = this.signs[[]i];
-    var se = sign.elem;
-    var ss = se.style;
-
-    if (sign.active) asign = sign;
-
-    var left, top;
-
-    if (now >= sign.moveTime)
+    for (var i in this.signs)
     {
-      left = sign.left;
-      top = sign.top;
+      var sign = this.signs[[]i];
+      sign.curLeft = sign.left;
+      sign.curTop = sign.top;
     }
-    else if (sign.retract)
-    {
-      kill = false;
-      left = this.rectPos + (this.rectWidth - sign.width) / 2;
-      top = this.rectPos + (this.rectHeight - sign.height) / 2;
-      var t = (now - sign.clickTime) / 500.0;
-      t = t * t;
-      if (t >= 1.0)
-      {
-        sign.retract = false;
-        sign.clickTime = now;
-        sign.clickLeft = left;
-        sign.clickTop = top;
-      }
-      else
-      {
-        left = sign.clickLeft + t * (left - sign.clickLeft);
-        top = sign.clickTop + t * (top - sign.clickTop);
-      }
-    }
-    else
-    {
-      kill = false;
-      left = sign.clickLeft + (sign.left - sign.clickLeft)
-             * (now - sign.clickTime) / (sign.moveTime - sign.clickTime);
-      top = sign.clickTop + (sign.top - sign.clickTop)
-            * (now - sign.clickTime) / (sign.moveTime - sign.clickTime);
-    }
-
-    sign.curLeft = left;
-    sign.curTop = top;
-    ss.left = left + "px";
-    ss.top = top + "px";
-  }
-  this.draw_lines();
-  if (kill)
-  {
-    this.kill_timer();
-    this.show_active(asign);
-    this.finish_load();
+    this.draw_lines();
   }
 }
 
@@ -573,49 +610,6 @@ function http_req()
     return new XMLHttpRequest;
   else if (window.ActiveXObject)
     return new ActiveXObject("Microsoft.XMLHTTP")
-}
-
-// -->
-</script>
-<body>
-
-[for signs]|
-  [if-any signs.active]|
-  [else]|
-    |<a href="[signs.href]"><img src="[signs.src]" id="[signs.id]" alt="[signs.title]" style="width: [signs.width]px; height: [signs.height]px; position: absolute; top: [signs.top]px; left: [signs.left]px;" /></a>
-  [end]|
-[end]|
-
-<div id="rect" style="background-color: #ff5509; width: [rect_width]px; height: [rect_height]px; position: absolute; top: [rect_pos]px; left: [rect_pos]px;"></div>
-
-<div style="margin-top: 0px; margin-left: [tri_width]px; margin-right: [rect_pos]px; margin-bottom: [rect_pos]px;">
-
-<div id="grect" style="background-image: url([root]media/grect.png); width: [rect_swidth]px; height: [rect_height]px;  margin-left: auto; margin-right: 0px; margin-top: [rect_pos]px; margin-bottom: [rect_pos]px;">
-[for signs]|
-  [if-any signs.active]|
-    |<img src="[signs.src]" id="gsign" alt="[signs.title]" style="width: [signs.width]px; height: [signs.height]px; position: relative; top: [signs.top]px; left: [signs.left]px;" />
-  [end]|
-[end]|
-</div>
-
-<div id="load" style="position: absolute; right: [rect_pos]px; margin-top: [rect_pos]px; background-color: #FFFFCC; padding: 5px; border: 1px solid black; visibility: hidden"></div>
-
-<script type="text/javascript">
-<!--
-
-Animation.prototype.onresize = function()
-{
-  this.setpos();
-  if (!this.timer)
-  {
-    for (var i in this.signs)
-    {
-      var sign = this.signs[[]i];
-      sign.curLeft = sign.left;
-      sign.curTop = sign.top;
-    }
-    this.draw_lines();
-  }
 }
 
 anim = new Animation([[]|
