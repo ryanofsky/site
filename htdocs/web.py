@@ -132,6 +132,7 @@ a {
 
 <script type="text/javascript">
 <!--
+(function(){
 
 function Sign(title, id, href, src, width, height, hat, heels, corn, active)
 {
@@ -213,6 +214,9 @@ function Animation(signs, triWidth, triHeight, rectWidth, rectHeight,
   }
 
   window.onresize = this.onresize.bind(this);
+
+  this.setpos();
+  this.draw_lines();
 }
 
 Animation.prototype.move = function(nsign)
@@ -612,22 +616,21 @@ function http_req()
     return new ActiveXObject("Microsoft.XMLHTTP")
 }
 
-anim = new Animation([[]|
+window.anim = new Animation([[]|
 [for signs]|
   [if-index signs first][else],
-  |                      |
+  |                             |
   [end]|
   |new Sign("[signs.title]", "[signs.id]", "[signs.href]", "[signs.src]", |
             [signs.width], [signs.height], |
             [signs.hat], [signs.heels], [signs.corn], |
             [if-any signs.active]true[else]false[end])|
 [end]],
-  |                     |
+  |                            |
   [tri_width], [tri_height], [rect_width], [rect_height], [rect_swidth], |
   [rect_pos], [sign_spacing], "rect", "grect", "gsign", "load", "contents");
-anim.setpos();
-anim.draw_lines();
 
+}());
 // -->
 </script>
 
