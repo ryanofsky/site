@@ -218,7 +218,14 @@ function Animation(signs, info)
   }
 
   this.initialHref = this.loadUrl;
+  this.histState = {};
 
+  // Set non-null initial history state so onpopstate handler can distinguish
+  // between it and the null state set by the browser after hash changes.
+  if (window.history.replaceState)
+    window.history.replaceState(this.histState, null, null);
+
+  window.onpopstate = bind(this.onpopstate, this);
   window.onhashchange = bind(this.onhashchange, this);
   window.onresize = bind(this.onresize, this);
 
@@ -230,13 +237,20 @@ function Animation(signs, info)
 Animation.prototype.getCurrentHref = function()
 {
   var hashHref = window.location.hash.substring(1);
-  return /\.py\\b/.test(hashHref) ? hashHref : this.initialHref;
+  return /\.py\\b/.test(hashHref) ? hashHref :
+         this.histState.href     ? this.histState.href
+                                 : this.initialHref;
 }
 
 Animation.prototype.setCurrentHref = function(href)
 {
   if (!this.req)
     this.initialHref = href;
+  else if (window.history.pushState)
+  {
+    this.histState = {href:href};
+    window.history.pushState(this.histState, null, href);
+  }
   else
     window.location.hash = "#" + href;
 }
@@ -632,6 +646,14 @@ Animation.prototype.onclick = function(href, event)
   this.setCurrentHref(href);
   this.updateSigns();
   return false;
+}
+
+Animation.prototype.onpopstate = function(event)
+{
+  // Don't overwrite histState if event.state is null (happens on hash changes).
+  if (event.state) this.histState = event.state;
+  this.updateSigns();
+  return true;
 }
 
 Animation.prototype.onhashchange = function()
