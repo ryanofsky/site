@@ -250,7 +250,7 @@ Animation.prototype.updateSigns = function(immediate)
 
   this.loadUrl = href;
 
-  var now = date_now();
+  var now = perf_now();
   for (var i = 0; i < this.signs.length; ++i)
   {
     var sign = this.signs[[]i];
@@ -304,12 +304,12 @@ Animation.prototype.updateLayout = function()
   }
 }
 
-Animation.prototype.updateStyle = function()
+Animation.prototype.updateStyle = function(now)
 {
-  var now = date_now();
   var duration = 1000;
   if (this.animationStarted)
   {
+    if (!now) return;
     var finishTime = this.animationStarted + duration;
     if (now >= finishTime) this.animationStarted = null;
   }
@@ -470,6 +470,12 @@ Animation.prototype.drawLines = function()
 
       if ((dx < 0 ? -dx : dx) < SQDIST && (dy < 0 ? -dy : dy) < SQDIST)
         break;
+
+      if (idots > 1000)
+      {
+        console.warn("Could not draw line", x1, y1, x2, y2);
+        break;
+      }
     }
   }
 
@@ -482,20 +488,32 @@ Animation.prototype.drawLines = function()
 
 Animation.prototype.startAnimation = function(now)
 {
+  var prevStarted = this.animationStarted;
   this.animationStarted = now;
   this.updateLayout();
-  if (!this.timer)
-    this.timer = setInterval(bind(this.timerTick, this), 20);
-}
+  if (prevStarted) return;
 
-Animation.prototype.timerTick = function()
-{
-  this.updateStyle();
-  if (!this.animationStarted)
+  var anim = this;
+  var update = function(timestamp)
   {
-    clearInterval(this.timer);
-    this.timer = null;
-    this.finishLoad();
+    anim.updateStyle(timestamp);
+    anim.finishLoad();
+    return anim.animationStarted;
+  }
+
+  if (window.requestAnimationFrame)
+  {
+    var callback = function(timestamp)
+    {
+      if (update(timestamp)) window.requestAnimationFrame(callback);
+    }
+    window.requestAnimationFrame(callback);
+  } else {
+    var callback = function()
+    {
+      if (!update(perf_now())) clearInterval(this.timer);
+    }
+    this.timer = setInterval(callback, 20);
   }
 }
 
@@ -627,6 +645,12 @@ Animation.prototype.onresize = function()
   this.updateLayout();
   this.updateStyle();
   return true;
+}
+
+function perf_now()
+{
+  // From https://developers.google.com/web/updates/2012/05/requestAnimationFrame-API-now-with-sub-millisecond-precision
+  return window.performance && performance.now ? performance.now() : date_now();
 }
 
 function date_now()
