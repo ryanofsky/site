@@ -273,7 +273,7 @@ function Animation_state_change()
 {
   if (!this.loadUrl) return;
     
-  if (this.req.readyState == 4 |||| this.req.readyState == "complete")
+  if (this.req.readyState === 4 |||| this.req.readyState === "complete")
   {
     var status, statusText; 
     try
@@ -284,7 +284,7 @@ function Animation_state_change()
     catch(e)
     {}
     
-    if (status == 200)
+    if (status === 200)
     {
       this.set_status(this.loadUrl, "Done.");
       this.loadUrl = null;
@@ -298,13 +298,13 @@ function Animation_state_change()
   else
   {
     var status = "Unrecognized status";
-    if (this.req.readyState == 0 |||| this.req.readyState == "uninitialized")
+    if (this.req.readyState === 0 |||| this.req.readyState === "uninitialized")
       status = "Initializing...";
-    else if (this.req.readyState == 1 |||| this.req.readyState == "loading")
+    else if (this.req.readyState === 1 |||| this.req.readyState === "loading")
       status = "Retrieving headers...";
-    else if (this.req.readyState == 2 |||| this.req.readyState == "loaded")
+    else if (this.req.readyState === 2 |||| this.req.readyState === "loaded")
       status = "Retrieving contents...";
-    else if (this.req.readyState == 3 |||| this.req.readyState == "interactive")
+    else if (this.req.readyState === 3 |||| this.req.readyState === "interactive")
       status = "Downloading contents...";
     this.set_status(this.loadUrl, status);
   }
@@ -473,7 +473,7 @@ function Animation_move(nsign)
     }
     sign.moveTime = now + 1000;
     
-    if (sign == nsign)
+    if (sign === nsign)
       sign.active = true;
     else if (sign.active)
     {
@@ -495,7 +495,7 @@ function Animation_click(aelem)
   for (var i in this.signs)
   {
     sign = this.signs[[]i];
-    if (sign.aelem == aelem)
+    if (sign.aelem === aelem)
       return this.move(sign)
   }
 }
