@@ -77,7 +77,7 @@ VALUES (3, 'Web Based Course Evaluation System (WCES)', 'wces', '2000-11-12', '2
 
 <p>The site is mostly implemented in PHP, but there''s also a big chunk of core logic written in procedural SQL. And there are a number of smaller components written in other languages, including 2 C++ Postgres extensions, a mini web-crawler written in Delphi, and a COM authentication component written in Visual C++ with ATL. </p>
 
-<p>Since this is one of the biggest projects I''ve worked on, I''ve put up a demonstration copy of the site at <a href="http://wces.russ.yanofsky.org/">http://wces.russ.yanofsky.org/</a>.</p>');
+<p>Since this is one of the biggest projects I''ve worked on, I''ve put up a demonstration copy of the site at <a href="https://wces.russ.yanofsky.org/">https://wces.russ.yanofsky.org/</a>.</p>');
 
 -- sloc notes:
 --   mapped .js extension to c_count to get javascript count
@@ -155,7 +155,7 @@ INSERT INTO project_languages (project_id, language_id, lines) VALUES (9,5,315);
 
 INSERT INTO projects (project_id, name, repos, startdate, enddate, description)
 VALUES (10, 'Doctor Database', NULL, '2002-03-29', '2002-04-02',
-'Project for a database class to make a simple web application using Postgres and Java Servlets. Worked on with one other person. Demo and source code are available on a tomcat server I''ve got running at <a href="http://doc.russ.yanofsky.org:8080/">http://doc.russ.yanofsky.org:8080/</a>.');
+'Project for a database class to make a simple web application using Postgres and Java Servlets. Worked on with one other person. Demo and source code are available on a tomcat server I''ve got running at <a href="https://doc.russ.yanofsky.org/">https://doc.russ.yanofsky.org/</a>.');
 
 -- sloc notes:
 --   rm WEB-INF/classes/Base64.java

@@ -1,5 +1,5 @@
 import widgets
-from widgets.driver_ezt import Template as ezt
+from widgets.driver_ezt import Template
 
 import time
 import calendar
@@ -14,7 +14,7 @@ ROOT = "/"
 ### Should probably push them out to files if the site grows
 class Outline(widgets.TemplateWidget):
   root = ROOT
-  template = ezt(
+  template = Template(
 """|
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
@@ -743,7 +743,7 @@ class Sign:
 
 class Footer(widgets.TemplateWidget):
   root = ROOT
-  template = ezt(
+  template = Template(
 """<div id="footer">
   <hr />
   <a href="[date_href]" title="Last Modified">[date]</a>
@@ -795,9 +795,25 @@ class BasePage(widgets.TemplateWidget):
              - offset)
     return time.strftime('%a %b %d %H:%M:%S UTC %Y', time.gmtime(ticks))
 
+
 class kw:
   def __init__(self, **kw):
     vars(self).update(kw)
+
+
+def ezt(string):
+  # Preference is to keep index.py/links.py pages frozen in place from 2006
+  # since they don't serve any purpose, and would be ridiculous to modernize.
+  # A few external links are broken and can be patched though.
+  string = string.replace("http://www.evilive.net/",
+                          "https://web.archive.org/web/20050204121854/http://www.evilive.net/")
+  string = string.replace("http://www.cs.washington.edu/homes/klee/misc/slashdot.html",
+                          "http://web.archive.org/web/20120428034140/http://www.cs.washington.edu/homes/klee/misc/slashdot.html")
+  string = string.replace("http://memepool.com/",
+                          "https://en.wikipedia.org/wiki/Memepool")
+  string = string.replace('href="/ssh/ssh.html"', 'href="/ssh/"')
+
+  return Template(string)
 
 
 # ========================================================================== #
