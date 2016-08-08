@@ -261,7 +261,8 @@ Animation.prototype.updateSigns = function(immediate)
       sign.startTop = sign.curTop;
       sign.startTime = now;
     }
-    sign.retracting = !sign.active && (prevActive |||| sign.retracting);
+    sign.retracting = !immediate && !sign.active
+                      && (prevActive |||| sign.retracting);
   }
 
   // Call startAnimation before startLoad, so this.animationStarted will be set.
