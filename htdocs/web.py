@@ -161,7 +161,7 @@ function Animation(signs, triWidth, triHeight, rectWidth, rectHeight,
   this.status = document.getElementById(statusId);
   this.contentsId = contentsId;
 
-  for (var i in this.signs)
+  for (var i = 0; i < this.signs.length; ++i)
   {
     var sign = this.signs[[]i];
     sign.elem = document.getElementById(sign.id);
@@ -212,7 +212,7 @@ function Animation_setpos()
 {
   var j = 0;
   var y = this.rectPos + this.rectHeight;
-  for (var i in this.signs)
+  for (var i = 0; i < this.signs.length; ++i)
   {
     var sign = this.signs[[]i];
     var se = sign.elem;
@@ -360,7 +360,7 @@ function Animation_draw_lines()
   var SQSIZE = 10;
 
   var idots = 0;
-  for (i in this.signs)
+  for (var i = 0; i < this.signs.length; ++i)
   {
     var sign = this.signs[[]i];
     
@@ -461,7 +461,7 @@ function Animation_move(nsign)
 {
   var now = date_now();
   var asign = null;
-  for (var i in this.signs)
+  for (var i = 0; i < this.signs.length; ++i)
   {
     var sign = this.signs[[]i];
 
@@ -492,7 +492,7 @@ function Animation_move(nsign)
 function Animation_click(aelem)
 {
   var sign;
-  for (var i in this.signs)
+  for (var i = 0; i < this.signs.length; ++i)
   {
     sign = this.signs[[]i];
     if (sign.aelem === aelem)
@@ -504,7 +504,7 @@ function Animation_go(id, url)
 {
   var elem = document.getElementById(id);
   var sign;
-  for (var i in this.signs)
+  for (var i = 0; i < this.signs.length; ++i)
   {
     sign = this.signs[[]i];
     if (sign.elem == elem)
@@ -519,7 +519,7 @@ function Animation_tick()
   var asign = null;
   var left;
   var top;
-  for (var i in this.signs)
+  for (var i = 0; i < this.signs.length; ++i)
   {
     var sign = this.signs[[]i];
     var se = sign.elem;
@@ -539,9 +539,9 @@ function Animation_tick()
       kill = false;
       left = this.rectPos + (this.rectWidth - sign.width) / 2;
       top = this.rectPos + (this.rectHeight - sign.height) / 2;
-      i = (now - sign.clickTime) / 500.0;
-      i = i * i;
-      if (i >= 1.0)
+      var t = (now - sign.clickTime) / 500.0;
+      t = t * t;
+      if (t >= 1.0)
       {
 	sign.retract = false;
         sign.clickTime = now;
@@ -550,8 +550,8 @@ function Animation_tick()
       }
       else
       {
-        left = sign.clickLeft + i * (left - sign.clickLeft); 
-        top = sign.clickTop + i * (top - sign.clickTop); 
+        left = sign.clickLeft + t * (left - sign.clickLeft);
+        top = sign.clickTop + t * (top - sign.clickTop);
       }
     }
     else
