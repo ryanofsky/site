@@ -147,10 +147,10 @@ function Sign(title, id, href, src, width, height, hat, heels, corn, active)
   this.corn = corn;
   this.active = active;
 
-  this.finalLeft = null;
-  this.finalTop = null;
   this.curLeft = null;
   this.curTop = null;
+  this.finalLeft = null;
+  this.finalTop = null;
   this.startLeft = null;
   this.startTop = null;
   this.startTime = null;
@@ -184,29 +184,33 @@ function Animation(signs, triWidth, triHeight, rectWidth, rectHeight,
   for (var i = 0; i < this.signs.length; ++i)
   {
     var sign = this.signs[[]i];
+
     sign.elem = document.getElementById(sign.id);
-    if (sign.elem)
+    if (!sign.elem)
     {
-      sign.aelem = sign.elem.parentNode;
-    }
-    else
-    {
-      var ae = sign.aelem = document.createElement("a");
-      ae.href = sign.href;
-      var se = sign.elem = document.createElement("img");
-      se.src = sign.src;
-      se.style.position = "absolute";
-      se.style.width = sign.width + "px";
-      se.style.height = sign.height + "px";
-      se.style.left = (this.grect.offsetLeft + (this.rectSWidth-sign.width) / 2)
-                      + "px";
-      se.style.top = (this.rectPos + (this.rectHeight-sign.height) / 2)
-                     + "px";
-      se.style.visibility = "hidden";
-      ae.appendChild(se);
-      document.body.insertBefore(ae, this.rect);
+      // Create LHS sign element if there isn't one in the static HTML (because
+      // the sign is active and located on top instead of on the left).
+      sign.elem = document.createElement("img");
+      sign.elem.src = sign.src;
+      sign.elem.style.position = "absolute";
+      sign.elem.style.width = sign.width + "px";
+      sign.elem.style.height = sign.height + "px";
+      // Compute top/left position even though element is not visible so
+      // curLeft/curTop will be initialized correctly below and animation code
+      // will use the right start position.
+      sign.elem.style.left = (this.grect.offsetLeft
+                              + (this.rectSWidth-sign.width) / 2) + "px";
+      sign.elem.style.top = (this.rectPos
+                             + (this.rectHeight-sign.height) / 2) + "px";
+      sign.elem.style.visibility = "hidden";
+
+      var sa = document.createElement("a");
+      sa.href = sign.href;
+      sa.appendChild(sign.elem);
+      document.body.insertBefore(sa, this.rect);
     }
 
+    sign.aelem = sign.elem.parentNode;
     sign.aelem.onclick = this.onclick.bind(this, sign);
 
     sign.curLeft = sign.elem.offsetLeft;
@@ -257,7 +261,6 @@ Animation.prototype.updateLayout = function()
   for (var i = 0; i < this.signs.length; ++i)
   {
     var sign = this.signs[[]i];
-    var se = sign.elem;
     if (sign.active)
     {
       sign.finalLeft = this.grect.offsetLeft
@@ -268,9 +271,9 @@ Animation.prototype.updateLayout = function()
     {
       y += this.signSpacing;
       y -= sign.hat;
-      sign.finalLeft = ((this.triWidth
-                         - (y + sign.corn) * this.triWidth / this.triHeight) / 2
-                        - se.offsetWidth / 2);
+      sign.finalLeft = (this.triWidth
+                        - (y + sign.corn) * this.triWidth / this.triHeight
+                        - sign.elem.offsetWidth) / 2;
       sign.finalTop = y;
       y -= sign.heels;
       y += sign.height;
@@ -344,7 +347,7 @@ Animation.prototype.timerTick = function()
   }
 }
 
-Animation.prototype.hideTopSign = function(sign, nsign)
+Animation.prototype.hideTopSign = function(sign)
 {
   sign.elem.style.left = sign.curLeft + "px";
   sign.elem.style.top = sign.curTop + "px";
@@ -501,7 +504,8 @@ Animation.prototype.finishLoad = function()
     if (!this.loadUrl && !this.timer)
     {
       this.setLoadStatus();
-      document.getElementById(this.contentsId).innerHTML = this.req.responseText;
+      document.getElementById(this.contentsId).innerHTML
+          = this.req.responseText;
     }
   }
   else
